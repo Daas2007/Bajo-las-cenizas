@@ -14,19 +14,26 @@ public class Camara : MonoBehaviour
 
     void Update()
     {
+        //Valores del Mouse
         float valorX = Input.GetAxis("Mouse X") * Sensibilidad * Time.deltaTime;
         float valorY = Input.GetAxis("Mouse Y") * Sensibilidad * Time.deltaTime;
 
-        Debug.Log($"MouseEnX = {valorX:F1}, MouseEnY = {valorY:F1}");
-
+        //Guardado de valor/posicion del mouse
         rotacionHorizontal += valorX;
         rotacionVertical -= valorY;
 
-        rotacionHorizontal = math.clamp(rotacionVertical, -80f, 80f);
+        //Limitador de giro en Eje Y
+        rotacionVertical = math.clamp(rotacionVertical, -70f, 70f);
 
         transform.localRotation = Quaternion.Euler(rotacionVertical, 0f, 0f);
-         
-        Player.Rotate(Vector3.up * valorX);
+        if (Player != null)
+        {
+            Player.Rotate(Vector3.up * valorX);
+        }
+        else
+        {
+            Debug.Log("Falta asignas Jugador en Script: Camara");
+        }
     }
 
     public void OcultarMouse()

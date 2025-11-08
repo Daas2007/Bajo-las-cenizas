@@ -661,8 +661,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1059e70e70fd29a48a9c204f9342500b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Controlador: {fileID: 1085203909}
-  velocidad: 15
+  UsarGetAxisRaw: 0
+  camara: {fileID: 1323535477}
+  VelocidadMove: 5
+  controlador: {fileID: 1085203909}
 --- !u!143 &1085203909
 CharacterController:
   m_ObjectHideFlags: 0
