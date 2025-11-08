@@ -3,16 +3,23 @@ using UnityEngine;
 
 public class MovimientoPersonaje : MonoBehaviour
 {
-    [SerializeField] bool UsarGetAxisRaw = true;
+    [Header("Referencias")]
     [SerializeField] Transform camara;
-    [SerializeField] float VelocidadMove = 5f;
-    [SerializeField] float VelocidadBase;
     [SerializeField] CharacterController controlador;
+
+    [Header("Configuracion de velocidad Player")]
+    [SerializeField] bool UsarGetAxisRaw = false; //Movimiento Progresivo (True) || Movimiento inmediato (False)
+    [SerializeField] float VelocidadMove = 5f;
+    [SerializeField] float VelocidadBase; //Guarda la velocidad base del Player
+
+    [Header("Gravedad")]
+    [SerializeField] Vector3 velocidadVertical;
+    [SerializeField] float gravedad = -9f;
 
     private void Awake()
     {
         controlador = GetComponent<CharacterController>();
-            if (camara == null && Camera.main != null)
+        if (camara == null && Camera.main != null)
         {
             camara = Camera.main.transform;
         }
@@ -25,20 +32,11 @@ public class MovimientoPersonaje : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKey(KeyCode.LeftShift))
-        {
-            VelocidadMove = VelocidadBase * 1.5f;
-            Debug.Log("Velocidad actual = " + VelocidadMove);
-        }
-        else
-        {
-            VelocidadMove = VelocidadBase;
-            Debug.Log("Velocidad actual =" + VelocidadMove);
-        }
-            Caminado();
-        
+        JugadorCorrer();
+        JugadorCaminando();
+        AplicarGravedad();
     }
-    public void Caminado()
+    public void JugadorCaminando()
     {
         //GetAxisRaw = Movimiento inmediaro(Pasa de 0 a 1 instantaneamente) || GetAxis = Movimiento creciente (Pasa por 0.x hasta 1)
         float ValorHorizontalMove = UsarGetAxisRaw ? Input.GetAxisRaw("Horizontal") : Input.GetAxis("Horizontal");
@@ -62,4 +60,27 @@ public class MovimientoPersonaje : MonoBehaviour
         Vector3 desplazamientoXY = direccionPlano * (VelocidadMove * Time.deltaTime);
         controlador.Move(desplazamientoXY);
     }
+    public void JugadorCorrer()
+    {
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            VelocidadMove = VelocidadBase * 1.5f;
+            Debug.Log("Velocidad actual = " + VelocidadMove);
+        }
+        else
+        {
+            VelocidadMove = VelocidadBase;
+            Debug.Log("Velocidad actual =" + VelocidadMove);
+        }
+    }
+    public void AplicarGravedad()
+    {
+        velocidadVertical.y += gravedad * Time.deltaTime;
+        controlador.Move(velocidadVertical * Time.deltaTime);
+        if (controlador.isGrounded && velocidadVertical.y < 0)
+        {
+            velocidadVertical.y = -2f;
+        }
+    }
 }
+
