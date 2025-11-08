@@ -1,5 +1,7 @@
-using Unity.VisualScripting;
+using UnityEngine.UI;
 using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 
 public class MovimientoPersonaje : MonoBehaviour
 {
@@ -16,6 +18,15 @@ public class MovimientoPersonaje : MonoBehaviour
     [SerializeField] Vector3 velocidadVertical;
     [SerializeField] float gravedad = -9f;
 
+    [Header("Stamina")]
+    [SerializeField] Image BarraStamina;
+    [SerializeField] float Stamina;
+    [SerializeField] float StaminaMaxima;
+    [SerializeField] float CostoCorrer;
+    [SerializeField] float RecargarStamina;
+
+    private Coroutine recarga;
+
     private void Awake()
     {
         controlador = GetComponent<CharacterController>();
@@ -28,8 +39,6 @@ public class MovimientoPersonaje : MonoBehaviour
     {
         VelocidadBase = VelocidadMove;
     }
-
-
     void Update()
     {
         JugadorCorrer();
@@ -62,14 +71,30 @@ public class MovimientoPersonaje : MonoBehaviour
     }
     public void JugadorCorrer()
     {
-        if (Input.GetKey(KeyCode.LeftShift))
+        if (Input.GetKey(KeyCode.LeftShift) && Stamina > 0)
         {
             VelocidadMove = VelocidadBase * 1.5f;
-            Debug.Log("Velocidad actual = " + VelocidadMove);
+
+            //Consumo de Stamina
+            Stamina -= CostoCorrer * Time.deltaTime;           
+            if (Stamina <= 0) Stamina = 0;
+
+            //Actualiza la barra de Stamina
+            BarraStamina.fillAmount = Stamina / StaminaMaxima;
+            //Reiniciar || Activar corrutina de recarga
+            if (recarga != null) StopCoroutine(recarga);
+            recarga = StartCoroutine(RecargaStamina());
+
+            Debug.Log("Velocidad actual = " + VelocidadMove);           
         }
         else
         {
             VelocidadMove = VelocidadBase;
+
+            if (recarga == null)
+            {
+                recarga = StartCoroutine (RecargaStamina());
+            }
             Debug.Log("Velocidad actual =" + VelocidadMove);
         }
     }
@@ -80,6 +105,17 @@ public class MovimientoPersonaje : MonoBehaviour
         if (controlador.isGrounded && velocidadVertical.y < 0)
         {
             velocidadVertical.y = -2f;
+        }
+    }
+    private IEnumerator RecargaStamina()
+    {
+        yield return new WaitForSeconds(1f);
+        while (Stamina < StaminaMaxima)
+        {
+            Stamina += RecargarStamina / 10f;
+            if (Stamina >= StaminaMaxima) Stamina = StaminaMaxima;
+            BarraStamina.fillAmount = Stamina / StaminaMaxima;
+            yield return new WaitForSeconds(.1f);
         }
     }
 }
