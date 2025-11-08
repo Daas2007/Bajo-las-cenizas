@@ -3,35 +3,30 @@ using UnityEngine;
 
 public class Linterna : MonoBehaviour
 {
-    [SerializeField] Light luzLinterna;
-    [SerializeField] bool Activada = true;
-    [SerializeField] bool Desactivada = false;
-    [SerializeField] bool EstadoLinternaCatual;
+    [SerializeField] GameObject luzLinterna;
+    [SerializeField] AudioClip LuzSonido;
+    [SerializeField] private AudioSource source;
 
     private void Awake()
     {
-        EstadoLinternaCatual = Desactivada;
-        luzLinterna.enabled = EstadoLinternaCatual;
+        source = GetComponent<AudioSource>();
+        luzLinterna.SetActive(false);
     }
     private void Update()
     {
         InterracionLinterna();
-
     }
     public void InterracionLinterna()
     {
         if (Input.GetKeyDown(KeyCode.F))
         {
-            if (luzLinterna.enabled == Activada)
-            {
-                luzLinterna.enabled = Desactivada;
-                Debug.Log("Linterna Apagada");
-            }
-            else if (luzLinterna.enabled == Desactivada)
-            {
-                luzLinterna.enabled = Activada;
-                Debug.Log("Linterna Encendida");
-            }
+            LuzManager();
         }
     }
+    public void LuzManager()
+    {
+        luzLinterna.SetActive(!luzLinterna.activeSelf);
+        source.PlayOneShot(LuzSonido);
+    }
+
 }
