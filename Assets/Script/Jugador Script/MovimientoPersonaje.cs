@@ -10,7 +10,7 @@ public class MovimientoPersonaje : MonoBehaviour
     [SerializeField] CharacterController controlador;
 
     [Header("Configuracion de velocidad Player")]
-    [SerializeField] bool UsarGetAxisRaw = false; //Movimiento Progresivo (True) || Movimiento inmediato (False)
+    [SerializeField] bool UsarGetAxisRaw = true; //Movimiento Progresivo (True) || Movimiento inmediato (False)
     [SerializeField] float VelocidadMove = 5f;
     [SerializeField] float VelocidadBase; //Guarda la velocidad base del Player
 
@@ -19,6 +19,7 @@ public class MovimientoPersonaje : MonoBehaviour
     [SerializeField] float gravedad = -9f;
 
     [Header("Stamina")]
+    [SerializeField] GameObject canvas_StaminaBar;
     [SerializeField] Image BarraStamina;
     [SerializeField] float Stamina;
     [SerializeField] float StaminaMaxima;
@@ -37,6 +38,8 @@ public class MovimientoPersonaje : MonoBehaviour
     }
     void Start()
     {
+        canvas_StaminaBar.SetActive(false);
+        Stamina = StaminaMaxima;
         VelocidadBase = VelocidadMove;
     }
     void Update()
@@ -44,6 +47,16 @@ public class MovimientoPersonaje : MonoBehaviour
         JugadorCorrer();
         JugadorCaminando();
         AplicarGravedad();
+        if (Stamina < StaminaMaxima)
+        {
+            canvas_StaminaBar.SetActive(true);
+        }
+        else
+        {
+            // Oculta la barra cuando está llena y no estás corriendo
+            if (!Input.GetKey(KeyCode.LeftShift))
+                canvas_StaminaBar.SetActive(false);
+        }
     }
     public void JugadorCaminando()
     {
@@ -73,6 +86,7 @@ public class MovimientoPersonaje : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.LeftShift) && Stamina > 0)
         {
+            canvas_StaminaBar.SetActive(true);
             VelocidadMove = VelocidadBase * 1.5f;
 
             //Consumo de Stamina
@@ -83,7 +97,7 @@ public class MovimientoPersonaje : MonoBehaviour
             BarraStamina.fillAmount = Stamina / StaminaMaxima;
             //Reiniciar || Activar corrutina de recarga
             if (recarga != null) StopCoroutine(recarga);
-            recarga = StartCoroutine(RecargaStamina());
+            recarga = null;
 
             Debug.Log("Velocidad actual = " + VelocidadMove);           
         }
@@ -115,8 +129,10 @@ public class MovimientoPersonaje : MonoBehaviour
             Stamina += RecargarStamina / 10f;
             if (Stamina >= StaminaMaxima) Stamina = StaminaMaxima;
             BarraStamina.fillAmount = Stamina / StaminaMaxima;
-            yield return new WaitForSeconds(.1f);
+            yield return null;
         }
+        canvas_StaminaBar.SetActive(false);
+        recarga = null;
     }
 }
 
