@@ -1,11 +1,16 @@
 using UnityEngine;
+using TMPro;
 
 public class InteraccionJugador : MonoBehaviour
 {
     [Header("Configuración de interacción")]
-    [SerializeField] float distanciaInteraccion = 3f; // Distancia máxima para interactuar
-    [SerializeField] LayerMask layerInteractuable; // Capa de objetos interactuables
-    [SerializeField] Camera camara; // Cámara del jugador
+    [SerializeField] float distanciaInteraccion = 3f; 
+    [SerializeField] LayerMask layerInteractuable; 
+    [SerializeField] Camera camara;
+
+    [Header("UI de interacción")]
+    [SerializeField] GameObject panelInteraccion; 
+    [SerializeField] TMP_Text textoInteraccion; 
 
     private IInteractuable objetoActual;
 
@@ -13,9 +18,24 @@ public class InteraccionJugador : MonoBehaviour
     {
         DetectarObjeto();
 
-        if (objetoActual != null && Input.GetKeyDown(KeyCode.E))
+        if (objetoActual != null)
         {
-            objetoActual.Interactuar();
+            if (!panelInteraccion.activeSelf)
+                panelInteraccion.SetActive(true);
+
+            textoInteraccion.text = "Presiona [E] para interactuar";
+
+            if ( Input.GetKeyDown(KeyCode.E))
+            {
+                objetoActual.Interactuar();
+            }
+        }
+        else
+        {
+            if (panelInteraccion.activeSelf)
+            {
+                panelInteraccion.SetActive(false);
+            }
         }
     }
 

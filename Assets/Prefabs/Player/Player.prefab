@@ -262,7 +262,7 @@ Transform:
   m_GameObject: {fileID: 8484489214632886496}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: 0.29909515, y: 2.01, z: 5.92}
+  m_LocalPosition: {x: 0.3864522, y: 0.99, z: -2.52}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -530,6 +530,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   camara: {fileID: 7151900593535614164}
+  panelInteraccion: {fileID: 0}
+  textoInteraccion: {fileID: 0}
 --- !u!1 &8897587576848955000
 GameObject:
   m_ObjectHideFlags: 0
