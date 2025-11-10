@@ -1,14 +1,15 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class EnemigoVentana : MonoBehaviour
 {
     [Header("Estados del enemigo")]
-    [SerializeField] int estadoActual = 1; 
+    [SerializeField] int estadoActual = 1;
     [SerializeField] float tiempoEnEstado = 0f;
 
     [Header("Agresividad y tiempos")]
-    [SerializeField] float tiempoParaAvanzar = 10f; // tiempo sin luz para cambiar de estado
-    [SerializeField] float tiempoParaRetroceder = 4f; // tiempo con luz para volver al estado 1
+    [SerializeField] float tiempoParaAvanzar = 10f;
+    [SerializeField] float tiempoParaRetroceder = 4f;
     [SerializeField] float tiempoTotalJuego = 0f;
     [SerializeField] int nivelAgresividad = 1;
 
@@ -17,13 +18,23 @@ public class EnemigoVentana : MonoBehaviour
     [SerializeField] float contadorLuz = 0f;
 
     [Header("Configuración de dificultad")]
-    [SerializeField] float reduccionPorNivel = 2f; // cada nivel reduce este tiempo
-    [SerializeField] float tiempoPorNivel = 90f;   // cada 90s se vuelve más agresivo
-    [SerializeField] float tiempoMinimoAvance = 3f; // límite de velocidad máxima
+    [SerializeField] float reduccionPorNivel = 2f;
+    [SerializeField] float tiempoPorNivel = 90f;
+    [SerializeField] float tiempoMinimoAvance = 3f;
+
+    [Header("Spawn del enemigo físico")]
+    [SerializeField] GameObject prefabEnemigo;
+    [SerializeField] Transform puntoSpawn;
+
+    [Header("Temporizador fase 3")]
+    [SerializeField] float tiempoAntesDeEntrar = 10f; // tiempo para iluminarlo
+    bool cuentaRegresivaActiva = false;
+    float tiempoRestanteParaEntrar;
+    bool enemigoSpawned = false;
 
     void Start()
     {
-        Debug.Log("Enemigo iniciado en estado 1 (observando por la ventana)");
+        Debug.Log("👁️ Enemigo iniciado en estado 1 (observando por la ventana)");
     }
 
     void Update()
@@ -37,7 +48,7 @@ public class EnemigoVentana : MonoBehaviour
         {
             nivelAgresividad++;
             tiempoParaAvanzar = Mathf.Max(tiempoMinimoAvance, tiempoParaAvanzar - reduccionPorNivel);
-            Debug.Log($" El enemigo se vuelve más agresivo (Nivel {nivelAgresividad}) → Avanza cada {tiempoParaAvanzar}s sin luz.");
+            Debug.Log($"⚡ El enemigo se vuelve más agresivo (Nivel {nivelAgresividad}) → Avanza cada {tiempoParaAvanzar}s sin luz.");
         }
 
         // --- Reacción a la linterna ---
@@ -49,34 +60,44 @@ public class EnemigoVentana : MonoBehaviour
             {
                 RetrocederAEstado1();
             }
+
+            // Si lo iluminas durante la cuenta regresiva, se cancela
+            if (cuentaRegresivaActiva)
+            {
+                cuentaRegresivaActiva = false;
+                tiempoRestanteParaEntrar = 0f;
+                Debug.Log("🔦 Lo iluminaste a tiempo, el enemigo se retira!");
+            }
         }
         else
         {
             contadorLuz = 0f;
+
             if (tiempoEnEstado >= tiempoParaAvanzar)
             {
                 AvanzarEstado();
             }
         }
 
-        // --- Comportamiento por estado ---
-        switch (estadoActual)
+        // --- Lógica especial en estado 3 ---
+        if (estadoActual == 3 && !recibiendoLuz)
         {
-            case 1:
-                // En la ventana, observando
-                break;
+            if (!cuentaRegresivaActiva)
+            {
+                cuentaRegresivaActiva = true;
+                tiempoRestanteParaEntrar = tiempoAntesDeEntrar;
+                Debug.Log($"💀 El enemigo está listo para entrar... tienes {tiempoAntesDeEntrar} segundos para iluminarlo!");
+            }
 
-            case 2:
-                // Más agresivo
-                break;
+            if (cuentaRegresivaActiva)
+            {
+                tiempoRestanteParaEntrar -= deltaT;
 
-            case 3:
-                // A punto de entrar
-                if (!recibiendoLuz && tiempoEnEstado >= tiempoParaAvanzar)
+                if (tiempoRestanteParaEntrar <= 0f && !enemigoSpawned)
                 {
                     EntrarAHabitacion();
                 }
-                break;
+            }
         }
     }
 
@@ -91,10 +112,10 @@ public class EnemigoVentana : MonoBehaviour
         switch (estadoActual)
         {
             case 2:
-                Debug.Log(" El enemigo se acerca a la ventana (Estado 2).");
+                Debug.Log("😠 El enemigo se acerca a la ventana (Estado 2).");
                 break;
             case 3:
-                Debug.Log(" El enemigo está a punto de entrar (Estado 3).");
+                Debug.Log("💀 El enemigo está a punto de entrar (Estado 3).");
                 break;
         }
     }
@@ -108,17 +129,38 @@ public class EnemigoVentana : MonoBehaviour
         if (estadoActual != 1)
         {
             estadoActual = 1;
-            Debug.Log(" La luz lo ha repelido, vuelve al estado 1 (tranquilo).");
+            cuentaRegresivaActiva = false;
+            tiempoRestanteParaEntrar = 0f;
+            Debug.Log("🔦 La luz lo ha repelido, vuelve al estado 1 (tranquilo).");
         }
     }
 
     void EntrarAHabitacion()
     {
-        Debug.Log(" El enemigo ha entrado en la habitación... GAME OVER ");
-        enabled = false; // desactiva el comportamiento
+        Debug.Log("☠️ El enemigo ha entrado en la habitación... comienza la persecución.");
+        cuentaRegresivaActiva = false;
+        enemigoSpawned = true;
+
+        if (prefabEnemigo != null && puntoSpawn != null)
+        {
+            GameObject enemigoFisico = Instantiate(prefabEnemigo, puntoSpawn.position, Quaternion.identity);
+            EnemigoPerseguidor script = enemigoFisico.GetComponent<EnemigoPerseguidor>();
+
+            if (script != null)
+            {
+                GameObject jugador = GameObject.FindGameObjectWithTag("Player");
+                if (jugador != null)
+                {
+                    script.objetivo = jugador.transform;
+                }
+            }
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ No hay prefab o punto de spawn asignado para el enemigo físico.");
+        }
     }
 
-    // Método público que puede llamar la linterna
     public void SetIluminado(bool valor)
     {
         recibiendoLuz = valor;

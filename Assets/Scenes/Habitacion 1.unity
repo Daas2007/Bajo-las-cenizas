@@ -225,7 +225,8 @@ Transform:
   m_LocalPosition: {x: 0.18, y: 3.2, z: -1.17}
   m_LocalScale: {x: 0.31, y: 2, z: 1.53}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1783589979}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!114 &290503533
@@ -251,6 +252,9 @@ MonoBehaviour:
   reduccionPorNivel: 2
   tiempoPorNivel: 90
   tiempoMinimoAvance: 3
+  prefabEnemigo: {fileID: 7889320048251528082, guid: dfd955f35d0ac0847bca20dd4ecebc39, type: 3}
+  puntoSpawn: {fileID: 1783589979}
+  tiempoAntesDeEntrar: 10
 --- !u!1 &304411205 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1496096449609476644, guid: 6079fb04ff9bbbd4e9a24bdb1a873a5d, type: 3}
@@ -376,6 +380,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 1617390176446477769, guid: 137a784356ae9c243bc9850fd9710fbe, type: 3}
+      propertyPath: m_TagString
+      value: Player
+      objectReference: {fileID: 0}
     - target: {fileID: 2441442240038085109, guid: 137a784356ae9c243bc9850fd9710fbe, type: 3}
       propertyPath: BarraStamina
       value: 
@@ -394,11 +402,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7347465379483138520, guid: 137a784356ae9c243bc9850fd9710fbe, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 2.8127685
+      value: 5.92
       objectReference: {fileID: 0}
     - target: {fileID: 7347465379483138520, guid: 137a784356ae9c243bc9850fd9710fbe, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7347465379483138520, guid: 137a784356ae9c243bc9850fd9710fbe, type: 3}
       propertyPath: m_LocalRotation.x
@@ -406,7 +414,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7347465379483138520, guid: 137a784356ae9c243bc9850fd9710fbe, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7347465379483138520, guid: 137a784356ae9c243bc9850fd9710fbe, type: 3}
       propertyPath: m_LocalRotation.z
@@ -418,7 +426,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7347465379483138520, guid: 137a784356ae9c243bc9850fd9710fbe, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
+      value: 180
       objectReference: {fileID: 0}
     - target: {fileID: 7347465379483138520, guid: 137a784356ae9c243bc9850fd9710fbe, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
@@ -966,6 +974,37 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6079fb04ff9bbbd4e9a24bdb1a873a5d, type: 3}
+--- !u!1 &1783589978
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1783589979}
+  m_Layer: 0
+  m_Name: SpwnEnemigo
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1783589979
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1783589978}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
+  m_LocalPosition: {x: -3.18, y: -0.90386814, z: -0.39}
+  m_LocalScale: {x: 0.6535946, y: 0.5, z: 3.225806}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 290503532}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1869458200
 GameObject:
   m_ObjectHideFlags: 0
