@@ -1,40 +1,36 @@
 ﻿using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.SceneManagement;
 
+[RequireComponent(typeof(NavMeshAgent))]
 public class EnemigoPerseguidor : MonoBehaviour
 {
-    [Header("Movimiento")]
     public Transform objetivo;
-    [SerializeField] float velocidad = 3f;
     [SerializeField] float distanciaAtaque = 1.2f;
-
-    [Header("Configuración")]
     [SerializeField] float tiempoParaReinicio = 2f;
 
+    NavMeshAgent agent;
     bool jugadorMuerto = false;
+
+    void Awake()
+    {
+        agent = GetComponent<NavMeshAgent>();
+        agent.stoppingDistance = distanciaAtaque * 0.9f;
+    }
 
     void Update()
     {
         if (objetivo == null || jugadorMuerto) return;
+        agent.SetDestination(objetivo.position);
 
-        // Seguir al jugador
-        Vector3 direccion = (objetivo.position - transform.position).normalized;
-        transform.position += direccion * velocidad * Time.deltaTime;
-        transform.LookAt(objetivo);
-
-        float distancia = Vector3.Distance(transform.position, objetivo.position);
-        if (distancia <= distanciaAtaque)
-        {
+        if (!jugadorMuerto && Vector3.Distance(transform.position, objetivo.position) <= distanciaAtaque)
             MatarJugador();
-        }
     }
 
     void MatarJugador()
     {
-        if (jugadorMuerto) return;
-
         jugadorMuerto = true;
-        Debug.Log("💀 El enemigo te atrapó. Reiniciando nivel...");
+        agent.isStopped = true;
         Invoke(nameof(ReiniciarNivel), tiempoParaReinicio);
     }
 

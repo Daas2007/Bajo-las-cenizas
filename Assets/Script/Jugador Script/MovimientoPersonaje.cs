@@ -1,133 +1,97 @@
-using UnityEngine.UI;
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
-using System.Collections.Generic;
 
+[RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider))]
 public class MovimientoPersonaje : MonoBehaviour
 {
     [Header("Referencias")]
     [SerializeField] Transform camara;
-    [SerializeField] CharacterController controlador;
+    [SerializeField] Rigidbody rb;
 
-    [Header("Configuracion de velocidad Player")]
-    [SerializeField] bool UsarGetAxisRaw = true; //Movimiento Progresivo (True) || Movimiento inmediato (False)
+    [Header("Configuración de velocidad Player")]
+    [SerializeField] bool UsarGetAxisRaw = true;
     [SerializeField] float VelocidadMove = 5f;
-    [SerializeField] float VelocidadBase; //Guarda la velocidad base del Player
-
-    [Header("Gravedad")]
-    [SerializeField] Vector3 velocidadVertical;
-    [SerializeField] float gravedad = -9f;
+    [SerializeField] float VelocidadBase;
 
     [Header("Stamina")]
     [SerializeField] GameObject canvas_StaminaBar;
     [SerializeField] Image BarraStamina;
+    [SerializeField] float StaminaMaxima = 100f;
     [SerializeField] float Stamina;
-    [SerializeField] float StaminaMaxima;
-    [SerializeField] float CostoCorrer;
-    [SerializeField] float RecargarStamina;
+    [SerializeField] float CostoCorrer = 15f;
+    [SerializeField] float RecargarStamina = 10f;
 
     private Coroutine recarga;
 
-    private void Awake()
+    void Awake()
     {
-        controlador = GetComponent<CharacterController>();
-        if (camara == null && Camera.main != null)
-        {
-            camara = Camera.main.transform;
-        }
+        rb = GetComponent<Rigidbody>();
+        rb.freezeRotation = true;
+        if (camara == null && Camera.main != null) camara = Camera.main.transform;
     }
+
     void Start()
     {
-        canvas_StaminaBar.SetActive(false);
         Stamina = StaminaMaxima;
         VelocidadBase = VelocidadMove;
+        canvas_StaminaBar.SetActive(false);
     }
+
     void Update()
     {
         JugadorCorrer();
-        JugadorCaminando();
-        AplicarGravedad();
-        if (Stamina < StaminaMaxima)
-        {
-            canvas_StaminaBar.SetActive(true);
-        }
-        else
-        {
-            // Oculta la barra cuando está llena y no estás corriendo
-            if (!Input.GetKey(KeyCode.LeftShift))
-                canvas_StaminaBar.SetActive(false);
-        }
+        ActualizarBarraStamina();
     }
-    public void JugadorCaminando()
+
+    void FixedUpdate()
     {
-        //GetAxisRaw = Movimiento inmediaro(Pasa de 0 a 1 instantaneamente) || GetAxis = Movimiento creciente (Pasa por 0.x hasta 1)
-        float ValorHorizontalMove = UsarGetAxisRaw ? Input.GetAxisRaw("Horizontal") : Input.GetAxis("Horizontal");
-        float ValorVerticalMove = UsarGetAxisRaw ? Input.GetAxisRaw("Vertical") : Input.GetAxis("Vertical");
-
-        Vector3 adelanteCamara = camara.forward;
-        Vector3 derechaCamara = camara.right;
-
-        adelanteCamara.y = 0f;
-        derechaCamara.y = 0f;
-
-        adelanteCamara.Normalize();
-        derechaCamara.Normalize();
-
-        Vector3 direccionPlano = (derechaCamara * ValorHorizontalMove + adelanteCamara * ValorVerticalMove);
-
-        if (direccionPlano.sqrMagnitude > 0.001f)
-        {
-            direccionPlano.Normalize();
-        }
-        Vector3 desplazamientoXY = direccionPlano * (VelocidadMove * Time.deltaTime);
-        controlador.Move(desplazamientoXY);
+        JugadorCaminandoRB();
     }
-    public void JugadorCorrer()
+
+    void JugadorCaminandoRB()
     {
-        if (Input.GetKey(KeyCode.LeftShift) && Stamina > 0)
+        float h = UsarGetAxisRaw ? Input.GetAxisRaw("Horizontal") : Input.GetAxis("Horizontal");
+        float v = UsarGetAxisRaw ? Input.GetAxisRaw("Vertical") : Input.GetAxis("Vertical");
+
+        Vector3 adelanteCamara = camara.forward; adelanteCamara.y = 0f; adelanteCamara.Normalize();
+        Vector3 derechaCamara = camara.right; derechaCamara.y = 0f; derechaCamara.Normalize();
+
+        Vector3 direccionPlano = (derechaCamara * h + adelanteCamara * v).normalized;
+        Vector3 movimiento = direccionPlano * VelocidadMove * Time.fixedDeltaTime;
+
+        rb.MovePosition(rb.position + movimiento);
+    }
+
+    void JugadorCorrer()
+    {
+        if (Input.GetKey(KeyCode.LeftShift) && Stamina > 0f)
         {
-            canvas_StaminaBar.SetActive(true);
             VelocidadMove = VelocidadBase * 1.5f;
-
-            //Consumo de Stamina
-            Stamina -= CostoCorrer * Time.deltaTime;           
-            if (Stamina <= 0) Stamina = 0;
-
-            //Actualiza la barra de Stamina
-            BarraStamina.fillAmount = Stamina / StaminaMaxima;
-            //Reiniciar || Activar corrutina de recarga
-            if (recarga != null) StopCoroutine(recarga);
-            recarga = null;
-
-            Debug.Log("Velocidad actual = " + VelocidadMove);           
+            Stamina -= CostoCorrer * Time.deltaTime;
+            if (Stamina < 0f) Stamina = 0f;
+            if (recarga != null) { StopCoroutine(recarga); recarga = null; }
         }
         else
         {
             VelocidadMove = VelocidadBase;
+            if (recarga == null) recarga = StartCoroutine(RecargaStamina());
+        }
+    }
 
-            if (recarga == null)
-            {
-                recarga = StartCoroutine (RecargaStamina());
-            }
-            Debug.Log("Velocidad actual =" + VelocidadMove);
-        }
-    }
-    public void AplicarGravedad()
+    void ActualizarBarraStamina()
     {
-        velocidadVertical.y += gravedad * Time.deltaTime;
-        controlador.Move(velocidadVertical * Time.deltaTime);
-        if (controlador.isGrounded && velocidadVertical.y < 0)
-        {
-            velocidadVertical.y = -2f;
-        }
+        BarraStamina.fillAmount = Stamina / StaminaMaxima;
+        canvas_StaminaBar.SetActive(Stamina < StaminaMaxima || Input.GetKey(KeyCode.LeftShift));
     }
-    private IEnumerator RecargaStamina()
+
+    IEnumerator RecargaStamina()
     {
         yield return new WaitForSeconds(1f);
         while (Stamina < StaminaMaxima)
         {
-            Stamina += RecargarStamina / 10f;
-            if (Stamina >= StaminaMaxima) Stamina = StaminaMaxima;
+            Stamina += RecargarStamina * Time.deltaTime;
+            if (Stamina > StaminaMaxima) Stamina = StaminaMaxima;
             BarraStamina.fillAmount = Stamina / StaminaMaxima;
             yield return null;
         }
@@ -135,4 +99,3 @@ public class MovimientoPersonaje : MonoBehaviour
         recarga = null;
     }
 }
-
