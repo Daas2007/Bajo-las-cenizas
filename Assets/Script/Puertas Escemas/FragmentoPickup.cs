@@ -9,3 +9,4 @@ public class FragmentoPickup : MonoBehaviour, IInteractuable
     }
 }
 
+
