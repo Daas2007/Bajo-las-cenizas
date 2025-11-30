@@ -4,7 +4,7 @@ using TMPro;
 public class InteraccionJugador : MonoBehaviour
 {
     [Header("Configuración de interacción")]
-    [SerializeField] float distanciaInteraccion = 3f; 
+    [SerializeField] float distanciaInteraccion = 2f; 
     [SerializeField] LayerMask layerInteractuable; 
     [SerializeField] Camera camara;
 

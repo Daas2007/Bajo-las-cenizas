@@ -21,7 +21,7 @@ public class JugadorLinterna : MonoBehaviour
     public void ActivarLinterna()
     {
         tieneLinterna = true;
-        linternaObjeto.SetActive(true);
+        linternaObjeto.SetActive(false);
     }
 
     void Update()
