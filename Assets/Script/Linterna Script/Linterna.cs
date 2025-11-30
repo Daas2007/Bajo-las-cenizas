@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Linterna : MonoBehaviour
 {
@@ -10,28 +10,48 @@ public class Linterna : MonoBehaviour
     [Header("Sistema Deteccion Enemigo")]
     [SerializeField] float distanciaMax = 10f;
     [SerializeField] LayerMask layerEnemigo;
-
     [SerializeField] Camera cam;
 
     private EnemigoVentana enemigoDetectato;
+    private bool tieneLinterna = false; // 🔑 nuevo control
+
     private void Awake()
     {
         source = GetComponent<AudioSource>();
         luzLinterna.SetActive(false);
+
+        // Revisar si ya estaba guardado que el jugador tiene linterna
+        if (PlayerPrefs.GetInt("TieneLinterna", 0) == 1)
+        {
+            tieneLinterna = true;
+        }
     }
+
     private void Update()
     {
-        InterracionLinterna();
-        if (luzLinterna.activeSelf)
+        if (tieneLinterna) // 🔑 solo si la tiene
         {
-            DetectarEnemigoConLuz();
-        }
-        else
-        {
-            if (enemigoDetectato != null)
-                enemigoDetectato.SetIluminado(false);
+            InterracionLinterna();
+
+            if (luzLinterna.activeSelf)
+            {
+                DetectarEnemigoConLuz();
+            }
+            else
+            {
+                if (enemigoDetectato != null)
+                    enemigoDetectato.SetIluminado(false);
+            }
         }
     }
+
+    public void DarLinterna() // 🔑 llamado desde el pickup
+    {
+        tieneLinterna = true;
+        PlayerPrefs.SetInt("TieneLinterna", 1);
+        PlayerPrefs.Save();
+    }
+
     public void InterracionLinterna()
     {
         if (Input.GetKeyDown(KeyCode.F))
@@ -39,11 +59,13 @@ public class Linterna : MonoBehaviour
             LuzManager();
         }
     }
+
     public void LuzManager()
     {
         luzLinterna.SetActive(!luzLinterna.activeSelf);
         source.PlayOneShot(LuzSonido);
     }
+
     private void DetectarEnemigoConLuz()
     {
         Ray rayo = new Ray(cam.transform.position, cam.transform.forward);
@@ -57,7 +79,6 @@ public class Linterna : MonoBehaviour
             {
                 enemigo.SetIluminado(true);
                 enemigoDetectato = enemigo;
-                // Debug.DrawRay(cam.transform.position, cam.transform.forward * distanciaMax, Color.yellow);
             }
         }
         else

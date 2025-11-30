@@ -31,6 +31,11 @@ public class PausaMenu : MonoBehaviour
         pausePanel.SetActive(false);
         opcionesPanel.SetActive(true);
     }
+    public void CerrarOpciones()
+    {
+        pausePanel.SetActive(true);
+        opcionesPanel.SetActive(false);
+    }
 
     public void Resume()
     {
@@ -39,11 +44,13 @@ public class PausaMenu : MonoBehaviour
         Time.timeScale = 1f;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        isPaused = false; 
     }
 
     public void ExitToMenu()
     {
         Time.timeScale = 1f;
+        isPaused = false;
         SceneManager.LoadScene("Main Menu Start");
     }
 }
