@@ -8,6 +8,18 @@ public class PausaMenu : MonoBehaviour
 
     bool isPaused = false;
 
+    private void Awake()
+    {
+        pausePanel.SetActive(false);
+        opcionesPanel.SetActive(false);
+    }
+    void Start()
+    {
+        Time.timeScale = 1f; // siempre arrancar con tiempo normal
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
+
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -39,12 +51,11 @@ public class PausaMenu : MonoBehaviour
 
     public void Resume()
     {
-        pausePanel.SetActive(false);
-        opcionesPanel.SetActive(false);
         Time.timeScale = 1f;
+        pausePanel.SetActive(false);
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        isPaused = false; 
+
     }
 
     public void ExitToMenu()

@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Opciones
   - Pickup
+  - EnemigoVentana
   layers:
   - Default
   - TransparentFX

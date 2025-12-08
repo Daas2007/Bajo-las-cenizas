@@ -2,28 +2,22 @@ using UnityEngine;
 
 public class CristalMetaSpawner : MonoBehaviour
 {
-    [SerializeField] GameObject cristalPrefab;
-    [SerializeField] Transform puntoSpawn;
+    [SerializeField] GameObject cristalNormalPrefab;
+    [SerializeField] GameObject cristalDañadoPrefab;
+    [SerializeField] Transform spawnPoint;
 
-    GameObject cristalInstanciado;
-
-    void OnEnable()
+    public void SpawnCristal()
     {
-        GameManager.Instancia.OnNivelCompletado += InstanciarCristal;
-    }
-
-    void OnDisable()
-    {
-        if (GameManager.Instancia != null)
-            GameManager.Instancia.OnNivelCompletado -= InstanciarCristal;
-    }
-
-    void InstanciarCristal()
-    {
-        if (cristalInstanciado == null && cristalPrefab != null && puntoSpawn != null)
+        if (GameManager.Instancia.CristalDañadoNivelActual())
         {
-            cristalInstanciado = Instantiate(cristalPrefab, puntoSpawn.position, puntoSpawn.rotation);
-            Debug.Log("? Cristal meta instanciado");
+            Instantiate(cristalDañadoPrefab, spawnPoint.position, spawnPoint.rotation);
+            Debug.Log("Cristal dañado.");
+        }
+        else
+        {
+            Instantiate(cristalNormalPrefab, spawnPoint.position, spawnPoint.rotation);
+            Debug.Log("Cristal normal.");
         }
     }
 }
+

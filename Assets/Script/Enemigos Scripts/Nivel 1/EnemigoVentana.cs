@@ -32,9 +32,18 @@ public class EnemigoVentana : MonoBehaviour
     float tiempoRestanteParaEntrar;
     bool enemigoSpawned = false;
 
+    [Header("Colores Fases Ventana")]
+    [SerializeField] Material azulMat;
+    [SerializeField] Material naranjaMat;
+    [SerializeField] Material rojoMat;
+
+    [Header("Visual de la ventana")]
+    [SerializeField] Renderer ventanaRenderer;
+
     void Start()
     {
-        Debug.Log("👁️ Enemigo iniciado en estado 1 (observando por la ventana)");
+        Debug.Log("Enemigo iniciado en estado 1 (observando por la ventana)");
+        ActualizarColorVentana();
     }
 
     void Update()
@@ -48,7 +57,7 @@ public class EnemigoVentana : MonoBehaviour
         {
             nivelAgresividad++;
             tiempoParaAvanzar = Mathf.Max(tiempoMinimoAvance, tiempoParaAvanzar - reduccionPorNivel);
-            Debug.Log($"⚡ El enemigo se vuelve más agresivo (Nivel {nivelAgresividad}) → Avanza cada {tiempoParaAvanzar}s sin luz.");
+            Debug.Log($"El enemigo se vuelve más agresivo (Nivel {nivelAgresividad}) → Avanza cada {tiempoParaAvanzar}s sin luz.");
         }
 
         // --- Reacción a la linterna ---
@@ -61,12 +70,11 @@ public class EnemigoVentana : MonoBehaviour
                 RetrocederAEstado1();
             }
 
-            // Si lo iluminas durante la cuenta regresiva, se cancela
             if (cuentaRegresivaActiva)
             {
                 cuentaRegresivaActiva = false;
                 tiempoRestanteParaEntrar = 0f;
-                Debug.Log("🔦 Lo iluminaste a tiempo, el enemigo se retira!");
+                Debug.Log("Lo iluminaste a tiempo, el enemigo se retira!");
             }
         }
         else
@@ -86,7 +94,7 @@ public class EnemigoVentana : MonoBehaviour
             {
                 cuentaRegresivaActiva = true;
                 tiempoRestanteParaEntrar = tiempoAntesDeEntrar;
-                Debug.Log($"💀 El enemigo está listo para entrar... tienes {tiempoAntesDeEntrar} segundos para iluminarlo!");
+                Debug.Log($"El enemigo está listo para entrar... tienes {tiempoAntesDeEntrar} segundos para iluminarlo!");
             }
 
             if (cuentaRegresivaActiva)
@@ -112,12 +120,14 @@ public class EnemigoVentana : MonoBehaviour
         switch (estadoActual)
         {
             case 2:
-                Debug.Log("😠 El enemigo se acerca a la ventana (Estado 2).");
+                Debug.Log("El enemigo se acerca a la ventana (Estado 2).");
                 break;
             case 3:
-                Debug.Log("💀 El enemigo está a punto de entrar (Estado 3).");
+                Debug.Log("El enemigo está a punto de entrar (Estado 3).");
                 break;
         }
+
+        ActualizarColorVentana();
     }
 
     void RetrocederAEstado1()
@@ -131,13 +141,15 @@ public class EnemigoVentana : MonoBehaviour
             estadoActual = 1;
             cuentaRegresivaActiva = false;
             tiempoRestanteParaEntrar = 0f;
-            Debug.Log("🔦 La luz lo ha repelido, vuelve al estado 1 (tranquilo).");
+            Debug.Log("La luz lo ha repelido, vuelve al estado 1 (tranquilo).");
         }
+
+        ActualizarColorVentana();
     }
 
     void EntrarAHabitacion()
     {
-        Debug.Log("☠️ El enemigo ha entrado en la habitación... comienza la persecución.");
+        Debug.Log("El enemigo ha entrado en la habitación... comienza la persecución.");
         cuentaRegresivaActiva = false;
         enemigoSpawned = true;
 
@@ -157,12 +169,25 @@ public class EnemigoVentana : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("⚠️ No hay prefab o punto de spawn asignado para el enemigo físico.");
+            Debug.LogWarning("No hay prefab o punto de spawn asignado para el enemigo físico.");
         }
     }
 
     public void SetIluminado(bool valor)
     {
         recibiendoLuz = valor;
+    }
+
+    // Nuevo: cambia el color de la ventana según estado
+ 
+
+    void ActualizarColorVentana()
+    {
+        switch (estadoActual)
+        {
+            case 1: ventanaRenderer.material = azulMat; break;
+            case 2: ventanaRenderer.material = naranjaMat; break;
+            case 3: ventanaRenderer.material = rojoMat; break;
+        }
     }
 }
