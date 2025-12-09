@@ -1205,6 +1205,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7390018599790069863, guid: 7fa1fbb971b784e4d963e277935a5d6e, type: 3}
+      propertyPath: nombreEscenaLobby
+      value: GameplayScene
+      objectReference: {fileID: 0}
+    - target: {fileID: 7390018599790069863, guid: 7fa1fbb971b784e4d963e277935a5d6e, type: 3}
       propertyPath: nombreEscenaDestino
       value: Habitacion 1
       objectReference: {fileID: 0}
@@ -3079,6 +3083,14 @@ PrefabInstance:
     - target: {fileID: 6043197107553249474, guid: e01ad8037b63228458b17afa78f02482, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8257999581595465051, guid: e01ad8037b63228458b17afa78f02482, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: Resume
+      objectReference: {fileID: 0}
+    - target: {fileID: 8257999581595465051, guid: e01ad8037b63228458b17afa78f02482, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: PausaMenu, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 8899148682166647867, guid: e01ad8037b63228458b17afa78f02482, type: 3}
       propertyPath: opcionesPanel

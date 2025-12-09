@@ -1,23 +1,27 @@
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class CristalMetaSpawner : MonoBehaviour
 {
-    [SerializeField] GameObject cristalNormalPrefab;
-    [SerializeField] GameObject cristalDa�adoPrefab;
-    [SerializeField] Transform spawnPoint;
+    [SerializeField] private GameObject cristalNormalPrefab;
+    [SerializeField] private GameObject cristalDañadoPrefab;
+    [SerializeField] private Transform spawnPoint;
 
     public void SpawnCristal()
     {
-        if (GameManager.Instancia.CristalDa�adoNivelActual())
+        if (GameManager.Instancia.CristalDañadoNivelActual())
         {
-            Instantiate(cristalDa�adoPrefab, spawnPoint.position, spawnPoint.rotation);
-            Debug.Log("Cristal da�ado.");
+            Instantiate(cristalDañadoPrefab, spawnPoint.position, spawnPoint.rotation);
+            Debug.Log("⚠️ Cristal dañado instanciado.");
         }
         else
         {
             Instantiate(cristalNormalPrefab, spawnPoint.position, spawnPoint.rotation);
-            Debug.Log("Cristal normal.");
+            Debug.Log("✨ Cristal normal instanciado.");
         }
+
+        // 🔑 Marcar nivel como completado
+        string nivelActual = SceneManager.GetActiveScene().name;
+        GameManager.Instancia.MarcarNivelCompletado(nivelActual);
     }
 }
-

@@ -1,23 +1,37 @@
 ﻿using UnityEngine;
-using UnityEngine.SceneManagement;
 
-public class Bloqueadordenivel : MonoBehaviour
+public class BloqueadorDeNivel : MonoBehaviour
 {
-    [SerializeField] GameObject[] objetosBloqueables;
+    [Header("Puerta bloqueada")]
+    [SerializeField]  GameObject puertaBloqueada;
+
+    [Header("Spawner de cristal")]
+    [SerializeField]  CristalMetaSpawner spawner;
 
     void Start()
     {
-        string nivel = SceneManager.GetActiveScene().name;
-        bool completado = PlayerPrefs.GetInt(nivel + "_completado", 0) == 1;
+        // Al inicio, puerta cerrada
+        if (puertaBloqueada != null)
+            puertaBloqueada.SetActive(true);
 
-        if (completado)
-        {
-            foreach (GameObject obj in objetosBloqueables)
-            {
-                if (obj != null) obj.SetActive(false);
-            }
+        // Suscribirse al evento de nivel completado
+        GameManager.Instancia.OnNivelCompletado += OnNivelCompletado;
+    }
 
-            Debug.Log("🔒 Nivel ya completado. Fragmentos y cristal bloqueados.");
-        }
+     void OnDestroy()
+    {
+        if (GameManager.Instancia != null)
+            GameManager.Instancia.OnNivelCompletado -= OnNivelCompletado;
+    }
+
+    void OnNivelCompletado()
+    {
+        // Desbloquear salida
+        if (puertaBloqueada != null)
+            puertaBloqueada.SetActive(false);
+
+        // Instanciar cristal correcto
+        if (spawner != null)
+            spawner.SpawnCristal();
     }
 }

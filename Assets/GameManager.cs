@@ -18,6 +18,9 @@ public class GameManager : MonoBehaviour
     // Contador de muertes por nivel
     private Dictionary<string, int> muertesPorNivel = new Dictionary<string, int>();
 
+    // 🔑 Niveles completados
+    private HashSet<string> nivelesCompletados = new HashSet<string>();
+
     void Awake()
     {
         if (Instancia == null)
@@ -29,13 +32,8 @@ public class GameManager : MonoBehaviour
     }
 
     // -------------------
-    // Métodos existentes
+    // Piezas
     // -------------------
-    public void TomarLinterna()
-    {
-        tieneLinterna = true;
-    }
-
     public void RecogerPieza()
     {
         piezasRecogidas++;
@@ -45,6 +43,10 @@ public class GameManager : MonoBehaviour
         {
             nivelCompletado = true;
             OnNivelCompletado?.Invoke();
+
+            // 🔑 Marcar nivel actual como completado
+            string nivelActual = SceneManager.GetActiveScene().name;
+            MarcarNivelCompletado(nivelActual);
         }
     }
 
@@ -55,7 +57,7 @@ public class GameManager : MonoBehaviour
     }
 
     // -------------------
-    //  Muertes
+    // Muertes
     // -------------------
     public void RegistrarMuerte()
     {
@@ -77,5 +79,22 @@ public class GameManager : MonoBehaviour
     public bool CristalDañadoNivelActual()
     {
         return GetMuertesNivelActual() > 2;
+    }
+
+    // -------------------
+    // 🔑 Bloqueo de niveles
+    // -------------------
+    public void MarcarNivelCompletado(string nombreNivel)
+    {
+        if (!nivelesCompletados.Contains(nombreNivel))
+        {
+            nivelesCompletados.Add(nombreNivel);
+            Debug.Log($"✅ Nivel completado: {nombreNivel}");
+        }
+    }
+
+    public bool EstaNivelCompletado(string nombreNivel)
+    {
+        return nivelesCompletados.Contains(nombreNivel);
     }
 }

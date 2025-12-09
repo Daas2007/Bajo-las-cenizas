@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class PausaMenu : MonoBehaviour
@@ -13,6 +13,7 @@ public class PausaMenu : MonoBehaviour
         pausePanel.SetActive(false);
         opcionesPanel.SetActive(false);
     }
+
     void Start()
     {
         Time.timeScale = 1f; // siempre arrancar con tiempo normal
@@ -24,16 +25,39 @@ public class PausaMenu : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (isPaused) Resume();
-            else Pause();
+            if (!isPaused)
+            {
+                Pause();
+            }
+            else
+            {
+                // Si estoy en opciones, volver al panel de pausa
+                if (opcionesPanel.activeSelf)
+                {
+                    opcionesPanel.SetActive(false);
+                    pausePanel.SetActive(true);
+                }
+                else
+                {
+                    Resume();
+                }
+            }
         }
     }
 
     public void Pause()
     {
+        if (pausePanel == null)
+        {
+            Debug.LogWarning("⚠️ pausePanel no está asignado.");
+            return;
+        }
+
         pausePanel.SetActive(true);
+        opcionesPanel?.SetActive(false); // el ? evita error si es null
         Time.timeScale = 0f;
         isPaused = true;
+
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
@@ -43,19 +67,22 @@ public class PausaMenu : MonoBehaviour
         pausePanel.SetActive(false);
         opcionesPanel.SetActive(true);
     }
+
     public void CerrarOpciones()
     {
-        pausePanel.SetActive(true);
         opcionesPanel.SetActive(false);
+        pausePanel.SetActive(true);
     }
 
     public void Resume()
     {
         Time.timeScale = 1f;
         pausePanel.SetActive(false);
+        opcionesPanel.SetActive(false);
+        isPaused = false; // 🔑 ahora sí se actualiza
+
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-
     }
 
     public void ExitToMenu()
@@ -65,4 +92,3 @@ public class PausaMenu : MonoBehaviour
         SceneManager.LoadScene("Main Menu Start");
     }
 }
-
