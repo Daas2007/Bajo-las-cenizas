@@ -52,5 +52,7 @@ public class PuertaInteractuable : MonoBehaviour, IInteractuable
         abierta = abrir;
         Debug.Log(abrir ? "🚪 Puerta abierta." : "🚪 Puerta cerrada.");
     }
-}
 
+    // 🔑 Método añadido para que otros scripts (como DoorLock) puedan consultar el estado
+    public bool EstaAbierta() => abierta;
+}

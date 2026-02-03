@@ -1,20 +1,16 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class CristalMeta : MonoBehaviour, IInteractuable
 {
-    [SerializeField] string escenaHabitacionInicial = "HabitacionInicial";
+    [SerializeField] string idHabitacion = "Habitacion1";
 
     public void Interactuar()
     {
-        string nivelActual = SceneManager.GetActiveScene().name;
-        PlayerPrefs.SetInt(nivelActual + "_completado", 1);
+        PlayerPrefs.SetInt(idHabitacion + "_completado", 1);
         PlayerPrefs.Save();
 
         GameManager.Instancia.ResetearProgresoNivel();
-
-        SceneManager.LoadScene(escenaHabitacionInicial);
+        LevelGateManager.Instancia?.CompletarHabitacion(idHabitacion);
+        GameManager.Instancia?.MarcarNivelCompletado(idHabitacion);
     }
 }
-
-

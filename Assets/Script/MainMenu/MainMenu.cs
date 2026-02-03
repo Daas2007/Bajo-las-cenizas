@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class MainMenu : MonoBehaviour
 {
@@ -15,7 +15,7 @@ public class MainMenu : MonoBehaviour
 
     private void Awake()
     {
-        // Al inicio: solo menú principal
+        // Al inicio: solo menÃº principal
         mainMenu.SetActive(true);
         menuOpciones.SetActive(false);
         pauseMenu.SetActive(false);
@@ -24,7 +24,7 @@ public class MainMenu : MonoBehaviour
         enemigos.SetActive(false);
     }
 
-    // --- Menú Principal ---
+    // --- MenÃº Principal ---
     public void AbrirPanelDeOpciones()
     {
         mainMenu.SetActive(false);
@@ -44,7 +44,7 @@ public class MainMenu : MonoBehaviour
 
     public void IniciarJuego()
     {
-        // Activa gameplay y oculta menú principal
+        // Activa gameplay y oculta menÃº principal
         mainMenu.SetActive(false);
         menuOpciones.SetActive(false);
 
@@ -89,4 +89,3 @@ public class MainMenu : MonoBehaviour
         pauseMenu.SetActive(true);
     }
 }
-

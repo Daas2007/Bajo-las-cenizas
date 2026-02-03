@@ -1,45 +1,26 @@
 ﻿using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class PuertaCambioEscena : MonoBehaviour, IInteractuable
 {
-    [Header("Configuración de puerta")]
-    [SerializeField] string nombreEscenaDestino; // Nombre de la escena destino
-    [SerializeField] string nombreEscenaLobby; // nombre exacto de tu escena de lobby
+    [SerializeField] private string idHabitacion = "Habitacion1";
 
     public void Interactuar()
     {
-        if (string.IsNullOrEmpty(nombreEscenaDestino))
+        var manager = LevelGateManager.Instancia;
+        if (manager == null)
         {
-            Debug.LogWarning("⚠️ No hay ruta de escena destinada");
+            Debug.LogWarning("LevelGateManager no está inicializado.");
             return;
         }
 
-        string escenaActual = SceneManager.GetActiveScene().name;
-
-        // ✅ Si estoy en el lobby, siempre me deja entrar
-        if (escenaActual == nombreEscenaLobby)
+        var estado = manager.GetRoomState(idHabitacion);
+        if (estado != LevelGateManager.RoomState.Completado)
         {
-            Debug.Log($"🚪 Desde el lobby entrando a {nombreEscenaDestino}...");
-            SceneManager.LoadScene(nombreEscenaDestino);
-            return;
+            manager.EntrarHabitacion(idHabitacion);
         }
-
-        // 🔒 Si NO estoy en el lobby, bloqueo salida si el nivel actual NO está completado
-        if (GameManager.Instancia != null && !GameManager.Instancia.nivelCompletado)
+        else
         {
-            Debug.Log("🚫 No puedes salir todavía, faltan fragmentos.");
-            return;
+            Debug.Log($"🚫 No puedes entrar a {idHabitacion}, ya completada.");
         }
-
-        // 🔑 Opcional: bloquear entrada si el nivel destino ya fue completado
-        if (GameManager.Instancia != null && GameManager.Instancia.EstaNivelCompletado(nombreEscenaDestino))
-        {
-            Debug.Log($"🚫 No puedes entrar a {nombreEscenaDestino}, ya fue completado.");
-            return;
-        }
-
-        Debug.Log($"🚪 Entrando a {nombreEscenaDestino}...");
-        SceneManager.LoadScene(nombreEscenaDestino);
     }
 }

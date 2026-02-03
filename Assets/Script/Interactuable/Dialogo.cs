@@ -4,32 +4,40 @@ using TMPro;
 
 public class Dialogo : MonoBehaviour, IInteractuable
 {
-    [SerializeField] GameObject dialogoCanvas;
-    [SerializeField] TMP_Text dialogoTexto;
+    [SerializeField] private GameObject dialogoCanvas;
+    [SerializeField] private TMP_Text dialogoTexto;
 
     [Header("Líneas de diálogo")]
     [TextArea(2, 5)]
-    [SerializeField] string[] lineas;
+    [SerializeField] private string[] lineas;
 
     [Header("Configuración de interacción")]
-    [SerializeField] float distanciaInteraccion = 2f; // 🔑 distancia máxima
-    [SerializeField] LayerMask layerInteractuable;      // capa de objetos interactuables
+    [SerializeField] private float distanciaInteraccion = 2f;
+    [SerializeField] private LayerMask layerInteractuable;
 
     private int indiceLinea = 0;
     private Transform jugador;
 
     private void Start()
     {
-        dialogoCanvas.SetActive(false);
-        jugador = GameObject.FindGameObjectWithTag("Player").transform;
+        if (dialogoCanvas != null)
+            dialogoCanvas.SetActive(false);
+        else
+            Debug.LogError("⚠️ No se asignó el Canvas de diálogo en el Inspector.");
+
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null)
+            jugador = playerObj.transform;
+        else
+            Debug.LogError("⚠️ No se encontró un objeto con tag 'Player'.");
     }
 
     private void Update()
     {
-        // Calcular distancia entre jugador y este objeto
+        if (jugador == null || dialogoCanvas == null || dialogoTexto == null) return;
+
         float distancia = Vector3.Distance(jugador.position, transform.position);
 
-        // Si está dentro de la distancia y presiona E
         if (distancia <= distanciaInteraccion && Input.GetKeyDown(KeyCode.E))
         {
             if (!dialogoCanvas.activeSelf)
@@ -46,6 +54,8 @@ public class Dialogo : MonoBehaviour, IInteractuable
 
     public void MostrarLinea()
     {
+        if (dialogoTexto == null) return;
+
         if (indiceLinea < lineas.Length)
         {
             dialogoTexto.text = lineas[indiceLinea];
@@ -60,6 +70,16 @@ public class Dialogo : MonoBehaviour, IInteractuable
 
     public void Interactuar()
     {
-        throw new System.NotImplementedException();
+        // Puedes usar esta función si quieres que el sistema de interacción general
+        // también dispare el diálogo sin necesidad de presionar E.
+        if (dialogoCanvas != null && !dialogoCanvas.activeSelf)
+        {
+            dialogoCanvas.SetActive(true);
+            MostrarLinea();
+        }
+        else
+        {
+            MostrarLinea();
+        }
     }
 }

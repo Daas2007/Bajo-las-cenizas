@@ -29,13 +29,14 @@ public class MovimientoPersonaje : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
         if (camara == null && Camera.main != null) camara = Camera.main.transform;
+        canvas_StaminaBar.SetActive(false);
     }
 
     void Start()
     {
         Stamina = StaminaMaxima;
         VelocidadBase = VelocidadMove;
-        canvas_StaminaBar.SetActive(false);
+        //canvas_StaminaBar.SetActive(false);
     }
 
     void Update()

@@ -59,4 +59,3 @@ public class InteraccionJugador : MonoBehaviour
         objetoActual = null;
     }
 }
-
