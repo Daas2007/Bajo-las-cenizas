@@ -8,8 +8,9 @@ public class MovimientoPersonaje : MonoBehaviour
     [Header("Referencias")]
     [SerializeField] Transform camara;
     [SerializeField] Rigidbody rb;
+    [SerializeField] Camara camaraScript; // referencia al script de cámara
 
-    [Header("Configuraci�n de velocidad Player")]
+    [Header("Configuración de velocidad Player")]
     [SerializeField] bool UsarGetAxisRaw = true;
     [SerializeField] float VelocidadMove = 5f;
     [SerializeField] float VelocidadBase;
@@ -36,7 +37,6 @@ public class MovimientoPersonaje : MonoBehaviour
     {
         Stamina = StaminaMaxima;
         VelocidadBase = VelocidadMove;
-        //canvas_StaminaBar.SetActive(false);
     }
 
     void Update()
@@ -62,6 +62,14 @@ public class MovimientoPersonaje : MonoBehaviour
         Vector3 movimiento = direccionPlano * VelocidadMove * Time.fixedDeltaTime;
 
         rb.MovePosition(rb.position + movimiento);
+
+        // --- Calcular velocidad manualmente ---
+        float velocidadActual = movimiento.magnitude / Time.fixedDeltaTime;
+
+        if (camaraScript != null)
+        {
+            camaraScript.SetEstado(velocidadActual);
+        }
     }
 
     void JugadorCorrer()

@@ -1,16 +1,15 @@
 using UnityEngine;
 
-public class CristalMeta : MonoBehaviour, IInteractuable
+public class CristalMeta : MonoBehaviour
 {
-    [SerializeField] string idHabitacion = "Habitacion1";
+    [SerializeField] private string idHabitacion;
 
-    public void Interactuar()
+    private void OnTriggerEnter(Collider other)
     {
-        PlayerPrefs.SetInt(idHabitacion + "_completado", 1);
-        PlayerPrefs.Save();
+        if (!other.CompareTag("Player")) return;
 
-        GameManager.Instancia.ResetearProgresoNivel();
-        LevelGateManager.Instancia?.CompletarHabitacion(idHabitacion);
-        GameManager.Instancia?.MarcarNivelCompletado(idHabitacion);
+        LevelGateManager.Instancia.CompletarHabitacion(idHabitacion);
+        Destroy(gameObject); // eliminar cristal
     }
 }
+

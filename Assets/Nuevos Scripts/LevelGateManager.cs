@@ -65,27 +65,25 @@ public class LevelGateManager : MonoBehaviour
 
     public void EntrarHabitacion(string id)
     {
-        if (!habitacionesMap.TryGetValue(id, out var room))
-        {
-            Debug.LogWarning($"LevelGateManager.EntrarHabitacion: id '{id}' no encontrado.");
-            return;
-        }
+        if (!habitacionesMap.TryGetValue(id, out var room)) return;
 
         if (room.estado == RoomState.Completado)
         {
             if (room.puertaLobby != null) room.puertaLobby.Lock();
-            Debug.Log($"EntrarHabitacion: '{id}' ya completada. No se reabre el acceso desde lobby.");
             return;
         }
 
-        if (room.puertaLobby != null) room.puertaLobby.Lock();
+        // Abrir puerta interna para mostrar hacia dónde ir
+        if (room.puertaInterna != null) room.puertaInterna.Unlock();
+
+        // Activar muro de retorno
         if (room.muroRetorno != null) room.muroRetorno.SetActive(true);
+
+        // Activar enemigos
         if (room.enemyActivator != null) room.enemyActivator.Activar(true);
 
         room.estado = RoomState.EnCurso;
-        Debug.Log($"EntrarHabitacion: '{id}' estado -> EnCurso");
     }
-
     public void SalirHabitacion(string id)
     {
         if (!habitacionesMap.TryGetValue(id, out var room))
@@ -100,29 +98,33 @@ public class LevelGateManager : MonoBehaviour
             Debug.Log($"SalirHabitacion: '{id}' jugador salió del trigger (estado EnCurso).");
         }
     }
-
     public void CompletarHabitacion(string id)
     {
-        if (!habitacionesMap.TryGetValue(id, out var room))
-        {
-            Debug.LogWarning($"LevelGateManager.CompletarHabitacion: id '{id}' no encontrado.");
-            return;
-        }
+        if (!habitacionesMap.TryGetValue(id, out var room)) return;
 
-        if (room.estado == RoomState.Completado)
-        {
-            Debug.Log($"CompletarHabitacion: '{id}' ya estaba completada.");
-            return;
-        }
+        if (room.estado == RoomState.Completado) return;
 
+        // Abrir puerta interna y quitar muro
         if (room.puertaInterna != null) room.puertaInterna.Unlock();
         if (room.muroRetorno != null) room.muroRetorno.SetActive(false);
+
         if (room.enemyActivator != null) room.enemyActivator.Activar(false);
 
         room.estado = RoomState.Completado;
-        Debug.Log($"CompletarHabitacion: '{id}' estado -> Completado");
     }
+    public void CerrarHabitacionYIniciar(string id)
+    {
+        if (!habitacionesMap.TryGetValue(id, out var room)) return;
 
+        if (room.puertaInterna != null) room.puertaInterna.Lock();
+
+        if (id == "Habitacion1")
+        {
+            Debug.Log("Iniciando juego en Habitación 1");
+            // Aquí llamas a tu GameManager o activas la lógica del nivel 1
+            // GameManager.Instancia.IniciarNivel1();
+        }
+    }
     public void ResetHabitacion(string id)
     {
         if (!habitacionesMap.TryGetValue(id, out var room))
@@ -138,7 +140,6 @@ public class LevelGateManager : MonoBehaviour
         room.estado = RoomState.NoEntrado;
         Debug.Log($"ResetHabitacion: '{id}' reiniciada a NoEntrado.");
     }
-
     public RoomState GetRoomState(string id)
     {
         if (!habitacionesMap.TryGetValue(id, out var room))

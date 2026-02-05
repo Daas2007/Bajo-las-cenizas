@@ -1,41 +1,30 @@
 ﻿using UnityEngine;
-using UnityEngine.AI;
-using UnityEngine.SceneManagement;
 
-[RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(Rigidbody))]
 public class EnemigoPerseguidor : MonoBehaviour
 {
+    [Header("Objetivo a perseguir")]
     public Transform objetivo;
-    [SerializeField] float distanciaAtaque = 1.2f;
-    [SerializeField] float tiempoParaReinicio = 2f;
 
-    NavMeshAgent agent;
-    bool jugadorMuerto = false;
+    [Header("Velocidad de movimiento")]
+    [SerializeField] private float velocidad = 3f;
 
-    void Awake()
+    private Rigidbody rb;
+
+    private void Awake()
     {
-        agent = GetComponent<NavMeshAgent>();
-        agent.stoppingDistance = distanciaAtaque * 0.9f;
+        rb = GetComponent<Rigidbody>();
+        rb.constraints = RigidbodyConstraints.FreezeRotation; // evitar que se caiga o rote raro
     }
 
-    void Update()
+    private void FixedUpdate()
     {
-        if (objetivo == null || jugadorMuerto) return;
-        agent.SetDestination(objetivo.position);
+        if (objetivo == null) return;
 
-        if (!jugadorMuerto && Vector3.Distance(transform.position, objetivo.position) <= distanciaAtaque)
-            MatarJugador();
-    }
+        // Dirección hacia el jugador
+        Vector3 direccion = (objetivo.position - transform.position).normalized;
 
-    void MatarJugador()
-    {
-        jugadorMuerto = true;
-        agent.isStopped = true;
-        Invoke(nameof(ReiniciarNivel), tiempoParaReinicio);
-    }
-
-    void ReiniciarNivel()
-    {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        // Movimiento físico hacia el jugador
+        rb.MovePosition(transform.position + direccion * velocidad * Time.fixedDeltaTime);
     }
 }
