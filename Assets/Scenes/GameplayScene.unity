@@ -3205,7 +3205,7 @@ MeshRenderer:
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
   m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 2
+  m_SelectedEditorRenderState: 3
   m_MinimumChartSize: 4
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
@@ -3609,17 +3609,9 @@ MonoBehaviour:
   m_Mesh: {fileID: 1760084010}
   m_VersionIndex: 8212
   m_IsSelectable: 1
-  m_SelectedFaces: 05000000
-  m_SelectedEdges:
-  - a: 21
-    b: 22
-  - a: 24
-    b: 21
-  - a: 22
-    b: 23
-  - a: 23
-    b: 24
-  m_SelectedVertices: 15000000160000001800000017000000
+  m_SelectedFaces: 
+  m_SelectedEdges: []
+  m_SelectedVertices: 
 --- !u!4 &1389590114
 Transform:
   m_ObjectHideFlags: 0
@@ -3629,7 +3621,7 @@ Transform:
   m_GameObject: {fileID: 1389590108}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0, z: -0.7071068, w: 0.7071068}
-  m_LocalPosition: {x: -13.931658, y: 2.5877426, z: 0.38364124}
+  m_LocalPosition: {x: -13.730758, y: 2.537369, z: 0.34005642}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
