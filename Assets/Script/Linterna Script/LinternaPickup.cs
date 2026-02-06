@@ -1,20 +1,21 @@
 using UnityEngine;
 
-public class LinternaPickup : MonoBehaviour
+public class LinternaPickup : MonoBehaviour, IInteractuable
 {
-    void OnTriggerEnter(Collider other)
+    public void Interactuar()
     {
-        if (other.CompareTag("Player"))
+        // Buscar el jugador
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
         {
-            // Guardar que el jugador ya tiene la linterna
-            PlayerPrefs.SetInt("TieneLinterna", 1);
-            PlayerPrefs.Save();
-
-            // Activar la linterna en el jugador
-            other.GetComponent<JugadorLinterna>().ActivarLinterna();
-
-            // Destruir el objeto linterna en el mundo
-            Destroy(gameObject);
+            JugadorLinterna jugadorLinterna = player.GetComponent<JugadorLinterna>();
+            if (jugadorLinterna != null)
+            {
+                jugadorLinterna.DarLinternaEncendida(); // activa linterna en la mano con luz encendida
+            }
         }
+
+        // Destruir el objeto linterna del mapa
+        Destroy(gameObject);
     }
 }

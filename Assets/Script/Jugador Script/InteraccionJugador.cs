@@ -4,15 +4,16 @@ using TMPro;
 public class InteraccionJugador : MonoBehaviour
 {
     [Header("Configuración de interacción")]
-    [SerializeField] float distanciaInteraccion = 2f; 
-    [SerializeField] LayerMask layerInteractuable; 
+    [SerializeField] float distanciaInteraccion;
+    [SerializeField] LayerMask layerInteractuable;
     [SerializeField] Camera camara;
 
     [Header("UI de interacción")]
-    [SerializeField] GameObject panelInteraccion; 
-    [SerializeField] TMP_Text textoInteraccion; 
+    [SerializeField] GameObject panelInteraccion;
+    [SerializeField] TMP_Text textoInteraccion;
 
     private IInteractuable objetoActual;
+    private Transform objetoTransform; // para leer el Tag
 
     void Update()
     {
@@ -23,9 +24,13 @@ public class InteraccionJugador : MonoBehaviour
             if (!panelInteraccion.activeSelf)
                 panelInteraccion.SetActive(true);
 
-            textoInteraccion.text = "Presiona [E] para interactuar";
+            // Mostrar texto según el Tag
+            if (objetoTransform.CompareTag("Pickup"))
+                textoInteraccion.text = "Presiona [E] para agarrar";
+            else
+                textoInteraccion.text = "Presiona [E] para interactuar";
 
-            if ( Input.GetKeyDown(KeyCode.E))
+            if (Input.GetKeyDown(KeyCode.E))
             {
                 objetoActual.Interactuar();
             }
@@ -33,9 +38,7 @@ public class InteraccionJugador : MonoBehaviour
         else
         {
             if (panelInteraccion.activeSelf)
-            {
                 panelInteraccion.SetActive(false);
-            }
         }
     }
 
@@ -51,11 +54,12 @@ public class InteraccionJugador : MonoBehaviour
             if (interactuable != null)
             {
                 objetoActual = interactuable;
-                // Debug.DrawRay(camara.transform.position, camara.transform.forward * distanciaInteraccion, Color.green);
+                objetoTransform = hit.collider.transform;
                 return;
             }
         }
 
         objetoActual = null;
+        objetoTransform = null;
     }
 }
