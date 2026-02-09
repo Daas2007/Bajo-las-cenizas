@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class EnemigoVentana : MonoBehaviour
 {
     [Header("Estados del enemigo")]
-    [SerializeField] int estadoActual = 1;
+    public int estadoActual = 1; // público para ver en Inspector
+    public bool recibiendoLuz = false; // público para ver en Inspector
     [SerializeField] float tiempoEnEstado = 0f;
 
     [Header("Agresividad y tiempos")]
@@ -14,7 +14,6 @@ public class EnemigoVentana : MonoBehaviour
     [SerializeField] int nivelAgresividad = 1;
 
     [Header("Detección de luz (desde linterna)")]
-    [SerializeField] bool recibiendoLuz = false;
     [SerializeField] float contadorLuz = 0f;
 
     [Header("Configuración de dificultad")]
@@ -27,7 +26,7 @@ public class EnemigoVentana : MonoBehaviour
     [SerializeField] Transform puntoSpawn;
 
     [Header("Temporizador fase 3")]
-    [SerializeField] float tiempoAntesDeEntrar = 10f; // tiempo para iluminarlo
+    [SerializeField] float tiempoAntesDeEntrar = 10f;
     bool cuentaRegresivaActiva = false;
     float tiempoRestanteParaEntrar;
     bool enemigoSpawned = false;
@@ -42,7 +41,7 @@ public class EnemigoVentana : MonoBehaviour
 
     void Start()
     {
-        Debug.Log("Enemigo iniciado en estado 1 (observando por la ventana)");
+        Debug.Log("[Ventana] Iniciado en estado 1 (observando).");
         ActualizarColorVentana();
     }
 
@@ -52,20 +51,26 @@ public class EnemigoVentana : MonoBehaviour
         tiempoTotalJuego += deltaT;
         tiempoEnEstado += deltaT;
 
-        // --- Escalado de agresividad ---
+        // Escalado de agresividad
         if (tiempoTotalJuego >= nivelAgresividad * tiempoPorNivel)
         {
             nivelAgresividad++;
             tiempoParaAvanzar = Mathf.Max(tiempoMinimoAvance, tiempoParaAvanzar - reduccionPorNivel);
-            Debug.Log($"El enemigo se vuelve más agresivo (Nivel {nivelAgresividad}) → Avanza cada {tiempoParaAvanzar}s sin luz.");
+            Debug.Log($"[Ventana] Nivel agresividad {nivelAgresividad}, avanza cada {tiempoParaAvanzar}s sin luz.");
         }
 
-        // --- Reacción a la linterna ---
+        // Reacción a la linterna
         if (recibiendoLuz)
         {
             contadorLuz += deltaT;
+            Debug.Log($"[Ventana] Recibiendo luz, contador={contadorLuz:F2}");
 
-            if (contadorLuz >= tiempoParaRetroceder)
+            // Retrocede inmediatamente si está en estado 3
+            if (estadoActual == 3)
+            {
+                RetrocederAEstado1();
+            }
+            else if (contadorLuz >= tiempoParaRetroceder)
             {
                 RetrocederAEstado1();
             }
@@ -74,7 +79,7 @@ public class EnemigoVentana : MonoBehaviour
             {
                 cuentaRegresivaActiva = false;
                 tiempoRestanteParaEntrar = 0f;
-                Debug.Log("Lo iluminaste a tiempo, el enemigo se retira!");
+                Debug.Log("[Ventana] Lo iluminaste a tiempo, el enemigo se retira!");
             }
         }
         else
@@ -87,19 +92,20 @@ public class EnemigoVentana : MonoBehaviour
             }
         }
 
-        // --- Lógica especial en estado 3 ---
+        // Lógica especial en estado 3
         if (estadoActual == 3 && !recibiendoLuz)
         {
             if (!cuentaRegresivaActiva)
             {
                 cuentaRegresivaActiva = true;
                 tiempoRestanteParaEntrar = tiempoAntesDeEntrar;
-                Debug.Log($"El enemigo está listo para entrar... tienes {tiempoAntesDeEntrar} segundos para iluminarlo!");
+                Debug.Log($"[Ventana] Estado 3, tienes {tiempoAntesDeEntrar}s para iluminarlo!");
             }
 
             if (cuentaRegresivaActiva)
             {
                 tiempoRestanteParaEntrar -= deltaT;
+                Debug.Log($"[Ventana] Tiempo restante para entrar: {tiempoRestanteParaEntrar:F2}");
 
                 if (tiempoRestanteParaEntrar <= 0f && !enemigoSpawned)
                 {
@@ -117,16 +123,7 @@ public class EnemigoVentana : MonoBehaviour
         if (estadoActual > 3)
             estadoActual = 3;
 
-        switch (estadoActual)
-        {
-            case 2:
-                Debug.Log("El enemigo se acerca a la ventana (Estado 2).");
-                break;
-            case 3:
-                Debug.Log("El enemigo está a punto de entrar (Estado 3).");
-                break;
-        }
-
+        Debug.Log($"[Ventana] Avanza a estado {estadoActual}");
         ActualizarColorVentana();
     }
 
@@ -134,14 +131,13 @@ public class EnemigoVentana : MonoBehaviour
     {
         tiempoEnEstado = 0f;
         contadorLuz = 0f;
-        recibiendoLuz = false;
 
         if (estadoActual != 1)
         {
             estadoActual = 1;
             cuentaRegresivaActiva = false;
             tiempoRestanteParaEntrar = 0f;
-            Debug.Log("La luz lo ha repelido, vuelve al estado 1 (tranquilo).");
+            Debug.Log("[Ventana] La luz lo ha repelido, vuelve al estado 1.");
         }
 
         ActualizarColorVentana();
@@ -149,7 +145,7 @@ public class EnemigoVentana : MonoBehaviour
 
     void EntrarAHabitacion()
     {
-        Debug.Log("El enemigo ha entrado en la habitación... comienza la persecución.");
+        Debug.Log("[Ventana] El enemigo ha entrado en la habitación!");
         cuentaRegresivaActiva = false;
         enemigoSpawned = true;
 
@@ -169,17 +165,15 @@ public class EnemigoVentana : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("No hay prefab o punto de spawn asignado para el enemigo físico.");
+            Debug.LogWarning("[Ventana] No hay prefab o punto de spawn asignado.");
         }
     }
 
     public void SetIluminado(bool valor)
     {
         recibiendoLuz = valor;
+        Debug.Log("[Ventana] SetIluminado llamado → " + valor);
     }
-
-    // Nuevo: cambia el color de la ventana según estado
- 
 
     void ActualizarColorVentana()
     {

@@ -7,8 +7,14 @@ public class JugadorLinterna : MonoBehaviour
     [SerializeField] GameObject luzLinterna;
     [SerializeField] AudioSource source;
     [SerializeField] AudioClip sonidoEncender;
+    [SerializeField] Camera cam; // cámara del jugador
+
+    [Header("Detección de enemigos")]
+    [SerializeField] float distanciaMax = 10f;
+    [SerializeField] LayerMask layerEnemigo;
 
     private bool tieneLinterna = false;
+    private EnemigoVentana enemigoDetectado;
 
     void Start()
     {
@@ -17,7 +23,7 @@ public class JugadorLinterna : MonoBehaviour
 
         if (PlayerPrefs.GetInt("TieneLinterna", 0) == 1)
         {
-            DarLinterna(); // si estaba guardado
+            DarLinterna();
         }
     }
 
@@ -28,6 +34,16 @@ public class JugadorLinterna : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.F))
         {
             ToggleLinterna();
+        }
+
+        if (luzLinterna.activeSelf)
+        {
+            DetectarEnemigoConLuz();
+        }
+        else if (enemigoDetectado != null)
+        {
+            enemigoDetectado.SetIluminado(false);
+            enemigoDetectado = null;
         }
     }
 
@@ -41,7 +57,6 @@ public class JugadorLinterna : MonoBehaviour
         PlayerPrefs.Save();
     }
 
-    // Nuevo: recoger linterna y encenderla directamente
     public void DarLinternaEncendida()
     {
         tieneLinterna = true;
@@ -62,5 +77,26 @@ public class JugadorLinterna : MonoBehaviour
 
         if (source != null && sonidoEncender != null)
             source.PlayOneShot(sonidoEncender);
+    }
+
+    private void DetectarEnemigoConLuz()
+    {
+        Ray rayo = new Ray(cam.transform.position, cam.transform.forward);
+        RaycastHit hit;
+
+        if (Physics.Raycast(rayo, out hit, distanciaMax, layerEnemigo))
+        {
+            EnemigoVentana enemigo = hit.collider.GetComponent<EnemigoVentana>();
+            if (enemigo != null)
+            {
+                enemigo.SetIluminado(true);
+                enemigoDetectado = enemigo;
+            }
+        }
+        else if (enemigoDetectado != null)
+        {
+            enemigoDetectado.SetIluminado(false);
+            enemigoDetectado = null;
+        }
     }
 }
