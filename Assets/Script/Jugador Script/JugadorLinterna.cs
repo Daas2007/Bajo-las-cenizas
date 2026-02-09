@@ -81,6 +81,7 @@ public class JugadorLinterna : MonoBehaviour
 
     private void DetectarEnemigoConLuz()
     {
+
         Ray rayo = new Ray(cam.transform.position, cam.transform.forward);
         RaycastHit hit;
 

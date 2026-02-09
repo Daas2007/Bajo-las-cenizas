@@ -1,24 +1,18 @@
 ﻿using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class PausaMenu : MonoBehaviour
 {
     [SerializeField] GameObject pausePanel;
-    [SerializeField] GameObject opcionesPanel; // referencia al panel de opciones
+    [SerializeField] GameObject opcionesPanel;
+    [SerializeField] GameObject mainPanel; // referencia al panel del menú principal
 
     bool isPaused = false;
 
-    private void Awake()
+    void Awake()
     {
-        pausePanel.SetActive(false);
-        opcionesPanel.SetActive(false);
-    }
-
-    void Start()
-    {
-        Time.timeScale = 1f; // siempre arrancar con tiempo normal
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        if (pausePanel != null) pausePanel.SetActive(false);
+        if (opcionesPanel != null) opcionesPanel.SetActive(false);
+        if (mainPanel != null) mainPanel.SetActive(false); // arranca oculto
     }
 
     void Update()
@@ -31,11 +25,9 @@ public class PausaMenu : MonoBehaviour
             }
             else
             {
-                // Si estoy en opciones, volver al panel de pausa
                 if (opcionesPanel.activeSelf)
                 {
-                    opcionesPanel.SetActive(false);
-                    pausePanel.SetActive(true);
+                    CerrarOpciones();
                 }
                 else
                 {
@@ -47,14 +39,9 @@ public class PausaMenu : MonoBehaviour
 
     public void Pause()
     {
-        if (pausePanel == null)
-        {
-            Debug.LogWarning("⚠️ pausePanel no está asignado.");
-            return;
-        }
-
         pausePanel.SetActive(true);
-        opcionesPanel?.SetActive(false); // el ? evita error si es null
+        opcionesPanel.SetActive(false);
+
         Time.timeScale = 0f;
         isPaused = true;
 
@@ -79,16 +66,29 @@ public class PausaMenu : MonoBehaviour
         Time.timeScale = 1f;
         pausePanel.SetActive(false);
         opcionesPanel.SetActive(false);
-        isPaused = false; // 🔑 ahora sí se actualiza
+
+        isPaused = false;
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
 
-    public void ExitToMenu()
+    public void VolverAlMenu()
     {
-        Time.timeScale = 1f;
+        // Ocultar paneles de pausa y opciones
+        pausePanel.SetActive(false);
+        opcionesPanel.SetActive(false);
+
+        // Mostrar el menú principal
+        if (mainPanel != null) mainPanel.SetActive(true);
+
+        // Pausar el juego
+        Time.timeScale = 0f;
         isPaused = false;
-        SceneManager.LoadScene("Main Menu Start");
+
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        Debug.Log("Volviendo al menú principal.");
     }
 }

@@ -2,90 +2,52 @@
 
 public class MainMenu : MonoBehaviour
 {
-    [Header("Paneles UI")]
-    [SerializeField] private GameObject mainMenu;
-    [SerializeField] private GameObject menuOpciones;
-    [SerializeField] private GameObject pauseMenu;
+    [SerializeField] GameObject mainPanel;       // Panel principal del menú
+    [SerializeField] GameObject opcionesPanel;   // Panel de opciones compartido
+    [SerializeField] GameObject pausaPanel;      // Panel de pausa (para asegurarnos que arranca oculto)
 
-    [Header("Gameplay Objects")]
-    [SerializeField] private GameObject jugador;
-    [SerializeField] private GameObject enemigos; // puedes usar un empty con todos los enemigos dentro
-
-    private bool isPaused = false;
-
-    private void Awake()
+    void Start()
     {
-        // Al inicio: solo menú principal
-        mainMenu.SetActive(true);
-        menuOpciones.SetActive(false);
-        pauseMenu.SetActive(false);
+        // Al iniciar, solo mostrar el menú principal
+        mainPanel.SetActive(true);
+        opcionesPanel.SetActive(false);
+        if (pausaPanel != null) pausaPanel.SetActive(false);
 
-        jugador.SetActive(false);
-        enemigos.SetActive(false);
+        Time.timeScale = 0f; // detener el juego mientras está el menú principal
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
-    // --- Menú Principal ---
-    public void AbrirPanelDeOpciones()
+    public void Jugar()
     {
-        mainMenu.SetActive(false);
-        menuOpciones.SetActive(true);
+        mainPanel.SetActive(false);
+        opcionesPanel.SetActive(false);
+
+        Time.timeScale = 1f; // reanudar el juego
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
+        Debug.Log("Juego iniciado en la misma escena.");
     }
 
-    public void AbrirPanelDeMenu()
+    public void AbrirOpciones()
     {
-        mainMenu.SetActive(true);
-        menuOpciones.SetActive(false);
+        mainPanel.SetActive(false);
+        opcionesPanel.SetActive(true);
+
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
-    public void SalirDelJuego()
+    public void CerrarOpciones()
+    {
+        opcionesPanel.SetActive(false);
+        mainPanel.SetActive(true);
+    }
+
+    public void SalirJuego()
     {
         Application.Quit();
-    }
-
-    public void IniciarJuego()
-    {
-        // Activa gameplay y oculta menú principal
-        mainMenu.SetActive(false);
-        menuOpciones.SetActive(false);
-
-        jugador.SetActive(true);
-        enemigos.SetActive(true);
-    }
-
-    // --- Pausa ---
-    private void Update()
-    {
-        if (jugador.activeSelf && Input.GetKeyDown(KeyCode.Escape))
-        {
-            if (isPaused) ReanudarJuego();
-            else PausarJuego();
-        }
-    }
-
-    public void PausarJuego()
-    {
-        pauseMenu.SetActive(true);
-        Time.timeScale = 0f; // congela el tiempo
-        isPaused = true;
-    }
-
-    public void ReanudarJuego()
-    {
-        pauseMenu.SetActive(false);
-        menuOpciones.SetActive(false); // por si estaba abierto
-        Time.timeScale = 1f;
-        isPaused = false;
-    }
-
-    public void AbrirOpcionesDesdePausa()
-    {
-        pauseMenu.SetActive(false);
-        menuOpciones.SetActive(true);
-    }
-
-    public void VolverDeOpcionesAPausa()
-    {
-        menuOpciones.SetActive(false);
-        pauseMenu.SetActive(true);
+        Debug.Log("Juego cerrado desde el menú principal.");
     }
 }
