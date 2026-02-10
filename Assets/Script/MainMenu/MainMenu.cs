@@ -4,16 +4,16 @@ public class MainMenu : MonoBehaviour
 {
     [SerializeField] GameObject mainPanel;       // Panel principal del menú
     [SerializeField] GameObject opcionesPanel;   // Panel de opciones compartido
-    [SerializeField] GameObject pausaPanel;      // Panel de pausa (para asegurarnos que arranca oculto)
+    [SerializeField] GameObject pausaPanel;      // Panel de pausa
 
     void Start()
     {
-        // Al iniciar, solo mostrar el menú principal
+        // Al iniciar, mostrar solo el menú principal
         mainPanel.SetActive(true);
-        opcionesPanel.SetActive(false);
+        if (opcionesPanel != null) opcionesPanel.SetActive(false);
         if (pausaPanel != null) pausaPanel.SetActive(false);
 
-        Time.timeScale = 0f; // detener el juego mientras está el menú principal
+        Time.timeScale = 0f; // detener el juego hasta que se presione Jugar
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
@@ -21,7 +21,7 @@ public class MainMenu : MonoBehaviour
     public void Jugar()
     {
         mainPanel.SetActive(false);
-        opcionesPanel.SetActive(false);
+        if (opcionesPanel != null) opcionesPanel.SetActive(false);
 
         Time.timeScale = 1f; // reanudar el juego
         Cursor.lockState = CursorLockMode.Locked;
@@ -32,17 +32,15 @@ public class MainMenu : MonoBehaviour
 
     public void AbrirOpciones()
     {
-        mainPanel.SetActive(false);
-        opcionesPanel.SetActive(true);
-
+        opcionesPanel.SetActive(true); // se activa encima del MainMenu
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
 
     public void CerrarOpciones()
     {
-        opcionesPanel.SetActive(false);
-        mainPanel.SetActive(true);
+        opcionesPanel.SetActive(false); // simplemente se oculta
+        mainPanel.SetActive(true);      // vuelve a mostrarse el MainMenu
     }
 
     public void SalirJuego()

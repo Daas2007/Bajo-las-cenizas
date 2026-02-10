@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -15,18 +14,14 @@ public class GameManager : MonoBehaviour
     // Linterna
     public bool tieneLinterna = false;
 
-    // Contador de muertes por nivel
-    private Dictionary<string, int> muertesPorNivel = new Dictionary<string, int>();
-
-    // 🔑 Niveles completados
-    private HashSet<string> nivelesCompletados = new HashSet<string>();
+    // Contador de muertes por nivel (en una sola escena basta con un contador global)
+    private int muertes = 0;
 
     void Awake()
     {
         if (Instancia == null)
         {
             Instancia = this;
-            DontDestroyOnLoad(gameObject);
         }
         else Destroy(gameObject);
     }
@@ -43,10 +38,7 @@ public class GameManager : MonoBehaviour
         {
             nivelCompletado = true;
             OnNivelCompletado?.Invoke();
-
-            // 🔑 Marcar nivel actual como completado
-            string nivelActual = SceneManager.GetActiveScene().name;
-            MarcarNivelCompletado(nivelActual);
+            Debug.Log("✅ Nivel completado en esta escena");
         }
     }
 
@@ -61,40 +53,17 @@ public class GameManager : MonoBehaviour
     // -------------------
     public void RegistrarMuerte()
     {
-        string nivelActual = SceneManager.GetActiveScene().name;
-
-        if (!muertesPorNivel.ContainsKey(nivelActual))
-            muertesPorNivel[nivelActual] = 0;
-
-        muertesPorNivel[nivelActual]++;
-        Debug.Log($"Muertes en {nivelActual}: {muertesPorNivel[nivelActual]}");
+        muertes++;
+        Debug.Log($"Muertes: {muertes}");
     }
 
-    public int GetMuertesNivelActual()
+    public int GetMuertes()
     {
-        string nivelActual = SceneManager.GetActiveScene().name;
-        return muertesPorNivel.ContainsKey(nivelActual) ? muertesPorNivel[nivelActual] : 0;
+        return muertes;
     }
 
-    public bool CristalDañadoNivelActual()
+    public bool CristalDañado()
     {
-        return GetMuertesNivelActual() > 2;
-    }
-
-    // -------------------
-    // 🔑 Bloqueo de niveles
-    // -------------------
-    public void MarcarNivelCompletado(string nombreNivel)
-    {
-        if (!nivelesCompletados.Contains(nombreNivel))
-        {
-            nivelesCompletados.Add(nombreNivel);
-            Debug.Log($"✅ Nivel completado: {nombreNivel}");
-        }
-    }
-
-    public bool EstaNivelCompletado(string nombreNivel)
-    {
-        return nivelesCompletados.Contains(nombreNivel);
+        return muertes > 2;
     }
 }

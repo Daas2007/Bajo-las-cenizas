@@ -2,9 +2,9 @@
 
 public class PausaMenu : MonoBehaviour
 {
-    [SerializeField] GameObject pausePanel;
-    [SerializeField] GameObject opcionesPanel;
-    [SerializeField] GameObject mainPanel; // referencia al panel del menú principal
+    [SerializeField] GameObject pausePanel;      // Panel de pausa
+    [SerializeField] GameObject opcionesPanel;   // Panel de opciones compartido
+    [SerializeField] GameObject mainPanel;       // Panel del menú principal
 
     bool isPaused = false;
 
@@ -12,12 +12,11 @@ public class PausaMenu : MonoBehaviour
     {
         if (pausePanel != null) pausePanel.SetActive(false);
         if (opcionesPanel != null) opcionesPanel.SetActive(false);
-        if (mainPanel != null) mainPanel.SetActive(false); // arranca oculto
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape) && Time.timeScale == 1f)
         {
             if (!isPaused)
             {
@@ -51,14 +50,13 @@ public class PausaMenu : MonoBehaviour
 
     public void AbrirOpciones()
     {
-        pausePanel.SetActive(false);
-        opcionesPanel.SetActive(true);
+        opcionesPanel.SetActive(true); // se activa encima del PausaPanel
     }
 
     public void CerrarOpciones()
     {
-        opcionesPanel.SetActive(false);
-        pausePanel.SetActive(true);
+        opcionesPanel.SetActive(false); // simplemente se oculta
+        pausePanel.SetActive(true);     // vuelve a mostrarse el PausaPanel
     }
 
     public void Resume()
@@ -75,15 +73,11 @@ public class PausaMenu : MonoBehaviour
 
     public void VolverAlMenu()
     {
-        // Ocultar paneles de pausa y opciones
         pausePanel.SetActive(false);
         opcionesPanel.SetActive(false);
-
-        // Mostrar el menú principal
         if (mainPanel != null) mainPanel.SetActive(true);
 
-        // Pausar el juego
-        Time.timeScale = 0f;
+        Time.timeScale = 0f; // volver a pausar el juego
         isPaused = false;
 
         Cursor.lockState = CursorLockMode.None;
