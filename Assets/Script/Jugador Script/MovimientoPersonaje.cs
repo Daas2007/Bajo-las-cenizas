@@ -8,7 +8,7 @@ public class MovimientoPersonaje : MonoBehaviour
     [Header("Referencias")]
     [SerializeField] Transform camara;
     [SerializeField] Rigidbody rb;
-    [SerializeField] Camara camaraScript; // referencia al script de cámara
+    [SerializeField] Camara camaraScript;
 
     [Header("Configuración de velocidad Player")]
     [SerializeField] bool UsarGetAxisRaw = true;
@@ -41,13 +41,23 @@ public class MovimientoPersonaje : MonoBehaviour
 
     void Update()
     {
-        JugadorCorrer();
-        ActualizarBarraStamina();
+        // Solo actualizar stamina si el juego está activo
+        if (Time.timeScale == 1f)
+        {
+            JugadorCorrer();
+            ActualizarBarraStamina();
+        }
+        else
+        {
+            // Si el juego está pausado o en menú, ocultar la barra
+            canvas_StaminaBar.SetActive(false);
+        }
     }
 
     void FixedUpdate()
     {
-        JugadorCaminandoRB();
+        if (Time.timeScale == 1f)
+            JugadorCaminandoRB();
     }
 
     void JugadorCaminandoRB()
@@ -63,7 +73,6 @@ public class MovimientoPersonaje : MonoBehaviour
 
         rb.MovePosition(rb.position + movimiento);
 
-        // --- Calcular velocidad manualmente ---
         float velocidadActual = movimiento.magnitude / Time.fixedDeltaTime;
 
         if (camaraScript != null)
@@ -74,7 +83,10 @@ public class MovimientoPersonaje : MonoBehaviour
 
     void JugadorCorrer()
     {
-        if (Input.GetKey(KeyCode.LeftShift) && Stamina > 0f)
+        bool moviendo = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) ||
+                        Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D);
+
+        if (Input.GetKey(KeyCode.LeftShift) && moviendo && Stamina > 0f)
         {
             VelocidadMove = VelocidadBase * 1.5f;
             Stamina -= CostoCorrer * Time.deltaTime;
@@ -91,7 +103,18 @@ public class MovimientoPersonaje : MonoBehaviour
     void ActualizarBarraStamina()
     {
         BarraStamina.fillAmount = Stamina / StaminaMaxima;
-        canvas_StaminaBar.SetActive(Stamina < StaminaMaxima || Input.GetKey(KeyCode.LeftShift));
+
+        bool moviendo = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) ||
+                        Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D);
+
+        if ((Input.GetKey(KeyCode.LeftShift) && moviendo && Stamina > 0f) || Stamina < StaminaMaxima)
+        {
+            canvas_StaminaBar.SetActive(true);
+        }
+        else
+        {
+            canvas_StaminaBar.SetActive(false);
+        }
     }
 
     IEnumerator RecargaStamina()

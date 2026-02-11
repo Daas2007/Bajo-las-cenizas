@@ -1,85 +1,119 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
+using System.Collections;
 
 public class Dialogo : MonoBehaviour, IInteractuable
 {
-    [SerializeField] private GameObject dialogoCanvas;
-    [SerializeField] private TMP_Text dialogoTexto;
+    [SerializeField] public GameObject dialogoCanvas;
+    [SerializeField] public TMP_Text dialogoTexto;
 
     [Header("Líneas de diálogo")]
     [TextArea(2, 5)]
-    [SerializeField] private string[] lineas;
+    [SerializeField] public string[] lineas;
 
-    [Header("Configuración de interacción")]
-    [SerializeField] private float distanciaInteraccion = 2f;
-    [SerializeField] private LayerMask layerInteractuable;
+    [Header("Configuración")]
+    [SerializeField] public float tiempoEntreLetras = 0.05f;
+    [SerializeField] public float tiempoAutoAvance = 5f;
 
-    private int indiceLinea = 0;
-    private Transform jugador;
+    public int indiceLinea = 0;
+    public Transform jugador;
+    public bool mostrandoDialogo = false;
+    public Coroutine rutinaTexto;
 
-    private void Start()
+    // Referencia al script de movimiento del jugador
+    [SerializeField] public MonoBehaviour scriptMovimiento;
+
+    void Start()
     {
         if (dialogoCanvas != null)
             dialogoCanvas.SetActive(false);
-        else
-            Debug.LogError("⚠️ No se asignó el Canvas de diálogo en el Inspector.");
 
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
         if (playerObj != null)
             jugador = playerObj.transform;
-        else
-            Debug.LogError("⚠️ No se encontró un objeto con tag 'Player'.");
     }
 
-    private void Update()
+    void Update()
     {
-        if (jugador == null || dialogoCanvas == null || dialogoTexto == null) return;
+        if (!mostrandoDialogo) return;
 
-        float distancia = Vector3.Distance(jugador.position, transform.position);
-
-        if (distancia <= distanciaInteraccion && Input.GetKeyDown(KeyCode.E))
+        // Permitir saltar con E
+        if (Input.GetKeyDown(KeyCode.E))
         {
-            if (!dialogoCanvas.activeSelf)
-            {
-                dialogoCanvas.SetActive(true);
-                MostrarLinea();
-            }
-            else
-            {
-                MostrarLinea();
-            }
-        }
-    }
-
-    public void MostrarLinea()
-    {
-        if (dialogoTexto == null) return;
-
-        if (indiceLinea < lineas.Length)
-        {
-            dialogoTexto.text = lineas[indiceLinea];
-            indiceLinea++;
-        }
-        else
-        {
-            dialogoCanvas.SetActive(false);
-            indiceLinea = 0;
+            CancelInvoke(nameof(AvanzarDialogo)); // evita doble avance
+            AvanzarDialogo();
         }
     }
 
     public void Interactuar()
     {
-        // Puedes usar esta función si quieres que el sistema de interacción general
-        // también dispare el diálogo sin necesidad de presionar E.
-        if (dialogoCanvas != null && !dialogoCanvas.activeSelf)
+        if (!mostrandoDialogo)
         {
-            dialogoCanvas.SetActive(true);
+            IniciarDialogo();
+        }
+        else
+        {
+            CancelInvoke(nameof(AvanzarDialogo));
+            AvanzarDialogo();
+        }
+    }
+
+    public void IniciarDialogo()
+    {
+        dialogoCanvas.SetActive(true);
+        indiceLinea = 0;
+        mostrandoDialogo = true;
+        MostrarLinea();
+        BloquearJugador(true);
+
+        // Ocultar texto de interacción si existe
+        GameObject panelInteraccion = GameObject.Find("PanelInteraccion");
+        if (panelInteraccion != null) panelInteraccion.SetActive(false);
+    }
+
+    public void MostrarLinea()
+    {
+        if (rutinaTexto != null) StopCoroutine(rutinaTexto);
+        rutinaTexto = StartCoroutine(EscribirLinea(lineas[indiceLinea]));
+        Invoke(nameof(AvanzarDialogo), tiempoAutoAvance);
+    }
+
+    public IEnumerator EscribirLinea(string linea)
+    {
+        dialogoTexto.text = "";
+        foreach (char letra in linea)
+        {
+            dialogoTexto.text += letra;
+            yield return new WaitForSeconds(tiempoEntreLetras);
+        }
+    }
+
+    public void AvanzarDialogo()
+    {
+        CancelInvoke(nameof(AvanzarDialogo));
+        indiceLinea++;
+
+        if (indiceLinea < lineas.Length)
+        {
             MostrarLinea();
         }
         else
         {
-            MostrarLinea();
+            TerminarDialogo();
         }
+    }
+
+    public void TerminarDialogo()
+    {
+        mostrandoDialogo = false;
+        dialogoCanvas.SetActive(false);
+        indiceLinea = 0; // reset para próxima vez
+        BloquearJugador(false);
+    }
+
+    public void BloquearJugador(bool bloquear)
+    {
+        if (scriptMovimiento != null)
+            scriptMovimiento.enabled = !bloquear;
     }
 }

@@ -2,11 +2,19 @@
 
 public class PausaMenu : MonoBehaviour
 {
-    [SerializeField] GameObject pausePanel;      // Panel de pausa
-    [SerializeField] GameObject opcionesPanel;   // Panel de opciones compartido
-    [SerializeField] GameObject mainPanel;       // Panel del menú principal
+    [SerializeField] GameObject pausePanel;
+    [SerializeField] GameObject opcionesPanel;
+    [SerializeField] GameObject mainPanel;
+    [SerializeField] GameObject dialogoCanvas;
+
+    [Header("UI adicional")]
+    [SerializeField] GameObject PanleEstamina;
+    [SerializeField] GameObject TextoInteracion;
 
     bool isPaused = false;
+    bool dialogoActivo = false;
+
+    public bool IsPaused => isPaused; // propiedad pública para que InteraccionJugador lo consulte
 
     void Awake()
     {
@@ -38,6 +46,12 @@ public class PausaMenu : MonoBehaviour
 
     public void Pause()
     {
+        if (dialogoCanvas != null && dialogoCanvas.activeSelf)
+        {
+            dialogoCanvas.SetActive(false);
+            dialogoActivo = true;
+        }
+
         pausePanel.SetActive(true);
         opcionesPanel.SetActive(false);
 
@@ -50,13 +64,13 @@ public class PausaMenu : MonoBehaviour
 
     public void AbrirOpciones()
     {
-        opcionesPanel.SetActive(true); // se activa encima del PausaPanel
+        opcionesPanel.SetActive(true);
     }
 
     public void CerrarOpciones()
     {
-        opcionesPanel.SetActive(false); // simplemente se oculta
-        pausePanel.SetActive(true);     // vuelve a mostrarse el PausaPanel
+        opcionesPanel.SetActive(false);
+        pausePanel.SetActive(true);
     }
 
     public void Resume()
@@ -69,6 +83,12 @@ public class PausaMenu : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        if (dialogoActivo && dialogoCanvas != null)
+        {
+            dialogoCanvas.SetActive(true);
+            dialogoActivo = false;
+        }
     }
 
     public void VolverAlMenu()
@@ -77,7 +97,11 @@ public class PausaMenu : MonoBehaviour
         opcionesPanel.SetActive(false);
         if (mainPanel != null) mainPanel.SetActive(true);
 
-        Time.timeScale = 0f; // volver a pausar el juego
+        // Apagar UI adicional
+        if (PanleEstamina != null) PanleEstamina.SetActive(false);
+        if (TextoInteracion != null) TextoInteracion.SetActive(false);
+
+        Time.timeScale = 0f;
         isPaused = false;
 
         Cursor.lockState = CursorLockMode.None;

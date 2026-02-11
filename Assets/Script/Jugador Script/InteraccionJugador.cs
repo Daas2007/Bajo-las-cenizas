@@ -4,22 +4,24 @@ using TMPro;
 public class InteraccionJugador : MonoBehaviour
 {
     [Header("Configuración de interacción")]
-    [SerializeField] float distanciaInteraccion;
+    [SerializeField] float distanciaInteraccion = 2f;
     [SerializeField] LayerMask layerInteractuable;
     [SerializeField] Camera camara;
 
     [Header("UI de interacción")]
     [SerializeField] GameObject panelInteraccion;
     [SerializeField] TMP_Text textoInteraccion;
+    [SerializeField] GameObject dialogoCanvas; // referencia al panel de diálogo
 
     private IInteractuable objetoActual;
-    private Transform objetoTransform; // para leer el Tag
+    private Transform objetoTransform;
 
     void Update()
     {
         DetectarObjeto();
 
-        if (objetoActual != null)
+        // Condición: no mostrar si el juego está pausado (timeScale < 1) o si hay diálogo activo
+        if (objetoActual != null && Time.timeScale == 1f && (dialogoCanvas == null || !dialogoCanvas.activeSelf))
         {
             if (!panelInteraccion.activeSelf)
                 panelInteraccion.SetActive(true);
