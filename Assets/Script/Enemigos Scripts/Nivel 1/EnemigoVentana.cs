@@ -3,8 +3,8 @@
 public class EnemigoVentana : MonoBehaviour
 {
     [Header("Estados del enemigo")]
-    public int estadoActual = 1; // público para ver en Inspector
-    public bool recibiendoLuz = false; // público para ver en Inspector
+    public int estadoActual = 1;
+    public bool recibiendoLuz = false;
     [SerializeField] float tiempoEnEstado = 0f;
 
     [Header("Agresividad y tiempos")]
@@ -21,9 +21,8 @@ public class EnemigoVentana : MonoBehaviour
     [SerializeField] float tiempoPorNivel = 90f;
     [SerializeField] float tiempoMinimoAvance = 3f;
 
-    [Header("Spawn del enemigo físico")]
-    [SerializeField] GameObject prefabEnemigo;
-    [SerializeField] Transform puntoSpawn;
+    [Header("Enemigo en escena (desactivado al inicio)")]
+    [SerializeField] GameObject enemigoEnEscena; // arrastra aquí el enemigo ya colocado en la escena
 
     [Header("Temporizador fase 3")]
     [SerializeField] float tiempoAntesDeEntrar = 10f;
@@ -43,6 +42,9 @@ public class EnemigoVentana : MonoBehaviour
     {
         Debug.Log("[Ventana] Iniciado en estado 1 (observando).");
         ActualizarColorVentana();
+
+        if (enemigoEnEscena != null)
+            enemigoEnEscena.SetActive(false); // aseguramos que esté desactivado al inicio
     }
 
     void Update()
@@ -63,9 +65,7 @@ public class EnemigoVentana : MonoBehaviour
         if (recibiendoLuz)
         {
             contadorLuz += deltaT;
-            Debug.Log($"[Ventana] Recibiendo luz, contador={contadorLuz:F2}");
 
-            // Retrocede inmediatamente si está en estado 3
             if (estadoActual == 3)
             {
                 RetrocederAEstado1();
@@ -118,11 +118,7 @@ public class EnemigoVentana : MonoBehaviour
     void AvanzarEstado()
     {
         tiempoEnEstado = 0f;
-        estadoActual++;
-
-        if (estadoActual > 3)
-            estadoActual = 3;
-
+        estadoActual = Mathf.Min(estadoActual + 1, 3);
         Debug.Log($"[Ventana] Avanza a estado {estadoActual}");
         ActualizarColorVentana();
     }
@@ -147,25 +143,26 @@ public class EnemigoVentana : MonoBehaviour
     {
         Debug.Log("[Ventana] El enemigo ha entrado en la habitación!");
         cuentaRegresivaActiva = false;
+        tiempoRestanteParaEntrar = 0f;
         enemigoSpawned = true;
 
-        if (prefabEnemigo != null && puntoSpawn != null)
+        if (enemigoEnEscena != null)
         {
-            GameObject enemigoFisico = Instantiate(prefabEnemigo, puntoSpawn.position, Quaternion.identity);
-            EnemigoPerseguidor script = enemigoFisico.GetComponent<EnemigoPerseguidor>();
+            enemigoEnEscena.SetActive(true); // activar el enemigo ya existente
 
+            EnemigoPerseguidor script = enemigoEnEscena.GetComponent<EnemigoPerseguidor>();
             if (script != null)
             {
                 GameObject jugador = GameObject.FindGameObjectWithTag("Player");
                 if (jugador != null)
                 {
-                    script.objetivo = jugador.transform;
+                    script.objetivo = jugador.transform; // ya corregido como público o con SetObjetivo
                 }
             }
         }
         else
         {
-            Debug.LogWarning("[Ventana] No hay prefab o punto de spawn asignado.");
+            Debug.LogWarning("[Ventana] No hay enemigo asignado en la escena.");
         }
     }
 
