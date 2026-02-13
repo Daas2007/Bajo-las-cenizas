@@ -4,6 +4,10 @@ public class EnemyActivator : MonoBehaviour
 {
     [SerializeField] private GameObject ventanaRoot; // solo la ventana
 
+    private void Awake()
+    {
+       
+    }
     void Start()
     {
         if (ventanaRoot != null)

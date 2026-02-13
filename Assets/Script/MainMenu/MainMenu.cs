@@ -6,6 +6,12 @@ public class MainMenu : MonoBehaviour
     [SerializeField] GameObject opcionesPanel;   // Panel de opciones compartido
     [SerializeField] GameObject pausaPanel;      // Panel de pausa
 
+    private void Awake()
+    {
+        mainPanel.SetActive(true);
+        opcionesPanel.SetActive(true);
+        pausaPanel.SetActive(true);
+    }
     void Start()
     {
         // Al iniciar, mostrar solo el menú principal
