@@ -154,4 +154,18 @@ public class LevelGateManager : MonoBehaviour
         }
         return room.estado;
     }
+    public void ActivarMuroRetorno(string id)
+    {
+        if (!habitacionesMap.TryGetValue(id, out var room)) return;
+        if (room.muroRetorno != null) room.muroRetorno.SetActive(true);
+        Debug.Log($"Muro de retorno activado en '{id}'.");
+    }
+
+    public void CerrarPuertaLobby(string id)
+    {
+        if (!habitacionesMap.TryGetValue(id, out var room)) return;
+        if (room.puertaLobby != null) room.puertaLobby.Lock();
+        Debug.Log($"Puerta lobby cerrada en '{id}'.");
+    }
+
 }

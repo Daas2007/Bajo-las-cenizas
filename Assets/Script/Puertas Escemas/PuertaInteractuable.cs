@@ -19,7 +19,7 @@ public class PuertaInteractuable : MonoBehaviour, IInteractuable
             return;
         }
 
-        rotacionInicial = engranaje.rotation;
+        rotacionInicial = engranaje.localRotation;
         rotacionFinal = Quaternion.Euler(0, anguloApertura, 0) * rotacionInicial;
     }
 
@@ -38,17 +38,17 @@ public class PuertaInteractuable : MonoBehaviour, IInteractuable
     private System.Collections.IEnumerator RotarPuerta(Quaternion destino, bool abrir)
     {
         float tiempo = 0f;
-        Quaternion inicio = engranaje.rotation;
+        Quaternion inicio = engranaje.localRotation;
 
         while (tiempo < duracion)
         {
             float t = tiempo / duracion;
-            engranaje.rotation = Quaternion.Lerp(inicio, destino, t);
+            engranaje.localRotation = Quaternion.Lerp(inicio, destino, t);
             tiempo += Time.deltaTime;
             yield return null;
         }
 
-        engranaje.rotation = destino;
+        engranaje.localRotation = destino;
         abierta = abrir;
         Debug.Log(abrir ? "🚪 Puerta abierta." : "🚪 Puerta cerrada.");
     }

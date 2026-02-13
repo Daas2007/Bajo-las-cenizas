@@ -3,8 +3,14 @@ using UnityEngine;
 [RequireComponent(typeof(Collider))]
 public class ZoneTrigger : MonoBehaviour
 {
+    public enum TipoTrigger
+    {
+        ActivarMuro,   // Trigger colocado ANTES de entrar al cuarto
+        CerrarPuerta   // Trigger colocado DENTRO del cuarto
+    }
+
     [SerializeField] private string idHabitacion = "Habitacion1";
-    [SerializeField] private bool detectarSalida = false;
+    [SerializeField] private TipoTrigger tipo = TipoTrigger.ActivarMuro;
 
     private void Reset()
     {
@@ -21,15 +27,16 @@ public class ZoneTrigger : MonoBehaviour
             return;
         }
 
-        LevelGateManager.Instancia?.EntrarHabitacion(idHabitacion);
-    }
+        switch (tipo)
+        {
+            case TipoTrigger.ActivarMuro:
+                LevelGateManager.Instancia?.ActivarMuroRetorno(idHabitacion);
+                break;
 
-    private void OnTriggerExit(Collider other)
-    {
-        if (!detectarSalida) return;
-        if (!other.CompareTag("Player")) return;
-        if (string.IsNullOrEmpty(idHabitacion)) return;
-
-        LevelGateManager.Instancia?.SalirHabitacion(idHabitacion);
+            case TipoTrigger.CerrarPuerta:
+                LevelGateManager.Instancia?.CerrarPuertaLobby(idHabitacion);
+                LevelGateManager.Instancia?.EntrarHabitacion(idHabitacion);
+                break;
+        }
     }
 }

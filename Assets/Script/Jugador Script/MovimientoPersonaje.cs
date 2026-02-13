@@ -5,6 +5,10 @@ using System.Collections;
 [RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider))]
 public class MovimientoPersonaje : MonoBehaviour
 {
+    [Header ("Referencias Sistema Guardado")]
+    [SerializeField] GameObject enemigo; 
+    [SerializeField] bool tieneLinterna;
+
     [Header("Referencias")]
     [SerializeField] Transform camara;
     [SerializeField] Rigidbody rb;
@@ -129,5 +133,15 @@ public class MovimientoPersonaje : MonoBehaviour
         }
         canvas_StaminaBar.SetActive(false);
         recarga = null;
+    }
+
+    public void GuardarPartida()
+    {
+        SistemaGuardar.Guardar(this,enemigo,tieneLinterna);
+    }
+    
+    public void CargarPartida()
+    {
+        SistemaGuardar.Cargar(this,enemigo,ref tieneLinterna);
     }
 }
