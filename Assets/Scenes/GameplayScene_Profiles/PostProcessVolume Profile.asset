@@ -17,7 +17,7 @@ MonoBehaviour:
     overrideState: 1
     value: 1
   gradingMode:
-    overrideState: 0
+    overrideState: 1
     value: 1
   externalLut:
     overrideState: 0
@@ -59,22 +59,22 @@ MonoBehaviour:
     value: 0
   colorFilter:
     overrideState: 1
-    value: {r: 0.015752913, g: 0.032972552, b: 0.111320704, a: 1}
+    value: {r: 0.017641952, g: 0.018500218, b: 0.019382361, a: 1}
   hueShift:
     overrideState: 0
     value: 0
   saturation:
     overrideState: 1
-    value: -10
+    value: -18
   brightness:
     overrideState: 0
     value: 0
   postExposure:
     overrideState: 1
-    value: -1
+    value: -1.2
   contrast:
     overrideState: 1
-    value: 20
+    value: 18
   mixerRedOutRedIn:
     overrideState: 0
     value: 100
@@ -103,14 +103,14 @@ MonoBehaviour:
     overrideState: 0
     value: 100
   lift:
-    overrideState: 0
-    value: {x: 1, y: 1, z: 1, w: 0}
+    overrideState: 1
+    value: {x: 0.9858124, y: 1, z: 0.98668426, w: 0.055620153}
   gamma:
-    overrideState: 0
-    value: {x: 1, y: 1, z: 1, w: 0}
+    overrideState: 1
+    value: {x: 1, y: 1, z: 1, w: 0.055619817}
   gain:
-    overrideState: 0
-    value: {x: 1, y: 1, z: 1, w: 0}
+    overrideState: 1
+    value: {x: 1, y: 1, z: 1, w: 0.037079394}
   masterCurve:
     overrideState: 0
     value:
@@ -1332,13 +1332,13 @@ MonoBehaviour:
     value: 1
   intensity:
     overrideState: 1
-    value: 0.3
+    value: 0.28
   size:
     overrideState: 1
     value: 1
   lumContrib:
-    overrideState: 0
-    value: 0.8
+    overrideState: 1
+    value: 0.5
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1383,13 +1383,13 @@ MonoBehaviour:
     value: {x: 0.5, y: 0.5}
   intensity:
     overrideState: 1
-    value: 0.4
+    value: 0.45
   smoothness:
     overrideState: 1
     value: 0.6
   roundness:
-    overrideState: 0
-    value: 1
+    overrideState: 1
+    value: 0
   rounded:
     overrideState: 0
     value: 0
@@ -1418,12 +1418,12 @@ MonoBehaviour:
     value: 1
   intensity:
     overrideState: 1
-    value: 2
+    value: 1.6
   threshold:
-    overrideState: 0
-    value: 1
+    overrideState: 1
+    value: 1.2
   softKnee:
-    overrideState: 0
+    overrideState: 1
     value: 0.5
   clamp:
     overrideState: 0
