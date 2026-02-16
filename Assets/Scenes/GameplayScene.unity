@@ -2580,7 +2580,6 @@ MonoBehaviour:
   tiempoEntreLetras: 0.05
   tiempoAutoAvance: 5
   indiceLinea: 0
-  jugador: {fileID: 6675402291284774070}
   mostrandoDialogo: 0
   scriptMovimiento: {fileID: 865070316914232347}
 --- !u!136 &121032863
@@ -34188,6 +34187,7 @@ MonoBehaviour:
   camara: {fileID: 8730480146499042761}
   rb: {fileID: 8582122233841568122}
   camaraScript: {fileID: 2993563530952754792}
+  animator: {fileID: 8582122233841568123}
   UsarGetAxisRaw: 1
   VelocidadMove: 5
   VelocidadBase: 0
@@ -42112,6 +42112,7 @@ GameObject:
   - component: {fileID: 3966017240715584979}
   - component: {fileID: 2508751197876440439}
   - component: {fileID: 8397890683966798552}
+  - component: {fileID: 8582122233841568123}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -44499,6 +44500,28 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!95 &8582122233841568123
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6787343848716583834}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: f2cdcb294a9cbef49bea388b48592048, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!33 &8611627114887445009
 MeshFilter:
   m_ObjectHideFlags: 0

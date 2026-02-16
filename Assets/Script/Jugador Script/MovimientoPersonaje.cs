@@ -5,14 +5,15 @@ using System.Collections;
 [RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider))]
 public class MovimientoPersonaje : MonoBehaviour
 {
-    [Header ("Referencias Sistema Guardado")]
-    [SerializeField] GameObject enemigo; 
+    [Header("Referencias Sistema Guardado")]
+    [SerializeField] GameObject enemigo;
     [SerializeField] bool tieneLinterna;
 
     [Header("Referencias")]
     [SerializeField] Transform camara;
     [SerializeField] Rigidbody rb;
     [SerializeField] Camara camaraScript;
+    [SerializeField] Animator animator; // 🔑 referencia al Animator
 
     [Header("Configuración de velocidad Player")]
     [SerializeField] bool UsarGetAxisRaw = true;
@@ -45,7 +46,6 @@ public class MovimientoPersonaje : MonoBehaviour
 
     void Update()
     {
-        // Solo actualizar stamina si el juego está activo
         if (Time.timeScale == 1f)
         {
             JugadorCorrer();
@@ -53,7 +53,6 @@ public class MovimientoPersonaje : MonoBehaviour
         }
         else
         {
-            // Si el juego está pausado o en menú, ocultar la barra
             canvas_StaminaBar.SetActive(false);
         }
     }
@@ -78,6 +77,13 @@ public class MovimientoPersonaje : MonoBehaviour
         rb.MovePosition(rb.position + movimiento);
 
         float velocidadActual = movimiento.magnitude / Time.fixedDeltaTime;
+
+        // 🔑 Actualizar Animator
+        if (animator != null)
+        {
+            animator.SetFloat("Velocidad", velocidadActual);
+            animator.SetBool("Corriendo", VelocidadMove > VelocidadBase);
+        }
 
         if (camaraScript != null)
         {
@@ -137,11 +143,12 @@ public class MovimientoPersonaje : MonoBehaviour
 
     public void GuardarPartida()
     {
-        SistemaGuardar.Guardar(this,enemigo,tieneLinterna);
+        SistemaGuardar.Guardar(this, enemigo, tieneLinterna);
     }
-    
+
     public void CargarPartida()
     {
-        SistemaGuardar.Cargar(this,enemigo,ref tieneLinterna);
+        SistemaGuardar.Cargar(this, enemigo, ref tieneLinterna);
     }
 }
+
