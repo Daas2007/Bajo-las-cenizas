@@ -8,13 +8,13 @@ public class BloqueadorDeNivel : MonoBehaviour
     void Start()
     {
         if (puertaBloqueada != null) puertaBloqueada.SetActive(true);
-        GameManager.Instancia.OnNivelCompletado += OnNivelCompletado;
+        GameManager.Instancia.OnOsoCompleto += OnNivelCompletado; // 🔑 ahora escucha el evento correcto
     }
 
     void OnDestroy()
     {
         if (GameManager.Instancia != null)
-            GameManager.Instancia.OnNivelCompletado -= OnNivelCompletado;
+            GameManager.Instancia.OnOsoCompleto -= OnNivelCompletado; // 🔑 cambio aquí también
     }
 
     void OnNivelCompletado()

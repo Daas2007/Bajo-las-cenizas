@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 
 public class PuertaInteractuable : MonoBehaviour, IInteractuable
 {
@@ -8,10 +9,11 @@ public class PuertaInteractuable : MonoBehaviour, IInteractuable
     [SerializeField] private float duracion = 1f;        // Tiempo de animación
 
     private bool abierta = false;
+    private bool enMovimiento = false; // 🔑 evita interacción doble
     private Quaternion rotacionInicial;
     private Quaternion rotacionFinal;
 
-    private void Start()
+    private void Awake()
     {
         if (engranaje == null)
         {
@@ -19,13 +21,16 @@ public class PuertaInteractuable : MonoBehaviour, IInteractuable
             return;
         }
 
+        // Guardar rotación inicial tal cual está en la escena
         rotacionInicial = engranaje.localRotation;
-        rotacionFinal = Quaternion.Euler(0, anguloApertura, 0) * rotacionInicial;
+
+        // Calcular rotación final relativa
+        rotacionFinal = rotacionInicial * Quaternion.Euler(0, anguloApertura, 0);
     }
 
     public void Interactuar()
     {
-        if (engranaje == null) return;
+        if (engranaje == null || enMovimiento) return;
 
         StopAllCoroutines();
 
@@ -35,8 +40,9 @@ public class PuertaInteractuable : MonoBehaviour, IInteractuable
             StartCoroutine(RotarPuerta(rotacionInicial, false));
     }
 
-    private System.Collections.IEnumerator RotarPuerta(Quaternion destino, bool abrir)
+    private IEnumerator RotarPuerta(Quaternion destino, bool abrir)
     {
+        enMovimiento = true;
         float tiempo = 0f;
         Quaternion inicio = engranaje.localRotation;
 
@@ -50,9 +56,11 @@ public class PuertaInteractuable : MonoBehaviour, IInteractuable
 
         engranaje.localRotation = destino;
         abierta = abrir;
+        enMovimiento = false;
+
         Debug.Log(abrir ? "🚪 Puerta abierta." : "🚪 Puerta cerrada.");
     }
 
-    // 🔑 Método añadido para que otros scripts (como DoorLock) puedan consultar el estado
     public bool EstaAbierta() => abierta;
 }
+

@@ -1,33 +1,49 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Audio;
 
 public class VolumenScript : MonoBehaviour
 {
-    [SerializeField] Slider slider;
-    [SerializeField] float valorSlider;
-    [SerializeField] Image imagenMute;
+    [Header("Referencias")]
+    [SerializeField] private Slider slider;
+    [SerializeField] private Image imagenMute;
+    [SerializeField] private AudioMixer audioMixer; // tu AudioMixer
+
+    private float valorSlider;
+
     void Start()
     {
-        slider.value = PlayerPrefs.GetFloat("volumenAudio", 0.5f);
-        AudioListener.volume = slider.value;
+        // Cargar valor guardado o usar 0.5 por defecto
+        valorSlider = PlayerPrefs.GetFloat("volumenAudio", 0.5f);
+        slider.value = valorSlider;
+
+        SetVolume(valorSlider);
         RevisarSiEstaEnMute();
     }
+
     public void CambiarSlider(float valor)
     {
         valorSlider = valor;
         PlayerPrefs.SetFloat("volumenAudio", valorSlider);
-        AudioListener.volume = slider.value;
+
+        SetVolume(valorSlider);
         RevisarSiEstaEnMute();
     }
-    public void RevisarSiEstaEnMute()
+
+    private void SetVolume(float valor)
     {
-        if (valorSlider == 0)
+        if (valor <= 0.0001f)
         {
-            imagenMute.enabled = true;
+            audioMixer.SetFloat("MasterVolume", -80f); // silencio total
         }
         else
         {
-            imagenMute.enabled = false;
+            audioMixer.SetFloat("MasterVolume", Mathf.Log10(valor) * 20);
         }
+    }
+
+    private void RevisarSiEstaEnMute()
+    {
+        imagenMute.enabled = valorSlider <= 0.0001f;
     }
 }

@@ -1,20 +1,20 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instancia;
 
-    // Sistema de piezas
+    // Sistema de piezas del oso
+    [Header("Puzzle del oso")]
     public int piezasRecogidas = 0;
-    public int piezasNecesarias = 5;
-    public bool nivelCompletado = false;
-    public System.Action OnNivelCompletado;
+    public int piezasNecesarias = 5; // brazos, piernas y cabeza
+    public bool osoCompleto = false;
+    public System.Action OnOsoCompleto; // evento que dispara el spawn del cristal
 
     // Linterna
     public bool tieneLinterna = false;
 
-    // Contador de muertes por nivel (en una sola escena basta con un contador global)
+    // Contador de muertes global
     private int muertes = 0;
 
     void Awake()
@@ -27,25 +27,25 @@ public class GameManager : MonoBehaviour
     }
 
     // -------------------
-    // Piezas
+    // Piezas del oso
     // -------------------
     public void RecogerPieza()
     {
         piezasRecogidas++;
-        Debug.Log($"Fragmento recogido: {piezasRecogidas}/{piezasNecesarias}");
+        Debug.Log($"🧩 Pieza del oso recogida: {piezasRecogidas}/{piezasNecesarias}");
 
-        if (!nivelCompletado && piezasRecogidas >= piezasNecesarias)
+        if (!osoCompleto && piezasRecogidas >= piezasNecesarias)
         {
-            nivelCompletado = true;
-            OnNivelCompletado?.Invoke();
-            Debug.Log("✅ Nivel completado en esta escena");
+            osoCompleto = true;
+            OnOsoCompleto?.Invoke(); // dispara el evento
+            Debug.Log("✅ Oso completado, se puede generar el cristal.");
         }
     }
 
-    public void ResetearProgresoNivel()
+    public void ResetearPuzzleOso()
     {
         piezasRecogidas = 0;
-        nivelCompletado = false;
+        osoCompleto = false;
     }
 
     // -------------------
@@ -54,7 +54,7 @@ public class GameManager : MonoBehaviour
     public void RegistrarMuerte()
     {
         muertes++;
-        Debug.Log($"Muertes: {muertes}");
+        Debug.Log($"☠️ Muertes acumuladas: {muertes}");
     }
 
     public int GetMuertes()
@@ -64,6 +64,7 @@ public class GameManager : MonoBehaviour
 
     public bool CristalDañado()
     {
+        // 🔑 Si el jugador tiene más de 2 muertes, el cristal será dañado
         return muertes > 2;
     }
 }
