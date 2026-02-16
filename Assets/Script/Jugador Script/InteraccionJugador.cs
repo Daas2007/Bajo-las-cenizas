@@ -3,15 +3,15 @@ using TMPro;
 
 public class InteraccionJugador : MonoBehaviour
 {
-    [Header("Configuración de interacción")]
+    [Header("Configuración")]
     [SerializeField] float distanciaInteraccion = 2f;
     [SerializeField] LayerMask layerInteractuable;
     [SerializeField] Camera camara;
 
-    [Header("UI de interacción")]
+    [Header("UI")]
     [SerializeField] GameObject panelInteraccion;
     [SerializeField] TMP_Text textoInteraccion;
-    [SerializeField] GameObject dialogoCanvas; // referencia al panel de diálogo
+    [SerializeField] GameObject dialogoCanvas;
 
     private IInteractuable objetoActual;
     private Transform objetoTransform;
@@ -20,17 +20,13 @@ public class InteraccionJugador : MonoBehaviour
     {
         DetectarObjeto();
 
-        // Condición: no mostrar si el juego está pausado (timeScale < 1) o si hay diálogo activo
         if (objetoActual != null && Time.timeScale == 1f && (dialogoCanvas == null || !dialogoCanvas.activeSelf))
         {
-            if (!panelInteraccion.activeSelf)
-                panelInteraccion.SetActive(true);
+            if (!panelInteraccion.activeSelf) panelInteraccion.SetActive(true);
 
-            // Mostrar texto según el Tag
-            if (objetoTransform.CompareTag("Pickup"))
-                textoInteraccion.text = "Presiona [E] para agarrar";
-            else
-                textoInteraccion.text = "Presiona [E] para interactuar";
+            textoInteraccion.text = objetoTransform.CompareTag("Pickup")
+                ? "Presiona [E] para agarrar"
+                : "Presiona [E] para interactuar";
 
             if (Input.GetKeyDown(KeyCode.E))
             {
@@ -39,8 +35,7 @@ public class InteraccionJugador : MonoBehaviour
         }
         else
         {
-            if (panelInteraccion.activeSelf)
-                panelInteraccion.SetActive(false);
+            if (panelInteraccion.activeSelf) panelInteraccion.SetActive(false);
         }
     }
 
@@ -52,7 +47,6 @@ public class InteraccionJugador : MonoBehaviour
         if (Physics.Raycast(rayo, out hit, distanciaInteraccion, layerInteractuable))
         {
             IInteractuable interactuable = hit.collider.GetComponent<IInteractuable>();
-
             if (interactuable != null)
             {
                 objetoActual = interactuable;
@@ -65,3 +59,4 @@ public class InteraccionJugador : MonoBehaviour
         objetoTransform = null;
     }
 }
+

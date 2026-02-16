@@ -1,15 +1,14 @@
-using UnityEngine;
+﻿using UnityEngine;
 
-public class OsoPieza : MonoBehaviour
+public class OsoPieza : MonoBehaviour, IInteractuable
 {
     [SerializeField] private OsoManager osoManager;
 
-    private void OnTriggerEnter(Collider other)
+    public void Interactuar()
     {
-        if (other.CompareTag("Player"))
-        {
-            osoManager.RecogerPieza(this);
-            gameObject.SetActive(false); // pieza recogida
-        }
+        osoManager.RecogerPieza(this);
+        gameObject.SetActive(false);
+        Debug.Log("🧩 Pieza del oso recogida mediante interacción.");
     }
 }
+

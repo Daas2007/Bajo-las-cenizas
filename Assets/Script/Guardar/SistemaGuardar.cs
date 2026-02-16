@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.IO;
 using System.Text;
-using UnityEditor.Rendering;
+//using UnityEditor.Rendering;
 
 public class SistemaGuardar : MonoBehaviour
 {
