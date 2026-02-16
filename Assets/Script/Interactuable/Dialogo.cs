@@ -16,32 +16,42 @@ public class Dialogo : MonoBehaviour, IInteractuable
     [SerializeField] public float tiempoAutoAvance = 5f;
 
     public int indiceLinea = 0;
-    public Transform jugador;
     public bool mostrandoDialogo = false;
     public Coroutine rutinaTexto;
+    private bool escribiendoLinea = false;
 
-    // Referencia al script de movimiento del jugador
     [SerializeField] public MonoBehaviour scriptMovimiento;
 
     void Start()
     {
         if (dialogoCanvas != null)
             dialogoCanvas.SetActive(false);
-
-        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-        if (playerObj != null)
-            jugador = playerObj.transform;
     }
 
     void Update()
     {
         if (!mostrandoDialogo) return;
 
-        // Permitir saltar con E
         if (Input.GetKeyDown(KeyCode.E))
         {
-            CancelInvoke(nameof(AvanzarDialogo)); // evita doble avance
-            AvanzarDialogo();
+            if (escribiendoLinea)
+            {
+                TerminarLineaInstantanea();
+            }
+            else
+            {
+                CancelInvoke(nameof(AvanzarDialogo));
+
+                // 🔑 Si estamos en la última línea, cerrar diálogo
+                if (indiceLinea >= lineas.Length - 1)
+                {
+                    TerminarDialogo();
+                }
+                else
+                {
+                    AvanzarDialogo();
+                }
+            }
         }
     }
 
@@ -53,22 +63,33 @@ public class Dialogo : MonoBehaviour, IInteractuable
         }
         else
         {
-            CancelInvoke(nameof(AvanzarDialogo));
-            AvanzarDialogo();
+            if (escribiendoLinea)
+            {
+                TerminarLineaInstantanea();
+            }
+            else
+            {
+                CancelInvoke(nameof(AvanzarDialogo));
+
+                if (indiceLinea >= lineas.Length - 1)
+                {
+                    TerminarDialogo();
+                }
+                else
+                {
+                    AvanzarDialogo();
+                }
+            }
         }
     }
 
     public void IniciarDialogo()
     {
         dialogoCanvas.SetActive(true);
-        indiceLinea = 0;
+        indiceLinea = 0; // 🔑 reinicia siempre al empezar
         mostrandoDialogo = true;
         MostrarLinea();
         BloquearJugador(true);
-
-        // Ocultar texto de interacción si existe
-        GameObject panelInteraccion = GameObject.Find("PanelInteraccion");
-        if (panelInteraccion != null) panelInteraccion.SetActive(false);
     }
 
     public void MostrarLinea()
@@ -80,12 +101,21 @@ public class Dialogo : MonoBehaviour, IInteractuable
 
     public IEnumerator EscribirLinea(string linea)
     {
+        escribiendoLinea = true;
         dialogoTexto.text = "";
         foreach (char letra in linea)
         {
             dialogoTexto.text += letra;
             yield return new WaitForSeconds(tiempoEntreLetras);
         }
+        escribiendoLinea = false;
+    }
+
+    private void TerminarLineaInstantanea()
+    {
+        if (rutinaTexto != null) StopCoroutine(rutinaTexto);
+        dialogoTexto.text = lineas[indiceLinea];
+        escribiendoLinea = false;
     }
 
     public void AvanzarDialogo()
@@ -105,10 +135,10 @@ public class Dialogo : MonoBehaviour, IInteractuable
 
     public void TerminarDialogo()
     {
+        dialogoCanvas.SetActive(false);   
         mostrandoDialogo = false;
-        dialogoCanvas.SetActive(false);
-        indiceLinea = 0; // reset para próxima vez
         BloquearJugador(false);
+        // 🔑 No reiniciamos aquí, solo al iniciar un nuevo diálogo
     }
 
     public void BloquearJugador(bool bloquear)
