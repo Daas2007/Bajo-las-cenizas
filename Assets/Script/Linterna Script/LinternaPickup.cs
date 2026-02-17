@@ -1,11 +1,11 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class LinternaPickup : MonoBehaviour, IInteractuable
 {
-    [SerializeField] GameObject MuroBloqueoInicio;
+    [SerializeField] private PuertaBloqueada puertaBloqueada;
+
     public void Interactuar()
     {
-        // Buscar el jugador
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
         {
@@ -13,9 +13,14 @@ public class LinternaPickup : MonoBehaviour, IInteractuable
             if (jugadorLinterna != null)
             {
                 jugadorLinterna.DarLinternaEncendida(); // activa linterna en la mano con luz encendida
-                MuroBloqueoInicio.transform.position = new Vector3(MuroBloqueoInicio.transform.position.x, MuroBloqueoInicio.transform.position.y + 3f, MuroBloqueoInicio.transform.position.z);
-                //MuroBloqueoInicio.SetActive(false);
             }
+        }
+
+        // 🔑 Desbloquear la puerta
+        if (puertaBloqueada != null)
+        {
+            puertaBloqueada.DesbloquearPuerta();
+            Debug.Log("🔓 Puerta desbloqueada al recoger la linterna.");
         }
 
         // Destruir el objeto linterna del mapa
