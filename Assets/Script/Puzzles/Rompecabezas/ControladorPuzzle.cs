@@ -11,17 +11,23 @@ public class ControladorPuzzle : MonoBehaviour
 
     bool enPuzzle = false;
 
+
     void Awake()
     {
         if (Instancia == null) Instancia = this;
         else Destroy(gameObject);
+    }
+    void Start()
+    {
+        if (ControladorPuzzle.Instancia != null)
+            ControladorPuzzle.Instancia.SalirModoPuzzle();
     }
 
     public void EntrarModoPuzzle()
     {
         if (enPuzzle) return;
         enPuzzle = true;
-
+        Debug.Log("Se activo puzzle");
         if (scriptMovimientoJugador != null) scriptMovimientoJugador.enabled = false;
         if (scriptControlCamara != null) scriptControlCamara.enabled = false;
 

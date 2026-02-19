@@ -4,21 +4,27 @@ using UnityEngine;
 public class PapelInteractuable : MonoBehaviour, IInteractuable
 {
     [Header("Opcional")]
-    public AudioClip sonidoAbrir; // sonido al abrir el papel
-    public bool destruirAlInteractuar = true;
+    [Tooltip("Sonido que se reproducirá al abrir el puzzle")]
+    public AudioClip sonidoAbrir;
+
+    [Tooltip("Si está en true, el objeto se destruirá al interactuar; si está en false, solo se ocultará")]
+    public bool desaparecerAlInteractuar = false;
 
     public void Interactuar()
     {
-        // reproducir sonido si hay
+        // reproducir sonido si existe
         if (sonidoAbrir != null)
             AudioSource.PlayClipAtPoint(sonidoAbrir, transform.position);
 
-        // Abrir el rompecabezas
+        // abrir el panel del rompecabezas
         if (GestorRompecabezas.Instancia != null)
             GestorRompecabezas.Instancia.IniciarPuzzle();
 
-        // desactivar o destruir el papel en el mundo
-        if (destruirAlInteractuar) Destroy(gameObject);
-        else gameObject.SetActive(false);
+        // comportamiento del objeto en el mundo
+        if (desaparecerAlInteractuar)
+            Destroy(gameObject);
+        else
+            gameObject.SetActive(false);
     }
 }
+

@@ -1,13 +1,13 @@
-using Unity.Mathematics;
+﻿using Unity.Mathematics;
 using UnityEngine;
 
 public class Camara : MonoBehaviour
 {
-    [Header("Rotaci�n con Mouse")]
-    [SerializeField] float Sensibilidad = 100f;
-    [SerializeField] Transform Player;
-    [SerializeField] float rotacionHorizontal = 0f;
-    [SerializeField] float rotacionVertical = 0f;
+    [Header("Rotación con Mouse")]
+    [SerializeField] float sensibilidad = 100f;
+    [SerializeField] Transform jugador; // referencia al cuerpo del jugador
+    float rotacionHorizontal = 0f;
+    float rotacionVertical = 0f;
 
     [Header("Balanceo (Head Bob)")]
     [SerializeField] float idleAmplitude = 0.05f;
@@ -30,26 +30,29 @@ public class Camara : MonoBehaviour
 
     void Update()
     {
-        // --- Rotaci�n con el mouse ---
-        float valorX = Input.GetAxis("Mouse X") * Sensibilidad * Time.deltaTime;
-        float valorY = Input.GetAxis("Mouse Y") * Sensibilidad * Time.deltaTime;
+        RotacionMouse();
+        AplicarBalanceo();
+    }
+
+    void RotacionMouse()
+    {
+        float valorX = Input.GetAxis("Mouse X") * sensibilidad * Time.deltaTime;
+        float valorY = Input.GetAxis("Mouse Y") * sensibilidad * Time.deltaTime;
 
         rotacionHorizontal += valorX;
         rotacionVertical -= valorY;
         rotacionVertical = math.clamp(rotacionVertical, -70f, 70f);
 
         transform.localRotation = Quaternion.Euler(rotacionVertical, 0f, 0f);
-        if (Player != null)
+
+        if (jugador != null)
         {
-            Player.Rotate(Vector3.up * valorX);
+            jugador.Rotate(Vector3.up * valorX);
         }
         else
         {
-            Debug.Log("Falta asignar Jugador en Script: Camara");
+            Debug.LogWarning("⚠ Falta asignar el jugador en el script Camara");
         }
-
-        // --- Balanceo ---
-        AplicarBalanceo();
     }
 
     void AplicarBalanceo()
@@ -71,6 +74,7 @@ public class Camara : MonoBehaviour
         transform.localPosition = posicionInicial + new Vector3(offsetX, offsetY, 0f);
     }
 
+    // Método que se llama desde MovimientoPersonaje
     public void SetEstado(float velocidad)
     {
         if (velocidad <= 0.1f) estado = Estado.Idle;
@@ -83,4 +87,11 @@ public class Camara : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
+
+    public void MostrarMouse()
+    {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+    }
 }
+
