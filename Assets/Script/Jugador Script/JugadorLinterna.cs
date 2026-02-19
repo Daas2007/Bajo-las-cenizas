@@ -7,11 +7,14 @@ public class JugadorLinterna : MonoBehaviour
     [SerializeField] GameObject luzLinterna;
     [SerializeField] AudioSource source;
     [SerializeField] AudioClip sonidoEncender;
-    [SerializeField] Camera cam; // cámara del jugador
+    [SerializeField] Camera cam;
 
     [Header("Detección de enemigos")]
     [SerializeField] float distanciaMax = 10f;
     [SerializeField] LayerMask layerEnemigo;
+
+    [Header("Bloqueo por diálogo")]
+    [SerializeField] GameObject panelDialogo; // 👈 arrastra aquí tu panel de diálogo
 
     [SerializeField] public bool tieneLinterna = false;
     [SerializeField] private EnemigoVentana enemigoDetectado;
@@ -20,13 +23,14 @@ public class JugadorLinterna : MonoBehaviour
     {
         linternaObjeto.SetActive(false);
         luzLinterna.SetActive(false);
-        // ❌ No revises PlayerPrefs aquí
     }
-
 
     void Update()
     {
         if (!tieneLinterna) return;
+
+        // 👇 Bloqueo: si el panel está activo, no permitir toggle
+        if (panelDialogo != null && panelDialogo.activeSelf) return;
 
         if (Input.GetKeyDown(KeyCode.F))
         {
@@ -49,9 +53,6 @@ public class JugadorLinterna : MonoBehaviour
         tieneLinterna = true;
         linternaObjeto.SetActive(true);
         luzLinterna.SetActive(false);
-
-        PlayerPrefs.SetInt("TieneLinterna", 1);
-        PlayerPrefs.Save();
     }
 
     public void DarLinternaEncendida()
@@ -59,9 +60,6 @@ public class JugadorLinterna : MonoBehaviour
         tieneLinterna = true;
         linternaObjeto.SetActive(true);
         luzLinterna.SetActive(true);
-
-        PlayerPrefs.SetInt("TieneLinterna", 1);
-        PlayerPrefs.Save();
 
         if (source != null && sonidoEncender != null)
             source.PlayOneShot(sonidoEncender);
@@ -78,7 +76,6 @@ public class JugadorLinterna : MonoBehaviour
 
     private void DetectarEnemigoConLuz()
     {
-
         Ray rayo = new Ray(cam.transform.position, cam.transform.forward);
         RaycastHit hit;
 
@@ -97,9 +94,9 @@ public class JugadorLinterna : MonoBehaviour
             enemigoDetectado = null;
         }
     }
+
     public bool TieneLinterna()
     {
         return tieneLinterna;
     }
-
 }

@@ -32,7 +32,8 @@ public class Dialogo : MonoBehaviour, IInteractuable
     {
         if (!mostrandoDialogo) return;
 
-        if (Input.GetKeyDown(KeyCode.E))
+        // 🔑 Ahora usamos F para avanzar/saltar/cerrar
+        if (Input.GetKeyDown(KeyCode.F))
         {
             if (escribiendoLinea)
             {
@@ -42,7 +43,6 @@ public class Dialogo : MonoBehaviour, IInteractuable
             {
                 CancelInvoke(nameof(AvanzarDialogo));
 
-                // 🔑 Si estamos en la última línea, cerrar diálogo
                 if (indiceLinea >= lineas.Length - 1)
                 {
                     TerminarDialogo();
@@ -59,10 +59,11 @@ public class Dialogo : MonoBehaviour, IInteractuable
     {
         if (!mostrandoDialogo)
         {
-            IniciarDialogo();
+            IniciarDialogo(); // 🔑 Se sigue iniciando con E
         }
         else
         {
+            // 🔑 Dentro de Interactuar mantenemos la lógica con F
             if (escribiendoLinea)
             {
                 TerminarLineaInstantanea();
@@ -86,7 +87,7 @@ public class Dialogo : MonoBehaviour, IInteractuable
     public void IniciarDialogo()
     {
         dialogoCanvas.SetActive(true);
-        indiceLinea = 0; // 🔑 reinicia siempre al empezar
+        indiceLinea = 0;
         mostrandoDialogo = true;
         MostrarLinea();
         BloquearJugador(true);
@@ -135,10 +136,9 @@ public class Dialogo : MonoBehaviour, IInteractuable
 
     public void TerminarDialogo()
     {
-        dialogoCanvas.SetActive(false);   
+        dialogoCanvas.SetActive(false);
         mostrandoDialogo = false;
         BloquearJugador(false);
-        // 🔑 No reiniciamos aquí, solo al iniciar un nuevo diálogo
     }
 
     public void BloquearJugador(bool bloquear)

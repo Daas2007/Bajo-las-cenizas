@@ -4,12 +4,16 @@ using System.Collections;
 public class PuertaInteractuable : MonoBehaviour, IInteractuable
 {
     [Header("Configuración de apertura")]
-    [SerializeField] private Transform engranaje;   // Empty en la bisagra
-    [SerializeField] private float anguloApertura = 90f; // Ángulo final en Y
-    [SerializeField] private float duracion = 1f;        // Tiempo de animación
+    [SerializeField] private Transform engranaje;
+    [SerializeField] private Vector3 rotacionInicialEuler; // editable en Inspector
+    [SerializeField] private Vector3 rotacionFinalEuler;   // editable en Inspector
+    [SerializeField] private float duracion = 1f;
+
+    [Header("Opciones especiales")]
+    [SerializeField] private bool cierreRapidoConCristal = false; // 👈 toggle en Inspector
 
     private bool abierta = false;
-    private bool enMovimiento = false; // 🔑 evita interacción doble
+    private bool enMovimiento = false;
     private Quaternion rotacionInicial;
     private Quaternion rotacionFinal;
 
@@ -21,11 +25,8 @@ public class PuertaInteractuable : MonoBehaviour, IInteractuable
             return;
         }
 
-        // Guardar rotación inicial tal cual está en la escena
-        rotacionInicial = engranaje.localRotation;
-
-        // Calcular rotación final relativa
-        rotacionFinal = rotacionInicial * Quaternion.Euler(0, anguloApertura, 0);
+        rotacionInicial = Quaternion.Euler(rotacionInicialEuler);
+        rotacionFinal = Quaternion.Euler(rotacionFinalEuler);
     }
 
     public void Interactuar()
@@ -35,20 +36,20 @@ public class PuertaInteractuable : MonoBehaviour, IInteractuable
         StopAllCoroutines();
 
         if (!abierta)
-            StartCoroutine(RotarPuerta(rotacionFinal, true));
+            StartCoroutine(RotarPuerta(rotacionFinal, true, duracion));
         else
-            StartCoroutine(RotarPuerta(rotacionInicial, false));
+            StartCoroutine(RotarPuerta(rotacionInicial, false, duracion));
     }
 
-    private IEnumerator RotarPuerta(Quaternion destino, bool abrir)
+    private IEnumerator RotarPuerta(Quaternion destino, bool abrir, float tiempoAnim)
     {
         enMovimiento = true;
         float tiempo = 0f;
         Quaternion inicio = engranaje.localRotation;
 
-        while (tiempo < duracion)
+        while (tiempo < tiempoAnim)
         {
-            float t = tiempo / duracion;
+            float t = tiempo / tiempoAnim;
             engranaje.localRotation = Quaternion.Lerp(inicio, destino, t);
             tiempo += Time.deltaTime;
             yield return null;
@@ -57,8 +58,17 @@ public class PuertaInteractuable : MonoBehaviour, IInteractuable
         engranaje.localRotation = destino;
         abierta = abrir;
         enMovimiento = false;
+    }
 
-        Debug.Log(abrir ? "🚪 Puerta abierta." : "🚪 Puerta cerrada.");
+    // 👇 Método para cerrar rápido si la puerta tiene el bool activado
+    public void CerrarSiCristal()
+    {
+        if (cierreRapidoConCristal && PlayerPrefs.GetInt("TieneCristal", 0) == 1)
+        {
+            StopAllCoroutines();
+            StartCoroutine(RotarPuerta(rotacionInicial, false, 0.3f)); // cierre rápido
+            Debug.Log("🚪 Puerta cerrada rápido por condición de cristal.");
+        }
     }
 
     public bool EstaAbierta() => abierta;

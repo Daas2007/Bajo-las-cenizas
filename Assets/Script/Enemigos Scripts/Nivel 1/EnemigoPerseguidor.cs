@@ -19,7 +19,6 @@ public class EnemigoPerseguidor : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         rb.constraints = RigidbodyConstraints.FreezeRotation;
 
-        // Si olvidaste asignar la pantalla en el Inspector, la busca automáticamente
         if (pantallaDeMuerte == null)
         {
             pantallaDeMuerte = Object.FindFirstObjectByType<PantallaDeMuerte>();
@@ -38,7 +37,6 @@ public class EnemigoPerseguidor : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player"))
         {
-            // Activa pantalla de muerte
             pantallaDeMuerte.ActivarPantallaMuerte();
         }
     }
@@ -49,5 +47,11 @@ public class EnemigoPerseguidor : MonoBehaviour
         {
             pantallaDeMuerte.ActivarPantallaMuerte();
         }
+    }
+
+    public void SetVelocidadExtra()
+    {
+        velocidad *= 2f; // ⚡ velocidad aumentada
+        Debug.Log("⚡ Enemigo activado con velocidad extra!");
     }
 }
