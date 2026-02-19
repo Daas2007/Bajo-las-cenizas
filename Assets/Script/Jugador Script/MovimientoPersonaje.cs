@@ -7,7 +7,7 @@ public class MovimientoPersonaje : MonoBehaviour
 {
     [Header("Referencias Sistema Guardado")]
     [SerializeField] GameObject enemigo;
-    [SerializeField] bool tieneLinterna;
+    [SerializeField] public bool tieneLinterna;
 
     [Header("Referencias")]
     [SerializeField] Transform camara;
@@ -32,6 +32,7 @@ public class MovimientoPersonaje : MonoBehaviour
 
     void Awake()
     {
+        tieneLinterna = false;
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
         if (camara == null && Camera.main != null) camara = Camera.main.transform;

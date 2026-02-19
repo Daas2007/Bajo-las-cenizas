@@ -1,29 +1,22 @@
-﻿using UnityEngine;
+﻿// PickupLinterna.cs
+using UnityEngine;
 
-public class LinternaPickup : MonoBehaviour, IInteractuable
+public class PickupLinterna : MonoBehaviour, IInteractuable
 {
-    [SerializeField] private PuertaBloqueada puertaBloqueada;
-
     public void Interactuar()
     {
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
+        JugadorLinterna jugadorLinterna = FindObjectOfType<JugadorLinterna>();
+        if (jugadorLinterna != null)
         {
-            JugadorLinterna jugadorLinterna = player.GetComponent<JugadorLinterna>();
-            if (jugadorLinterna != null)
-            {
-                jugadorLinterna.DarLinternaEncendida(); // activa linterna en la mano con luz encendida
-            }
+            jugadorLinterna.DarLinterna();
+            Debug.Log("Linterna recogida ✅");
+        }
+        else
+        {
+            Debug.LogError("⚠ No se encontró JugadorLinterna en la escena");
         }
 
-        // 🔑 Desbloquear la puerta
-        if (puertaBloqueada != null)
-        {
-            puertaBloqueada.DesbloquearPuerta();
-            Debug.Log("🔓 Puerta desbloqueada al recoger la linterna.");
-        }
-
-        // Destruir el objeto linterna del mapa
-        Destroy(gameObject);
+        // Desactivar linterna en la escena
+        gameObject.SetActive(false);
     }
 }

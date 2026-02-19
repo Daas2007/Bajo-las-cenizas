@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class JugadorLinterna : MonoBehaviour
 {
@@ -7,25 +7,22 @@ public class JugadorLinterna : MonoBehaviour
     [SerializeField] GameObject luzLinterna;
     [SerializeField] AudioSource source;
     [SerializeField] AudioClip sonidoEncender;
-    [SerializeField] Camera cam; // c�mara del jugador
+    [SerializeField] Camera cam; // cámara del jugador
 
-    [Header("Detecci�n de enemigos")]
+    [Header("Detección de enemigos")]
     [SerializeField] float distanciaMax = 10f;
     [SerializeField] LayerMask layerEnemigo;
 
-    private bool tieneLinterna = false;
-    private EnemigoVentana enemigoDetectado;
+    [SerializeField] public bool tieneLinterna = false;
+    [SerializeField] private EnemigoVentana enemigoDetectado;
 
     void Start()
     {
         linternaObjeto.SetActive(false);
         luzLinterna.SetActive(false);
-
-        if (PlayerPrefs.GetInt("TieneLinterna", 0) == 1)
-        {
-            DarLinterna();
-        }
+        // ❌ No revises PlayerPrefs aquí
     }
+
 
     void Update()
     {
@@ -100,4 +97,9 @@ public class JugadorLinterna : MonoBehaviour
             enemigoDetectado = null;
         }
     }
+    public bool TieneLinterna()
+    {
+        return tieneLinterna;
+    }
+
 }

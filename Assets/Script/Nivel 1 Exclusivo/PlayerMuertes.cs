@@ -13,6 +13,10 @@ public class PlayerMuertes : MonoBehaviour
             // Reiniciar la escena
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
+        else
+        {
+            Debug.Log("No chocaste con el enemigo");
+        }
     }
 }
 
