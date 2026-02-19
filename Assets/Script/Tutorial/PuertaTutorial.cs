@@ -10,25 +10,25 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
     [SerializeField] Transform pivote;
 
     [Header("UI de diálogo")]
-    [SerializeField] GameObject panelDialogo;   // 👈 arrastra tu panel del Canvas
-    [SerializeField] TMP_Text textoDialogo;     // 👈 arrastra tu TextMeshPro vacío
+    [SerializeField] GameObject panelDialogo;
+    [SerializeField] TMP_Text textoDialogo;
 
     [Header("Configuración del texto")]
     [SerializeField] float tiempoEntreLetras = 0.05f;
-    [SerializeField] float cooldownReactivar = 3f;
+    [SerializeField] float tiempoVisibleDespues = 5f;
+
+    [Header("Bloqueo de jugador")]
+    [SerializeField] MonoBehaviour scriptMovimiento; // tu script de movimiento
+    [SerializeField] Camara scriptCamara;     // tu script de cámara
 
     private bool abierta = false;
     private Quaternion rotacionInicial;
     private Quaternion rotacionFinal;
 
     private Coroutine rutinaTexto;
-    private bool escribiendo = false;
     private bool puedeActivar = true;
+    private string mensajeActual = "";
 
-    private void Awake()
-    {
-        panelDialogo.SetActive(false);
-    }
     void Start()
     {
         if (pivote == null) pivote = transform;
@@ -36,15 +36,6 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
         rotacionFinal = rotacionInicial * Quaternion.Euler(0f, anguloApertura, 0f);
 
         if (panelDialogo != null) panelDialogo.SetActive(false);
-    }
-
-    void Update()
-    {
-        // Si el panel está activo y presionas E → cerrar
-        if (panelDialogo.activeSelf && Input.GetKeyDown(KeyCode.E))
-        {
-            CerrarDialogo();
-        }
     }
 
     public void Interactuar()
@@ -57,8 +48,8 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
         }
         else
         {
-            if (puedeActivar)
-                MostrarDialogo("Antes necesito algo para ver a donde me dirijo...");
+            if (puedeActivar && !panelDialogo.activeSelf)
+                MostrarDialogo("Mmm... está bastante oscuro afuera, será mejor que busque algo para iluminar");
         }
     }
 
@@ -78,7 +69,12 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
     {
         if (panelDialogo == null || textoDialogo == null) return;
 
+        mensajeActual = mensaje;
         panelDialogo.SetActive(true);
+
+        // Bloquear jugador y cámara
+        if (scriptMovimiento != null) scriptMovimiento.enabled = false;
+        if (scriptCamara != null) scriptCamara.enabled = false;
 
         if (rutinaTexto != null) StopCoroutine(rutinaTexto);
         rutinaTexto = StartCoroutine(EscribirLinea(mensaje));
@@ -86,14 +82,16 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
 
     private IEnumerator EscribirLinea(string linea)
     {
-        escribiendo = true;
         textoDialogo.text = "";
         foreach (char letra in linea)
         {
             textoDialogo.text += letra;
             yield return new WaitForSeconds(tiempoEntreLetras);
         }
-        escribiendo = false;
+
+        // Cuando termina de escribir → esperar 5 segundos y cerrar
+        yield return new WaitForSeconds(tiempoVisibleDespues);
+        CerrarDialogo();
     }
 
     private void CerrarDialogo()
@@ -101,8 +99,14 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
         if (rutinaTexto != null) StopCoroutine(rutinaTexto);
         panelDialogo.SetActive(false);
         textoDialogo.text = "";
+
+        // Desbloquear jugador y cámara
+        if (scriptMovimiento != null) scriptMovimiento.enabled = true;
+        if (scriptCamara != null) scriptCamara.enabled = true;
+
+        // Cooldown antes de poder reactivar
         puedeActivar = false;
-        Invoke(nameof(ReactivarDialogo), cooldownReactivar);
+        Invoke(nameof(ReactivarDialogo), 2f);
     }
 
     private void ReactivarDialogo()
@@ -110,4 +114,5 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
         puedeActivar = true;
     }
 }
+
 
