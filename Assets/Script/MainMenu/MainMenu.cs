@@ -3,33 +3,33 @@
 public class MainMenu : MonoBehaviour
 {
     [SerializeField] GameObject mainPanel;       // Panel principal del menú
-    [SerializeField] GameObject opcionesPanel;   // Panel de opciones compartido
+    [SerializeField] GameObject opcionesPanel;   // Panel de opciones
     [SerializeField] GameObject pausaPanel;      // Panel de pausa
 
     private void Awake()
     {
-        mainPanel.SetActive(true);
-        opcionesPanel.SetActive(true);
-        pausaPanel.SetActive(true);
-    }
-    void Start()
-    {
-        // Al iniciar, mostrar solo el menú principal
-        mainPanel.SetActive(true);
+        // Al iniciar, solo mostrar el menú principal
+        if (mainPanel != null) mainPanel.SetActive(true);
         if (opcionesPanel != null) opcionesPanel.SetActive(false);
         if (pausaPanel != null) pausaPanel.SetActive(false);
 
-        Time.timeScale = 0f; // detener el juego hasta que se presione Jugar
+        // Cursor desbloqueado para poder usar botones
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
+
+        // Pausar el juego hasta que se presione Jugar
+        Time.timeScale = 0f;
     }
 
     public void Jugar()
     {
-        mainPanel.SetActive(false);
+        if (mainPanel != null) mainPanel.SetActive(false);
         if (opcionesPanel != null) opcionesPanel.SetActive(false);
 
-        Time.timeScale = 1f; // reanudar el juego
+        // Reanudar el juego
+        Time.timeScale = 1f;
+
+        // Bloquear cursor para gameplay
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
@@ -38,15 +38,21 @@ public class MainMenu : MonoBehaviour
 
     public void AbrirOpciones()
     {
-        opcionesPanel.SetActive(true); // se activa encima del MainMenu
+        if (opcionesPanel != null) opcionesPanel.SetActive(true);
+
+        // Cursor visible para interactuar con opciones
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
 
     public void CerrarOpciones()
     {
-        opcionesPanel.SetActive(false); // simplemente se oculta
-        mainPanel.SetActive(true);      // vuelve a mostrarse el MainMenu
+        if (opcionesPanel != null) opcionesPanel.SetActive(false);
+        if (mainPanel != null) mainPanel.SetActive(true);
+
+        // Cursor visible porque seguimos en menú
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
     public void SalirJuego()

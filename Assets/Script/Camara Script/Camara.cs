@@ -24,8 +24,8 @@ public class Camara : MonoBehaviour
 
     void Start()
     {
-        OcultarMouse();
         posicionInicial = transform.localPosition;
+        // ❌ No ocultar el mouse aquí, que lo maneje el menú
     }
 
     void Update()
@@ -94,4 +94,5 @@ public class Camara : MonoBehaviour
         Cursor.visible = true;
     }
 }
+
 

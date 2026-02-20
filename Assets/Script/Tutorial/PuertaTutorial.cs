@@ -17,10 +17,6 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
     [SerializeField] float tiempoEntreLetras = 0.05f;
     [SerializeField] float tiempoVisibleDespues = 5f;
 
-    [Header("Bloqueo de jugador")]
-    [SerializeField] MonoBehaviour scriptMovimiento; // tu script de movimiento
-    [SerializeField] Camara scriptCamara;     // tu script de cámara
-
     private bool abierta = false;
     private Quaternion rotacionInicial;
     private Quaternion rotacionFinal;
@@ -72,10 +68,6 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
         mensajeActual = mensaje;
         panelDialogo.SetActive(true);
 
-        // Bloquear jugador y cámara
-        if (scriptMovimiento != null) scriptMovimiento.enabled = false;
-        if (scriptCamara != null) scriptCamara.enabled = false;
-
         if (rutinaTexto != null) StopCoroutine(rutinaTexto);
         rutinaTexto = StartCoroutine(EscribirLinea(mensaje));
     }
@@ -89,7 +81,6 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
             yield return new WaitForSeconds(tiempoEntreLetras);
         }
 
-        // Cuando termina de escribir → esperar 5 segundos y cerrar
         yield return new WaitForSeconds(tiempoVisibleDespues);
         CerrarDialogo();
     }
@@ -100,11 +91,6 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
         panelDialogo.SetActive(false);
         textoDialogo.text = "";
 
-        // Desbloquear jugador y cámara
-        if (scriptMovimiento != null) scriptMovimiento.enabled = true;
-        if (scriptCamara != null) scriptCamara.enabled = true;
-
-        // Cooldown antes de poder reactivar
         puedeActivar = false;
         Invoke(nameof(ReactivarDialogo), 2f);
     }
@@ -114,5 +100,6 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
         puedeActivar = true;
     }
 }
+
 
 
