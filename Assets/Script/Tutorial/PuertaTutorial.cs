@@ -15,7 +15,7 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
     [SerializeField] TMP_Text textoSaltar; // Texto en esquina: "Pulsa ESPACIO para saltar"
 
     [Header("Configuración del texto")]
-    [SerializeField] float tiempoEntreLetras = 0.05f;
+    [SerializeField] float tiempoEntreLetras = 0.25f;
     [SerializeField] float tiempoVisibleDespues = 5f;
 
     [Header("PersonajeMovimiento")]
@@ -110,7 +110,7 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
         foreach (char letra in linea)
         {
             textoDialogo.text += letra;
-            yield return new WaitForSeconds(tiempoEntreLetras);
+            yield return new WaitForSeconds(tiempoEntreLetras*Time.deltaTime);
         }
 
         escribiendo = false;

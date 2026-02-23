@@ -72,7 +72,7 @@ public class MovimientoPersonaje : MonoBehaviour
         Vector3 direccionPlano = (derechaCamara * h + adelanteCamara * v).normalized;
         Vector3 movimiento = direccionPlano * VelocidadMove * Time.fixedDeltaTime;
 
-        rb.MovePosition(rb.position + movimiento);
+        rb.linearVelocity = direccionPlano * VelocidadMove;
 
         float velocidadActual = movimiento.magnitude / Time.fixedDeltaTime;
 
