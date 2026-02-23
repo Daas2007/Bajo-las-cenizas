@@ -17,7 +17,7 @@ RenderSettings:
   m_Fog: 1
   m_FogColor: {r: 0, g: 0, b: 0, a: 1}
   m_FogMode: 3
-  m_FogDensity: 0.295
+  m_FogDensity: 0.421
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
   m_AmbientSkyColor: {r: 0, g: 0, b: 0, a: 1}
@@ -273,7 +273,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -9.196249, y: 93.11215}
+  m_AnchoredPosition: {x: -9.196228, y: 93.11215}
   m_SizeDelta: {x: 202.4968, y: 22.1441}
   m_Pivot: {x: 1, y: 0}
 --- !u!114 &22855574
@@ -2356,8 +2356,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6614911238212939055}
-        m_TargetAssemblyTypeName: MainMenu, Assembly-CSharp
+      - m_Target: {fileID: 590427456}
+        m_TargetAssemblyTypeName: CanvasController, Assembly-CSharp
         m_MethodName: CargarPartida
         m_Mode: 1
         m_Arguments:
@@ -5629,7 +5629,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -9.139374, y: 92.533806}
+  m_AnchoredPosition: {x: -9.139343, y: 92.533806}
   m_SizeDelta: {x: 202.4968, y: 22.1441}
   m_Pivot: {x: 1, y: 0}
 --- !u!114 &210757440
@@ -7910,8 +7910,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 865070316914232347}
-        m_TargetAssemblyTypeName: MovimientoPersonaje, Assembly-CSharp
+      - m_Target: {fileID: 590427456}
+        m_TargetAssemblyTypeName: CanvasController, Assembly-CSharp
         m_MethodName: GuardarPartida
         m_Mode: 1
         m_Arguments:
@@ -7960,6 +7960,127 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 547175071}
   m_CullTransparentMesh: 1
+--- !u!1 &552702817
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 552702820}
+  - component: {fileID: 552702819}
+  - component: {fileID: 552702818}
+  m_Layer: 0
+  m_Name: Point Light (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &552702818
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 552702817}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Version: 3
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 1
+  m_LightLayerMask: 1
+  m_RenderingLayers: 1
+  m_CustomShadowLayers: 0
+  m_ShadowLayerMask: 1
+  m_ShadowRenderingLayers: 1
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+--- !u!108 &552702819
+Light:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 552702817}
+  m_Enabled: 1
+  serializedVersion: 11
+  m_Type: 2
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Intensity: 2.8
+  m_Range: 5
+  m_SpotAngle: 30
+  m_InnerSpotAngle: 30
+  m_CookieSize: 10
+  m_Shadows:
+    m_Type: 1
+    m_Resolution: -1
+    m_CustomResolution: -1
+    m_Strength: 0.62
+    m_Bias: 0.05
+    m_NormalBias: 0.4
+    m_NearPlane: 0.1
+    m_CullingMatrixOverride:
+      e00: 1
+      e01: 0
+      e02: 0
+      e03: 0
+      e10: 0
+      e11: 1
+      e12: 0
+      e13: 0
+      e20: 0
+      e21: 0
+      e22: 1
+      e23: 0
+      e30: 0
+      e31: 0
+      e32: 0
+      e33: 1
+    m_UseCullingMatrixOverride: 0
+  m_Cookie: {fileID: 0}
+  m_DrawHalo: 0
+  m_Flare: {fileID: 0}
+  m_RenderMode: 0
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RenderingLayerMask: 1
+  m_Lightmapping: 4
+  m_LightShadowCasterMode: 0
+  m_AreaSize: {x: 1, y: 1}
+  m_BounceIntensity: 0
+  m_ColorTemperature: 6570
+  m_UseColorTemperature: 0
+  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_UseBoundingSphereOverride: 0
+  m_UseViewFrustumForShadowCasterCull: 1
+  m_ForceVisible: 0
+  m_ShadowRadius: 0
+  m_ShadowAngle: 0
+  m_LightUnit: 1
+  m_LuxAtDistance: 1
+  m_EnableSpotReflector: 1
+--- !u!4 &552702820
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 552702817}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.5532093, y: 0.45407403, z: -0.4288082}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 747068624}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &590427455
 GameObject:
   m_ObjectHideFlags: 0
@@ -7989,10 +8110,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc53c0dd41070e6438c7266cf5e72d35, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  panelDialogo: {fileID: 1321037364}
-  panelPista: {fileID: 0}
+  panelMainMenu: {fileID: 8992306106745383449}
   panelPausa: {fileID: 5226320283061917068}
   panelOpciones: {fileID: 1985027563713522275}
+  panelMuerte: {fileID: 697476221}
+  panelTutorial: {fileID: 188096487}
+  panelDialogo: {fileID: 1321037364}
+  panelPuzzleCandado: {fileID: 4285010723205141572}
+  panelPuzzleRompecabezas: {fileID: 357457463}
+  panelPista: {fileID: 1547396492462400393}
   panelHUD: {fileID: 150358314}
 --- !u!4 &590427457
 Transform:
@@ -13326,8 +13452,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8615080011126281203}
-        m_TargetAssemblyTypeName: PantallaDeMuerte, Assembly-CSharp
+      - m_Target: {fileID: 590427456}
+        m_TargetAssemblyTypeName: CanvasController, Assembly-CSharp
         m_MethodName: SalirAlMenu
         m_Mode: 1
         m_Arguments:
@@ -13395,6 +13521,38 @@ RectTransform:
   m_AnchoredPosition: {x: 165, y: -33.5761}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &747068623
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 747068624}
+  m_Layer: 0
+  m_Name: Luces Indirectas
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &747068624
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 747068623}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -18.09321, y: 1.926926, z: -6.943192}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 552702820}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!43 &748658247
 Mesh:
   m_ObjectHideFlags: 0
@@ -38466,9 +38624,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 865070316914232347}
-        m_TargetAssemblyTypeName: MovimientoPersonaje, Assembly-CSharp
-        m_MethodName: CargarPartida
+      - m_Target: {fileID: 590427456}
+        m_TargetAssemblyTypeName: CanvasController, Assembly-CSharp
+        m_MethodName: CargarPartidaDesdePausa
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -41898,8 +42056,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8615080011126281203}
-        m_TargetAssemblyTypeName: PantallaDeMuerte, Assembly-CSharp
+      - m_Target: {fileID: 590427456}
+        m_TargetAssemblyTypeName: CanvasController, Assembly-CSharp
         m_MethodName: Reintentar
         m_Mode: 1
         m_Arguments:
@@ -50140,9 +50298,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6614911238212939055}
-        m_TargetAssemblyTypeName: MainMenu, Assembly-CSharp
-        m_MethodName: AbrirOpciones
+      - m_Target: {fileID: 590427456}
+        m_TargetAssemblyTypeName: CanvasController, Assembly-CSharp
+        m_MethodName: MostrarOpciones
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -50607,9 +50765,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8615080011126281201}
-        m_TargetAssemblyTypeName: PausaMenu, Assembly-CSharp
-        m_MethodName: AbrirOpciones
+      - m_Target: {fileID: 590427456}
+        m_TargetAssemblyTypeName: CanvasController, Assembly-CSharp
+        m_MethodName: MostrarOpciones
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -52386,8 +52544,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6614911238212939055}
-        m_TargetAssemblyTypeName: MainMenu, Assembly-CSharp
+      - m_Target: {fileID: 590427456}
+        m_TargetAssemblyTypeName: CanvasController, Assembly-CSharp
         m_MethodName: SalirJuego
         m_Mode: 1
         m_Arguments:
@@ -52548,8 +52706,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6614911238212939055}
-        m_TargetAssemblyTypeName: MainMenu, Assembly-CSharp
+      - m_Target: {fileID: 590427456}
+        m_TargetAssemblyTypeName: CanvasController, Assembly-CSharp
         m_MethodName: Jugar
         m_Mode: 1
         m_Arguments:
@@ -53226,9 +53384,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8615080011126281201}
-        m_TargetAssemblyTypeName: PausaMenu, Assembly-CSharp
-        m_MethodName: Resume
+      - m_Target: {fileID: 590427456}
+        m_TargetAssemblyTypeName: CanvasController, Assembly-CSharp
+        m_MethodName: Reanudar
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -53282,9 +53440,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8615080011126281201}
-        m_TargetAssemblyTypeName: PausaMenu, Assembly-CSharp
-        m_MethodName: VolverAlMenu
+      - m_Target: {fileID: 590427456}
+        m_TargetAssemblyTypeName: CanvasController, Assembly-CSharp
+        m_MethodName: SalirAlMenu
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -53645,9 +53803,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8615080011126281202}
-        m_TargetAssemblyTypeName: MenuOpciones, Assembly-CSharp
-        m_MethodName: CerrarPanel
+      - m_Target: {fileID: 590427456}
+        m_TargetAssemblyTypeName: CanvasController, Assembly-CSharp
+        m_MethodName: CerrarOpciones
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -60949,3 +61107,4 @@ SceneRoots:
   - {fileID: 1333211531}
   - {fileID: 1000975187}
   - {fileID: 590427457}
+  - {fileID: 747068624}

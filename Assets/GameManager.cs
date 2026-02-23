@@ -36,6 +36,8 @@ public class GameManager : MonoBehaviour
         else Destroy(gameObject);
     }
 
+    // ------------------- MÉTODOS DE JUEGO -------------------
+
     public void RecogerPieza()
     {
         piezasRecogidas++;
@@ -51,10 +53,41 @@ public class GameManager : MonoBehaviour
         piezasRecogidas = 0;
         osoCompleto = false;
     }
+
     public void RegistrarMuerte()
     {
         muertes++;
     }
+
     public int GetMuertes() => muertes;
     public bool CristalDañado() => muertes > 2;
+
+    // ------------------- MÉTODO NUEVO -------------------
+
+    public void ReiniciarEstado()
+    {
+        // Reiniciar valores básicos
+        muertes = 0;
+        piezasRecogidas = 0;
+        osoCompleto = false;
+        puzzle1Completado = false;
+        puzzle2Completado = false;
+        cristalMetaActivo = false;
+        tieneLinterna = false;
+
+        // Reiniciar linterna
+        if (linternaEnMano != null) linternaEnMano.SetActive(false);
+        if (linternaPickup != null) linternaPickup.SetActive(true);
+
+        // Reiniciar puertas bloqueadas
+        if (puertasBloqueadas != null)
+        {
+            foreach (GameObject puerta in puertasBloqueadas)
+            {
+                if (puerta != null) puerta.SetActive(true);
+            }
+        }
+
+        Debug.Log("✅ Estado del juego reiniciado correctamente.");
+    }
 }
