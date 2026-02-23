@@ -33,7 +33,7 @@ public class Dialogo : MonoBehaviour, IInteractuable
         if (!mostrandoDialogo) return;
 
         // 🔑 Ahora usamos F para avanzar/saltar/cerrar
-        if (Input.GetKeyDown(KeyCode.F))
+        if (Input.GetKeyDown(KeyCode.Space))
         {
             if (escribiendoLinea)
             {

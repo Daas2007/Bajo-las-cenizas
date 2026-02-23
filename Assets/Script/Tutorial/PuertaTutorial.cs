@@ -12,10 +12,14 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
     [Header("UI de diálogo")]
     [SerializeField] GameObject panelDialogo;
     [SerializeField] TMP_Text textoDialogo;
+    [SerializeField] TMP_Text textoSaltar; // Texto en esquina: "Pulsa ESPACIO para saltar"
 
     [Header("Configuración del texto")]
     [SerializeField] float tiempoEntreLetras = 0.05f;
     [SerializeField] float tiempoVisibleDespues = 5f;
+
+    [Header("PersonajeMovimiento")]
+    [SerializeField] MovimientoPersonaje quedateQuieto;
 
     private bool abierta = false;
     private Quaternion rotacionInicial;
@@ -24,6 +28,7 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
     private Coroutine rutinaTexto;
     private bool puedeActivar = true;
     private string mensajeActual = "";
+    private bool escribiendo = false;
 
     void Start()
     {
@@ -32,6 +37,28 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
         rotacionFinal = rotacionInicial * Quaternion.Euler(0f, anguloApertura, 0f);
 
         if (panelDialogo != null) panelDialogo.SetActive(false);
+        if (textoSaltar != null) textoSaltar.gameObject.SetActive(false);
+    }
+
+    void Update()
+    {
+        if (panelDialogo.activeSelf && Input.GetKeyDown(KeyCode.Space))
+        {
+            if (escribiendo)
+            {
+                // Mostrar todo el texto inmediatamente
+                if (rutinaTexto != null) StopCoroutine(rutinaTexto);
+                textoDialogo.text = mensajeActual;
+                escribiendo = false;
+                // Esperar unos segundos y cerrar
+                StartCoroutine(CerrarDespuesDeTiempo());
+            }
+            else
+            {
+                // Si ya terminó de escribir, cerrar directamente
+                CerrarDialogo();
+            }
+        }
     }
 
     public void Interactuar()
@@ -67,6 +94,10 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
 
         mensajeActual = mensaje;
         panelDialogo.SetActive(true);
+        if (textoSaltar != null) textoSaltar.gameObject.SetActive(true);
+
+        // Bloquear movimiento y cámara
+        if (quedateQuieto != null) quedateQuieto.enabled = false;
 
         if (rutinaTexto != null) StopCoroutine(rutinaTexto);
         rutinaTexto = StartCoroutine(EscribirLinea(mensaje));
@@ -74,6 +105,7 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
 
     private IEnumerator EscribirLinea(string linea)
     {
+        escribiendo = true;
         textoDialogo.text = "";
         foreach (char letra in linea)
         {
@@ -81,6 +113,13 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
             yield return new WaitForSeconds(tiempoEntreLetras);
         }
 
+        escribiendo = false;
+        yield return new WaitForSeconds(tiempoVisibleDespues);
+        CerrarDialogo();
+    }
+
+    private IEnumerator CerrarDespuesDeTiempo()
+    {
         yield return new WaitForSeconds(tiempoVisibleDespues);
         CerrarDialogo();
     }
@@ -89,7 +128,11 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
     {
         if (rutinaTexto != null) StopCoroutine(rutinaTexto);
         panelDialogo.SetActive(false);
+        if (textoSaltar != null) textoSaltar.gameObject.SetActive(false);
         textoDialogo.text = "";
+
+        // Desbloquear movimiento y cámara
+        if (quedateQuieto != null) quedateQuieto.enabled = true;
 
         puedeActivar = false;
         Invoke(nameof(ReactivarDialogo), 2f);
@@ -100,6 +143,3 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
         puedeActivar = true;
     }
 }
-
-
-

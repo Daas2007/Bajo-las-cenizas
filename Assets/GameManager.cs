@@ -10,7 +10,25 @@ public class GameManager : MonoBehaviour
     public bool osoCompleto = false;
     public System.Action OnOsoCompleto;
 
-    private int muertes = 0;
+    [Header("Objetos de la escena")]
+    public GameObject linternaEnMano;
+    public GameObject linternaPickup;
+
+    [Header("Puertas bloqueadas")]
+    public GameObject[] puertasBloqueadas;
+
+    [Header("CheckPoint")]
+    public Transform spawnInicial;
+
+    [Header("Estado del juego")]
+    public int muertes = 0;
+    public bool puzzle1Completado = false;
+    public bool puzzle2Completado = false;
+    public bool cristalMetaActivo = false;
+
+    [Header("Referencias")]
+    public GameObject enemigo;
+    public bool tieneLinterna = false;
 
     void Awake()
     {
@@ -21,13 +39,10 @@ public class GameManager : MonoBehaviour
     public void RecogerPieza()
     {
         piezasRecogidas++;
-        Debug.Log($"🧩 Pieza recogida: {piezasRecogidas}/{piezasNecesarias}");
-
         if (!osoCompleto && piezasRecogidas >= piezasNecesarias)
         {
             osoCompleto = true;
             OnOsoCompleto?.Invoke();
-            Debug.Log("✅ Oso completado, se puede generar el cristal.");
         }
     }
 
@@ -36,14 +51,10 @@ public class GameManager : MonoBehaviour
         piezasRecogidas = 0;
         osoCompleto = false;
     }
-
     public void RegistrarMuerte()
     {
         muertes++;
-        Debug.Log($"☠️ Muertes acumuladas: {muertes}");
     }
-
     public int GetMuertes() => muertes;
-
     public bool CristalDañado() => muertes > 2;
 }

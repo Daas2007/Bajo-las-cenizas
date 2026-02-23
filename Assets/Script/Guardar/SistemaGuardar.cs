@@ -1,51 +1,54 @@
 using UnityEngine;
 using System.IO;
 using System.Text;
-//using UnityEditor.Rendering;
 
-public class SistemaGuardar : MonoBehaviour
+public static class SistemaGuardar
 {
-    public static void  Guardar(MovimientoPersonaje Player, GameObject Enemigo, bool TieneLinterna)
+    private static string Ubicacion = Application.persistentDataPath + "/ArchivoGuardado";
+
+    public static void Guardar(MovimientoPersonaje player, GameManager gm)
     {
-        string Ubicacion = Application.persistentDataPath + "ArchivoGuardado";
         var archivo = File.Open(Ubicacion, FileMode.Create);
         var escribir = new BinaryWriter(archivo, Encoding.Default, false);
 
-        //Posicion
-        escribir.Write(Player.transform.position.x);
-        escribir.Write(Player.transform.position.y);
-        escribir.Write(Player.transform.position.z);
+        // Posición del jugador
+        escribir.Write(player.transform.position.x);
+        escribir.Write(player.transform.position.y);
+        escribir.Write(player.transform.position.z);
 
-        //Enemigo Activo
-        escribir.Write(Enemigo.activeSelf);
-
-        //Estado Linterna
-        escribir.Write(TieneLinterna);
+        // Estado del juego desde GameManager
+        escribir.Write(gm.enemigo.activeSelf);
+        escribir.Write(gm.tieneLinterna);
+        escribir.Write(gm.muertes);
+        escribir.Write(gm.piezasRecogidas);
+        escribir.Write(gm.puzzle1Completado);
+        escribir.Write(gm.puzzle2Completado);
+        escribir.Write(gm.cristalMetaActivo);
 
         archivo.Close();
     }
-    public static void Cargar(MovimientoPersonaje Player, GameObject enemigo, ref bool tieneLinterna)
+
+    public static void Cargar(MovimientoPersonaje player, GameManager gm)
     {
-        string Ubicacion = Application.persistentDataPath + "ArchivoGuardado";
-        if (File.Exists(Ubicacion))
-        {
-            var archivo = File.Open(Ubicacion, FileMode.Open);
-            var leer = new BinaryReader(archivo, Encoding.Default, false);
+        if (!File.Exists(Ubicacion)) return;
 
-            Vector3 pos;
-            pos.x = leer.ReadSingle();
-            pos.y = leer.ReadSingle();
-            pos.z = leer.ReadSingle();
-            // Estado del enemigo
+        var archivo = File.Open(Ubicacion, FileMode.Open);
+        var leer = new BinaryReader(archivo, Encoding.Default, false);
 
-            bool enemigoActivo = leer.ReadBoolean();
-            enemigo.SetActive(enemigoActivo); 
-            // Estado de la linterna
+        Vector3 pos;
+        pos.x = leer.ReadSingle();
+        pos.y = leer.ReadSingle();
+        pos.z = leer.ReadSingle();
+        player.transform.position = pos;
 
-            tieneLinterna = leer.ReadBoolean();
+        gm.enemigo.SetActive(leer.ReadBoolean());
+        gm.tieneLinterna = leer.ReadBoolean();
+        gm.muertes = leer.ReadInt32();
+        gm.piezasRecogidas = leer.ReadInt32();
+        gm.puzzle1Completado = leer.ReadBoolean();
+        gm.puzzle2Completado = leer.ReadBoolean();
+        gm.cristalMetaActivo = leer.ReadBoolean();
 
-            Player.transform.position = pos;
-            archivo.Close();
-        }
+        archivo.Close();
     }
 }

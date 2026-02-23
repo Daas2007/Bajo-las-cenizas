@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 121338cdb99c792418f4942c9f48489a
+guid: 326d849e67d4ae947b47494e55aef98e
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -34,12 +34,12 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
     wrapV: 1
-    wrapW: 1
+    wrapW: 0
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
@@ -136,13 +136,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Iconos_0
+      name: Botones_Final_0
       rect:
         serializedVersion: 2
-        x: 63
-        y: 1979
-        width: 421
-        height: 413
+        x: 43
+        y: 880
+        width: 200
+        height: 196
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -151,20 +151,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 0aa9052625f8afa44a3e004f7e2b5d63
-      internalID: -1838258575
+      spriteID: c4fc6f34d9226dd438c8867756be01b4
+      internalID: 1916092819
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Iconos_1
+      name: Botones_Final_1
       rect:
         serializedVersion: 2
-        x: 553
-        y: 1979
-        width: 420
-        height: 413
+        x: 278
+        y: 880
+        width: 200
+        height: 196
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -173,20 +173,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 1f1bd5a3cc06a2b4a834949420f1de25
-      internalID: -303451447
+      spriteID: c2343eaa1ca205d4b8ad428eab2643d6
+      internalID: 311962128
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Iconos_2
+      name: Botones_Final_2
       rect:
         serializedVersion: 2
-        x: 1078
-        y: 1981
-        width: 420
-        height: 414
+        x: 530
+        y: 881
+        width: 200
+        height: 196
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -195,20 +195,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b4ead766f00b94d45869a6ac1fe53ff5
-      internalID: -1697708432
+      spriteID: b6baf24dd4853084c8254e1668bf9b65
+      internalID: 671670456
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Iconos_3
+      name: Botones_Final_3
       rect:
         serializedVersion: 2
-        x: 63
-        y: 1509
-        width: 421
-        height: 412
+        x: 43
+        y: 640
+        width: 200
+        height: 210
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -217,20 +217,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: a979b65721622dc40ae79927ea54f4d2
-      internalID: -1409447090
+      spriteID: 3e12be83904e5a347abf632cf574484a
+      internalID: -2052313086
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Iconos_4
+      name: Botones_Final_4
       rect:
         serializedVersion: 2
-        x: 553
-        y: 1509
-        width: 420
-        height: 412
+        x: 278
+        y: 654
+        width: 200
+        height: 196
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -239,20 +239,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 8cae14885329f9140b5f1359e2ad4e0d
-      internalID: -1776170469
+      spriteID: f40ee2f0aff8e4b4699b65f98b9f3387
+      internalID: -976455249
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Iconos_5
+      name: Botones_Final_5
       rect:
         serializedVersion: 2
-        x: 1109
-        y: 1463
-        width: 356
-        height: 369
+        x: 545
+        y: 632
+        width: 169
+        height: 175
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -261,20 +261,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: ce1d079f639b20e4ab9c0c9320ca8dcb
-      internalID: -2104137318
+      spriteID: 098289f453d0b174a8f3fff5284b78b3
+      internalID: -1728857299
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Iconos_6
+      name: Botones_Final_6
       rect:
         serializedVersion: 2
-        x: 63
-        y: 1049
-        width: 421
-        height: 414
+        x: 43
+        y: 433
+        width: 200
+        height: 197
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -283,20 +283,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: f65eea6f15e13a84a81c18c5b67fbd7d
-      internalID: 1663608363
+      spriteID: 2660899611b444b43b7525143e6cbfe7
+      internalID: 1757421775
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Iconos_7
+      name: Botones_Final_7
       rect:
         serializedVersion: 2
-        x: 553
-        y: 1049
-        width: 420
-        height: 414
+        x: 278
+        y: 433
+        width: 200
+        height: 197
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -305,20 +305,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: e0e685d7944e4c04e92ed0da6a392fd5
-      internalID: 437844015
+      spriteID: 35ac640db10e911408b86de80f2ce6de
+      internalID: -2085805316
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Iconos_8
+      name: Botones_Final_8
       rect:
         serializedVersion: 2
-        x: 1058
-        y: 860
-        width: 458
-        height: 511
+        x: 521
+        y: 342
+        width: 218
+        height: 244
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -327,20 +327,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: f1b592f88eef01c489ea900ffda8e42b
-      internalID: -1434962908
+      spriteID: 56e829912b72c1d4d92c7bd5ec72a761
+      internalID: -514268884
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Iconos_9
+      name: Botones_Final_9
       rect:
         serializedVersion: 2
-        x: 63
-        y: 602
-        width: 421
-        height: 413
+        x: 43
+        y: 219
+        width: 200
+        height: 196
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -349,20 +349,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: ef06651b29bbae045aa3933ac1db7f3d
-      internalID: 1298571985
+      spriteID: d317527c6b147184e92a4b1d27e324d3
+      internalID: 260335531
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Iconos_10
+      name: Botones_Final_10
       rect:
         serializedVersion: 2
-        x: 553
-        y: 602
-        width: 420
-        height: 413
+        x: 278
+        y: 219
+        width: 200
+        height: 196
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -371,20 +371,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: c00b02c75f768fc488f372eb1f1c1f5c
-      internalID: -1203757624
+      spriteID: fc07acc8dcfa72946a3e2bfd3bcf6859
+      internalID: 818351139
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Iconos_11
+      name: Botones_Final_11
       rect:
         serializedVersion: 2
-        x: 1046
-        y: 215
-        width: 1809
-        height: 420
+        x: 632
+        y: 248
+        width: 946
+        height: 91
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -393,20 +393,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 563a79c1e09329f4bb17784c62d373e0
-      internalID: -1495276578
+      spriteID: a4f7d8c50724cc844a647167efe375da
+      internalID: -749732824
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Iconos_12
+      name: Botones_Final_12
       rect:
         serializedVersion: 2
-        x: 63
-        y: 152
-        width: 421
-        height: 412
+        x: 43
+        y: 2
+        width: 200
+        height: 197
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -415,20 +415,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 756ef487d91b6604fa3cee27e27ae5b9
-      internalID: 40732339
+      spriteID: a8762ccd66bf05b4aa8bd731baf83d9c
+      internalID: 867739661
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Iconos_13
+      name: Botones_Final_13
       rect:
         serializedVersion: 2
-        x: 553
-        y: 152
-        width: 420
-        height: 412
+        x: 278
+        y: 2
+        width: 200
+        height: 197
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -437,8 +437,52 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: ff97582dd0a670542815b80da390b573
-      internalID: 530750638
+      spriteID: f2fa4783ab1f097499c08aaac03c1366
+      internalID: -282524960
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Botones_Final_14
+      rect:
+        serializedVersion: 2
+        x: 642
+        y: 147
+        width: 926
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4e23a2974f1b2874c84fe585510a31b7
+      internalID: 1530786153
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Botones_Final_15
+      rect:
+        serializedVersion: 2
+        x: 632
+        y: 33
+        width: 946
+        height: 91
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b5df7404d3c1fee4bb67c740dbac2e8f
+      internalID: -272327888
       vertices: []
       indices: 
       edges: []
@@ -447,7 +491,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 813b45b13daa16e499d6230db79b69e2
+    spriteID: 6d99fdcfe9dd2e64abe5f3ec42ffa9c5
     internalID: 0
     vertices: []
     indices: 
@@ -457,20 +501,22 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Iconos_0: -1838258575
-      Iconos_1: -303451447
-      Iconos_10: -1203757624
-      Iconos_11: -1495276578
-      Iconos_12: 40732339
-      Iconos_13: 530750638
-      Iconos_2: -1697708432
-      Iconos_3: -1409447090
-      Iconos_4: -1776170469
-      Iconos_5: -2104137318
-      Iconos_6: 1663608363
-      Iconos_7: 437844015
-      Iconos_8: -1434962908
-      Iconos_9: 1298571985
+      Botones_Final_0: 1916092819
+      Botones_Final_1: 311962128
+      Botones_Final_10: 818351139
+      Botones_Final_11: -749732824
+      Botones_Final_12: 867739661
+      Botones_Final_13: -282524960
+      Botones_Final_14: 1530786153
+      Botones_Final_15: -272327888
+      Botones_Final_2: 671670456
+      Botones_Final_3: -2052313086
+      Botones_Final_4: -976455249
+      Botones_Final_5: -1728857299
+      Botones_Final_6: 1757421775
+      Botones_Final_7: -2085805316
+      Botones_Final_8: -514268884
+      Botones_Final_9: 260335531
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

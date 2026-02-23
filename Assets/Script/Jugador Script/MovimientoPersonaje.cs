@@ -5,9 +5,7 @@ using System.Collections;
 [RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider))]
 public class MovimientoPersonaje : MonoBehaviour
 {
-    [Header("Referencias Sistema Guardado")]
-    [SerializeField] GameObject enemigo;
-    [SerializeField] public bool tieneLinterna;
+
 
     [Header("Referencias")]
     [SerializeField] Transform camara;
@@ -32,7 +30,6 @@ public class MovimientoPersonaje : MonoBehaviour
 
     void Awake()
     {
-        tieneLinterna = false;
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
         if (camara == null && Camera.main != null) camara = Camera.main.transform;
@@ -144,12 +141,13 @@ public class MovimientoPersonaje : MonoBehaviour
 
     public void GuardarPartida()
     {
-        SistemaGuardar.Guardar(this, enemigo, tieneLinterna);
+        SistemaGuardar.Guardar(this, GameManager.Instancia);
     }
 
     public void CargarPartida()
     {
-        SistemaGuardar.Cargar(this, enemigo, ref tieneLinterna);
+        SistemaGuardar.Cargar(this, GameManager.Instancia);
     }
+
 }
 
