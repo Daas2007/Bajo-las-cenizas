@@ -19,11 +19,42 @@ public class CanvasController : MonoBehaviour
         if (panelHUD != null) panelHUD.SetActive(true);
     }
 
+    void Update()
+    {
+        // Control con ESC
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (panelActivo == panelDialogo || panelActivo == panelPista)
+            {
+                // Si estaba en diálogo o pista, cerrar y abrir pausa
+                CerrarPanelActivo();
+                MostrarPausa();
+            }
+            else if (panelActivo == panelPausa)
+            {
+                // Si estaba en pausa, cerrar pausa y volver al gameplay
+                CerrarPanelActivo();
+                Time.timeScale = 1f;
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
+            else if (panelActivo == null)
+            {
+                // Si no hay panel activo, abrir pausa
+                MostrarPausa();
+            }
+        }
+    }
+
     public void MostrarDialogo()
     {
         DesactivarTodos();
         panelDialogo.SetActive(true);
         panelActivo = panelDialogo;
+
+        Time.timeScale = 0f;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
     public void MostrarPista()
@@ -31,6 +62,10 @@ public class CanvasController : MonoBehaviour
         DesactivarTodos();
         panelPista.SetActive(true);
         panelActivo = panelPista;
+
+        Time.timeScale = 0f;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
     public void MostrarPausa()
@@ -38,6 +73,10 @@ public class CanvasController : MonoBehaviour
         DesactivarTodos();
         panelPausa.SetActive(true);
         panelActivo = panelPausa;
+
+        Time.timeScale = 0f;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
     public void MostrarOpciones()
@@ -45,6 +84,9 @@ public class CanvasController : MonoBehaviour
         DesactivarTodos();
         panelOpciones.SetActive(true);
         panelActivo = panelOpciones;
+
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
     public void CerrarPanelActivo()
