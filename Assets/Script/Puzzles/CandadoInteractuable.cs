@@ -2,12 +2,14 @@
 
 public class CandadoInteractuable : MonoBehaviour, IInteractuable
 {
+    //---------------UI del puzzle---------------
     [Header("UI del puzzle")]
     [SerializeField] private GameObject panelPuzzle; // Canvas/Panel del candado
     [SerializeField] private CandadoController controller; // opcional para cerrar al desbloquear
 
     private bool resuelto = false;
 
+    //---------------Interacción---------------
     public void Interactuar()
     {
         if (resuelto) return;
@@ -17,11 +19,11 @@ public class CandadoInteractuable : MonoBehaviour, IInteractuable
             panelPuzzle.SetActive(true);
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
-            // ❌ elimina Time.timeScale = 0f;
             Debug.Log("Puzzle del candado abierto.");
         }
     }
 
+    //---------------Cerrar puzzle---------------
     public void CerrarPuzzle()
     {
         if (panelPuzzle != null)
@@ -29,11 +31,11 @@ public class CandadoInteractuable : MonoBehaviour, IInteractuable
             panelPuzzle.SetActive(false);
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
-            // ❌ elimina Time.timeScale = 1f;
             Debug.Log("Puzzle del candado cerrado.");
         }
     }
 
+    //---------------Marcar resuelto---------------
     public void MarcarResuelto()
     {
         resuelto = true;
@@ -41,6 +43,7 @@ public class CandadoInteractuable : MonoBehaviour, IInteractuable
         Debug.Log("Candado resuelto.");
     }
 
+    //---------------Eventos al habilitar/deshabilitar---------------
     private void OnEnable()
     {
         if (controller != null)
@@ -53,4 +56,3 @@ public class CandadoInteractuable : MonoBehaviour, IInteractuable
             controller.AlDesbloquear.RemoveListener(MarcarResuelto);
     }
 }
-

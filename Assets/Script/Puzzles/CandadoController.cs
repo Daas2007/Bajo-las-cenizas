@@ -3,28 +3,34 @@ using UnityEngine.Events;
 
 public class CandadoController : MonoBehaviour
 {
+    //---------------Configuración---------------
     [Header("Configuración")]
-    [Min(1)] public int cantidadDigitos = 4;
+    [Min(1)] public int cantidadDigitos = 4; // número de dígitos del candado
     [Tooltip("Código correcto (debe coincidir con cantidadDigitos)")]
-    public int[] codigoCorrecto;
+    public int[] codigoCorrecto; // combinación correcta
 
+    //---------------Referencias---------------
     [Header("Referencias")]
     [Tooltip("Dígitos en orden de izquierda a derecha")]
-    public CandadoDigito[] digitos;
+    public CandadoDigito[] digitos; // cada rueda del candado
 
+    //---------------Eventos---------------
     [Header("Eventos")]
-    public UnityEvent AlDesbloquear;
-    public UnityEvent AlIntentoFallido;
+    public UnityEvent AlDesbloquear;     // se dispara al acertar el código
+    public UnityEvent AlIntentoFallido;  // se dispara al fallar el código
 
+    //---------------Integración con puzzle---------------
     [Header("Integración con puzzle de caja")]
-    [SerializeField] private CandadoPuzzle puzzle; // opcional, para llamar directamente
+    [SerializeField] private CandadoPuzzle puzzle; // opcional, para abrir caja/fragmento
 
+    //---------------Bloqueo de jugador/cámara---------------
     [Header("Bloqueo de jugador/cámara")]
     [SerializeField] private MonoBehaviour scriptMovimientoJugador; // tu script de movimiento
     [SerializeField] private MonoBehaviour scriptCamara;           // tu script de cámara
 
     private bool puzzleActivo = false;
 
+    //---------------Validaciones iniciales---------------
     private void Awake()
     {
         if (digitos == null || digitos.Length != cantidadDigitos)
@@ -33,9 +39,7 @@ public class CandadoController : MonoBehaviour
             Debug.LogWarning("El código correcto debe tener la misma cantidad de dígitos.");
     }
 
-    // -------------------
-    // Activar puzzle
-    // -------------------
+    //---------------Activar puzzle---------------
     public void ActivarPuzzle()
     {
         puzzleActivo = true;
@@ -44,14 +48,12 @@ public class CandadoController : MonoBehaviour
         if (scriptMovimientoJugador != null) scriptMovimientoJugador.enabled = false;
         if (scriptCamara != null) scriptCamara.enabled = false;
 
-        // Liberar el cursor para interactuar con el UI
+        // Liberar cursor para interactuar con UI
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
 
-    // -------------------
-    // Desactivar puzzle
-    // -------------------
+    //---------------Desactivar puzzle---------------
     public void DesactivarPuzzle()
     {
         puzzleActivo = false;
@@ -60,14 +62,12 @@ public class CandadoController : MonoBehaviour
         if (scriptMovimientoJugador != null) scriptMovimientoJugador.enabled = true;
         if (scriptCamara != null) scriptCamara.enabled = true;
 
-        // Volver a bloquear el cursor para gameplay normal
+        // Bloquear cursor para gameplay normal
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
 
-    // -------------------
-    // Verificar código
-    // -------------------
+    //---------------Verificar código---------------
     public void VerificarCodigo()
     {
         if (digitos == null || codigoCorrecto == null) return;
@@ -77,20 +77,21 @@ public class CandadoController : MonoBehaviour
         {
             if (digitos[i].valor != codigoCorrecto[i])
             {
-                AlIntentoFallido?.Invoke();
+                AlIntentoFallido?.Invoke(); // evento de fallo
                 return;
             }
         }
 
-        AlDesbloquear?.Invoke();
+        AlDesbloquear?.Invoke(); // evento de éxito
 
         if (puzzle != null)
             puzzle.Desbloquear();
 
-        // 🔑 Al terminar el puzzle, desbloqueamos al jugador
+        // desbloquear jugador al terminar puzzle
         DesactivarPuzzle();
     }
 
+    //---------------Cambiar código---------------
     public void EstablecerCodigo(int[] nuevoCodigo)
     {
         if (nuevoCodigo == null || nuevoCodigo.Length != cantidadDigitos)
@@ -101,6 +102,7 @@ public class CandadoController : MonoBehaviour
         codigoCorrecto = nuevoCodigo;
     }
 
+    //---------------Obtener código actual---------------
     public int[] ObtenerCodigoActual()
     {
         int[] actual = new int[cantidadDigitos];
@@ -109,4 +111,3 @@ public class CandadoController : MonoBehaviour
         return actual;
     }
 }
-
