@@ -16,13 +16,36 @@ public class CanvasController : MonoBehaviour
     [SerializeField] GameObject panelHUD;
 
     private GameObject panelActivo;
-    private GameObject panelAnterior; // recuerda el panel debajo de Opciones
+    private GameObject panelAnterior;
 
     void Start()
     {
         DesactivarTodos();
         if (panelHUD != null) panelHUD.SetActive(true);
         MostrarMainMenu(); // arranca en menú principal
+    }
+
+    void Update()
+    {
+        //---------------Control ESC---------------
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            // Si estamos en juego (sin panel activo y tiempo corriendo)
+            if (panelActivo == null && Time.timeScale == 1f)
+            {
+                MostrarPausa();
+            }
+            // Si estamos en pausa y no en opciones
+            else if (panelActivo == panelPausa)
+            {
+                Reanudar();
+            }
+            // Si estamos en opciones, cerrarlas y volver al panel anterior
+            else if (panelActivo == panelOpciones)
+            {
+                CerrarOpciones();
+            }
+        }
     }
 
     //---------------MainMenu---------------
@@ -42,7 +65,6 @@ public class CanvasController : MonoBehaviour
             gm.ReiniciarEstado();
         }
 
-        // cerrar menú principal y activar tutorial
         CerrarPanelActivo();
         Time.timeScale = 1f;
         Cursor.lockState = CursorLockMode.Locked;
@@ -69,27 +91,41 @@ public class CanvasController : MonoBehaviour
     {
         ActivarPanel(panelPausa, true);
     }
-
     public void Reanudar()
     {
-        if (panelActivo == panelPausa)
-        {
-            panelPausa.SetActive(false);
-            panelActivo = null;
-
-            Time.timeScale = 1f;
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-        }
+        panelPausa.SetActive(false);
+        panelActivo = null;
+        Time.timeScale = 1f;
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
+    public void SalirAlMenuDesdePausa()
+    {
+        // Cerrar panel de pausa
+        if (panelPausa != null) panelPausa.SetActive(false);
+        panelActivo = null;
+
+        // Activar menú principal
+        if (panelMainMenu != null) panelMainMenu.SetActive(true);
+        panelActivo = panelMainMenu;
+
+        // Pausar el juego porque estamos en menú
+        Time.timeScale = 0f;
+
+        // Cursor libre para interactuar con botones
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        Debug.Log("✅ Volviendo al menú principal desde pausa.");
+    }
+    
 
     //---------------Opciones---------------
     public void MostrarOpciones()
     {
-        // Guardar el panel que estaba activo antes
         panelAnterior = panelActivo;
+        if (panelAnterior != null) panelAnterior.SetActive(false);
 
-        DesactivarTodos();
         panelOpciones.SetActive(true);
         panelActivo = panelOpciones;
 
@@ -104,12 +140,18 @@ public class CanvasController : MonoBehaviour
             panelOpciones.SetActive(false);
             panelActivo = null;
 
-            // Volver al panel anterior si existía
             if (panelAnterior != null)
             {
                 panelAnterior.SetActive(true);
                 panelActivo = panelAnterior;
                 panelAnterior = null;
+
+                if (panelActivo == panelPausa || panelActivo == panelMainMenu)
+                {
+                    Time.timeScale = 0f;
+                    Cursor.lockState = CursorLockMode.None;
+                    Cursor.visible = true;
+                }
             }
         }
     }
@@ -121,7 +163,6 @@ public class CanvasController : MonoBehaviour
         panelTutorial.SetActive(true);
         panelActivo = panelTutorial;
 
-        // Pausar juego y bloquear movimiento
         Time.timeScale = 0f;
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
@@ -137,7 +178,6 @@ public class CanvasController : MonoBehaviour
             panelTutorial.SetActive(false);
             panelActivo = null;
 
-            // Reanudar juego y habilitar movimiento
             Time.timeScale = 1f;
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
