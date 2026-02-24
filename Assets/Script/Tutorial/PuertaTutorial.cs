@@ -4,32 +4,27 @@ using System.Collections;
 
 public class PuertaTutorial : MonoBehaviour, IInteractuable
 {
-    //---------------Configuración de apertura---------------
     [Header("Configuración de apertura")]
     [SerializeField] float anguloApertura = 90f;
     [SerializeField] float velocidadRotacion = 2f;
     [SerializeField] Transform pivote;
 
-    //---------------Puerta vinculada---------------
     [Header("Puerta vinculada")]
-    [SerializeField] PuertaTutorial puertaVinculada; // referencia a la otra puerta
+    [SerializeField] PuertaTutorial puertaVinculada;
 
-    //---------------UI de diálogo---------------
     [Header("UI de diálogo")]
     [SerializeField] GameObject panelDialogo;
     [SerializeField] TMP_Text textoDialogo;
     [SerializeField] TMP_Text textoSaltar;
 
-    //---------------Configuración del texto---------------
     [Header("Configuración del texto")]
     [SerializeField] float tiempoEntreLetras;
     [SerializeField] float tiempoVisibleDespues = 5f;
 
-    //---------------Movimiento personaje---------------
     [Header("PersonajeMovimiento")]
     [SerializeField] MovimientoPersonaje quedateQuieto;
 
-    private bool abierta = false;
+    public bool abierta = false;
     private Quaternion rotacionInicial;
     private Quaternion rotacionFinal;
 
@@ -47,29 +42,28 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
         if (panelDialogo != null) panelDialogo.SetActive(false);
         if (textoSaltar != null) textoSaltar.gameObject.SetActive(false);
     }
-
     void Update()
     {
-        if (panelDialogo.activeSelf && Input.GetKeyDown(KeyCode.Space))
+        if (panelDialogo != null && panelDialogo.activeSelf && Input.GetKeyDown(KeyCode.Space))
         {
             if (escribiendo)
             {
+                // Terminar escritura inmediatamente
                 if (rutinaTexto != null) StopCoroutine(rutinaTexto);
                 textoDialogo.text = mensajeActual;
                 escribiendo = false;
-                CerrarDialogo(); // cerrar inmediatamente
             }
             else
             {
+                // Cerrar diálogo si ya terminó
                 CerrarDialogo();
             }
         }
     }
-
-    //---------------Interacción---------------
+    //---------------Interfaz---------------
     public void Interactuar()
     {
-        JugadorLinterna jugadorLinterna = FindFirstObjectByType<JugadorLinterna>();
+        JugadorLinterna jugadorLinterna = FindObjectOfType<JugadorLinterna>();
         if (jugadorLinterna != null && jugadorLinterna.TieneLinterna())
         {
             if (!abierta)
@@ -81,6 +75,13 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
                 MostrarDialogo("Mmm... está bastante oscuro afuera, será mejor que busque algo para iluminar");
         }
     }
+    //---------------Reset---------------
+    public void ResetPuerta()
+    {
+        abierta = false;
+        pivote.rotation = rotacionInicial;
+        gameObject.layer = LayerMask.NameToLayer("Interaccion");
+    }
 
     //---------------Apertura simultánea---------------
     private void AbrirPuertasSimultaneas()
@@ -88,10 +89,8 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
         abierta = true;
         gameObject.layer = LayerMask.NameToLayer("Default");
 
-        // Iniciar rotación de esta puerta
         StartCoroutine(RotarPuerta());
 
-        // Iniciar rotación de la puerta vinculada al mismo tiempo
         if (puertaVinculada != null && !puertaVinculada.abierta)
         {
             puertaVinculada.AbrirPuertaVinculada();

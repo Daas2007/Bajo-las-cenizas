@@ -14,22 +14,23 @@ public class JugadorLinterna : MonoBehaviour
     [SerializeField] LayerMask layerEnemigo;
 
     [Header("Bloqueo por diálogo")]
-    [SerializeField] GameObject panelDialogo; // 👈 arrastra aquí tu panel de diálogo
+    [SerializeField] GameObject panelDialogo;
 
     [SerializeField] public bool tieneLinterna = false;
     [SerializeField] private EnemigoVentana enemigoDetectado;
+
+    private Quaternion rotacionInicial;
 
     void Start()
     {
         linternaObjeto.SetActive(false);
         luzLinterna.SetActive(false);
+        rotacionInicial = transform.rotation;
     }
 
     void Update()
     {
         if (!tieneLinterna) return;
-
-        // 👇 Bloqueo: si el panel está activo, no permitir toggle
         if (panelDialogo != null && panelDialogo.activeSelf) return;
 
         if (Input.GetKeyDown(KeyCode.F))
@@ -47,14 +48,15 @@ public class JugadorLinterna : MonoBehaviour
             enemigoDetectado = null;
         }
     }
-
     public void DarLinterna()
     {
         tieneLinterna = true;
         linternaObjeto.SetActive(true);
         luzLinterna.SetActive(false);
-    }
 
+        GameManager gm = GameManager.Instancia;
+        if (gm != null) gm.tieneLinterna = true; // 🔧 sincronizar con GameManager
+    }
     public void DarLinternaEncendida()
     {
         tieneLinterna = true;
@@ -99,4 +101,14 @@ public class JugadorLinterna : MonoBehaviour
     {
         return tieneLinterna;
     }
+
+    //---------------Reset---------------
+    //---------------Reset---------------
+    public void ResetLinterna()
+    {
+        tieneLinterna = false;
+        linternaObjeto.SetActive(false);
+        luzLinterna.SetActive(false);
+    }
 }
+

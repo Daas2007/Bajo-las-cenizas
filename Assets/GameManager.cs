@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
@@ -21,7 +22,8 @@ public class GameManager : MonoBehaviour
     public Transform spawnInicial;
 
     [Header("Estado del juego")]
-    public int muertes = 0;
+    public int muertes = 0;                        // contador global de muertes
+    public Dictionary<string, int> muertesPorHabitacion = new Dictionary<string, int>();
     public bool puzzle1Completado = false;
     public bool puzzle2Completado = false;
     public bool cristalMetaActivo = false;
@@ -54,40 +56,51 @@ public class GameManager : MonoBehaviour
         osoCompleto = false;
     }
 
-    public void RegistrarMuerte()
+    public void RegistrarMuerte(string habitacion = "global")
     {
         muertes++;
+
+        if (!muertesPorHabitacion.ContainsKey(habitacion))
+            muertesPorHabitacion[habitacion] = 0;
+
+        muertesPorHabitacion[habitacion]++;
     }
 
     public int GetMuertes() => muertes;
-    public bool CristalDañado() => muertes > 2;
 
-    // ------------------- MÉTODO NUEVO -------------------
+    // Ejemplo: cristal dañado si muertes > 2
+    public bool CristalDañado(string habitacion = "global")
+    {
+        if (!muertesPorHabitacion.ContainsKey(habitacion)) return false;
+        return muertesPorHabitacion[habitacion] > 2;
+    }
 
+    // ------------------- REINICIO -------------------
     public void ReiniciarEstado()
     {
-        // Reiniciar valores básicos
-        muertes = 0;
-        piezasRecogidas = 0;
-        osoCompleto = false;
+        // Reset linterna
+        JugadorLinterna linterna = FindObjectOfType<JugadorLinterna>();
+        if (linterna != null) linterna.ResetLinterna();
+
+        if (linternaPickup != null) linternaPickup.SetActive(true); // 🔧 siempre reaparece
+
+        // Reset puertas
+        foreach (PuertaTutorial puerta in FindObjectsOfType<PuertaTutorial>())
+            puerta.ResetPuerta();
+
+        // Reset enemigos
+        foreach (EnemigoPerseguidor enemigo in FindObjectsOfType<EnemigoPerseguidor>())
+            enemigo.ResetEnemigo();
+
+        // Reset muro
+        MuroBloqueo muro = FindObjectOfType<MuroBloqueo>();
+        if (muro != null) muro.ResetMuro();
+
+        // Reset puzzles
+        ResetearPuzzleOso();
         puzzle1Completado = false;
         puzzle2Completado = false;
         cristalMetaActivo = false;
-        tieneLinterna = false;
-
-        // Reiniciar linterna
-        if (linternaEnMano != null) linternaEnMano.SetActive(false);
-        if (linternaPickup != null) linternaPickup.SetActive(true);
-
-        // Reiniciar puertas bloqueadas
-        if (puertasBloqueadas != null)
-        {
-            foreach (GameObject puerta in puertasBloqueadas)
-            {
-                if (puerta != null) puerta.SetActive(true);
-            }
-        }
-
-        Debug.Log("✅ Estado del juego reiniciado correctamente.");
     }
+
 }

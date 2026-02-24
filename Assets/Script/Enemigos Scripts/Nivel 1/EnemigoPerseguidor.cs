@@ -13,11 +13,13 @@ public class EnemigoPerseguidor : MonoBehaviour
     [SerializeField] private PantallaDeMuerte pantallaDeMuerte;
 
     private Rigidbody rb;
+    private Vector3 posicionInicial;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
         rb.constraints = RigidbodyConstraints.FreezeRotation;
+        posicionInicial = transform.position;
 
         if (pantallaDeMuerte == null)
         {
@@ -51,7 +53,15 @@ public class EnemigoPerseguidor : MonoBehaviour
 
     public void SetVelocidadExtra()
     {
-        velocidad *= 2f; // ⚡ velocidad aumentada
+        velocidad *= 2f;
         Debug.Log("⚡ Enemigo activado con velocidad extra!");
+    }
+
+    //---------------Reset---------------
+    public void ResetEnemigo()
+    {
+        transform.position = posicionInicial;
+        velocidad = 3f;
+        gameObject.SetActive(false); // 🔧 desactivado al reiniciar
     }
 }

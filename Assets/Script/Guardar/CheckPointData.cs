@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 [System.Serializable]
 public class CheckpointData
@@ -9,5 +9,6 @@ public class CheckpointData
     public bool puzzle1Completado;
     public bool puzzle2Completado;
     public bool cristalMetaActivo;
+    public bool muroActivo; // 🔧 nuevo campo
 }
 

@@ -79,19 +79,14 @@ public class PantallaDeMuerte : MonoBehaviour
 
     public void Reintentar()
     {
-        // Reinicia el gameplay dentro de la misma escena
-        Time.timeScale = 1f;
-        panelMuerte.SetActive(false);
-
-        if (gameplayUI != null) gameplayUI.SetActive(true);
+        CanvasController cc = FindObjectOfType<CanvasController>();
+        if (cc != null) cc.ReintentarDesdeMuerte();
     }
 
     public void SalirAlMenu()
     {
-        // Volver al menú principal dentro de la misma escena
-        Time.timeScale = 0f;
-        panelMuerte.SetActive(false);
-
-        if (mainMenuPanel != null) mainMenuPanel.SetActive(true);
+        CanvasController cc = FindObjectOfType<CanvasController>();
+        if (cc != null) cc.SalirAlMenuDesdeMuerte();
     }
+
 }

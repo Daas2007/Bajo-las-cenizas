@@ -24,7 +24,6 @@ public class CanvasController : MonoBehaviour
         if (panelHUD != null) panelHUD.SetActive(true);
         MostrarMainMenu(); // arranca en menú principal
     }
-
     void Update()
     {
         //---------------Control ESC---------------
@@ -47,13 +46,11 @@ public class CanvasController : MonoBehaviour
             }
         }
     }
-
     //---------------MainMenu---------------
     public void MostrarMainMenu()
     {
         ActivarPanel(panelMainMenu, true);
     }
-
     public void Jugar()
     {
         GameManager gm = GameManager.Instancia;
@@ -72,20 +69,39 @@ public class CanvasController : MonoBehaviour
 
         MostrarTutorial();
     }
-
-    public void CargarPartida()
+    public void CargarPartidaDesdeMenu()
     {
         MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
         GameManager gm = GameManager.Instancia;
+
         if (jugador != null && gm != null)
         {
+            // Reinicia estado general
+            gm.ReiniciarEstado();
+
+            // Carga último guardado
             SistemaGuardar.Cargar(jugador, gm);
+
+            // 🔧 Si el jugador no tiene linterna, aseguramos que el pickup esté activo
+            if (!gm.tieneLinterna && gm.linternaPickup != null)
+                gm.linternaPickup.SetActive(true);
+
+            // Reactivar movimiento y cámara
+            jugador.enabled = true;
+            Camera cam = jugador.GetComponentInChildren<Camera>();
+            if (cam != null) cam.enabled = true;
         }
+
         CerrarPanelActivo();
+
+        // 🔧 Ajustar tiempo y cursor para volver al juego
+        Time.timeScale = 1f;
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
+        Debug.Log("📂 Partida cargada desde menú principal.");
     }
-
     public void SalirJuego() => Application.Quit();
-
     //---------------Pausa---------------
     public void MostrarPausa()
     {
@@ -101,25 +117,18 @@ public class CanvasController : MonoBehaviour
     }
     public void SalirAlMenuDesdePausa()
     {
-        // Cerrar panel de pausa
         if (panelPausa != null) panelPausa.SetActive(false);
         panelActivo = null;
 
-        // Activar menú principal
         if (panelMainMenu != null) panelMainMenu.SetActive(true);
         panelActivo = panelMainMenu;
 
-        // Pausar el juego porque estamos en menú
         Time.timeScale = 0f;
-
-        // Cursor libre para interactuar con botones
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
         Debug.Log("✅ Volviendo al menú principal desde pausa.");
     }
-    
-
     //---------------Opciones---------------
     public void MostrarOpciones()
     {
@@ -132,7 +141,6 @@ public class CanvasController : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
-
     public void CerrarOpciones()
     {
         if (panelActivo == panelOpciones)
@@ -155,6 +163,87 @@ public class CanvasController : MonoBehaviour
             }
         }
     }
+    //---------------Opciones: Guardar/Cargar---------------
+    public void GuardarPartida()
+    {
+        MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
+        GameManager gm = GameManager.Instancia;
+
+        if (jugador != null && gm != null)
+        {
+            SistemaGuardar.Guardar(jugador, gm);
+            Debug.Log("💾 Partida guardada desde menú de opciones.");
+        }
+    }
+    public void CargarPartida()
+    {
+        MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
+        GameManager gm = GameManager.Instancia;
+
+        if (jugador != null && gm != null)
+        {
+            SistemaGuardar.Cargar(jugador, gm);
+            Debug.Log("📂 Último punto de guardado cargado desde menú de opciones.");
+        }
+    }
+    //---------------Pantalla de Muerte---------------
+    public void MostrarPantallaMuerte()
+    {
+        DesactivarTodos();
+        if (panelMuerte != null) panelMuerte.SetActive(true);
+        panelActivo = panelMuerte;
+
+        // Disparar el fade desde PantallaDeMuerte
+        PantallaDeMuerte pm = panelMuerte.GetComponent<PantallaDeMuerte>();
+        if (pm != null) pm.ActivarPantallaMuerte();
+
+        Debug.Log("☠️ Pantalla de muerte activada.");
+    }
+    public void ReintentarDesdeMuerte()
+    {
+        if (panelMuerte != null) panelMuerte.SetActive(false);
+        panelActivo = null;
+
+        if (panelHUD != null) panelHUD.SetActive(true);
+
+        GameManager gm = GameManager.Instancia;
+        MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
+        if (gm != null && jugador != null)
+        {
+            gm.ReiniciarEstado();
+            SistemaGuardar.Cargar(jugador, gm);
+
+            // 🔧 Si el jugador no tiene linterna, aseguramos que el pickup esté activo
+            if (!gm.tieneLinterna && gm.linternaPickup != null)
+                gm.linternaPickup.SetActive(true);
+        }
+
+        // Reactivar movimiento y cámara
+        if (jugador != null) jugador.enabled = true;
+        Camera cam = jugador.GetComponentInChildren<Camera>();
+        if (cam != null) cam.enabled = true;
+
+        Time.timeScale = 1f;
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
+        Debug.Log("🔄 Reintentando partida desde pantalla de muerte.");
+    }
+    public void SalirAlMenuDesdeMuerte()
+    {
+        if (panelMuerte != null) panelMuerte.SetActive(false);
+        panelActivo = null;
+
+        if (panelMainMenu != null) panelMainMenu.SetActive(true);
+        panelActivo = panelMainMenu;
+
+        // 🔧 Cambiar a 1 para evitar bug
+        Time.timeScale = 1f;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        Debug.Log("✅ Volviendo al menú principal desde pantalla de muerte.");
+    }
 
     //---------------Tutorial---------------
     public void MostrarTutorial()
@@ -170,7 +259,6 @@ public class CanvasController : MonoBehaviour
         MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
         if (jugador != null) jugador.enabled = false;
     }
-
     public void CerrarTutorial()
     {
         if (panelActivo == panelTutorial)
@@ -186,10 +274,8 @@ public class CanvasController : MonoBehaviour
             if (jugador != null) jugador.enabled = true;
         }
     }
-
     //---------------Dialogo---------------
     public void MostrarDialogo() => ActivarPanel(panelDialogo, true);
-
     //---------------Control general---------------
     public void CerrarPanelActivo()
     {
@@ -199,7 +285,6 @@ public class CanvasController : MonoBehaviour
             panelActivo = null;
         }
     }
-
     private void ActivarPanel(GameObject panel, bool pausarJuego)
     {
         DesactivarTodos();
@@ -216,7 +301,6 @@ public class CanvasController : MonoBehaviour
             }
         }
     }
-
     private void DesactivarTodos()
     {
         if (panelMainMenu != null) panelMainMenu.SetActive(false);
