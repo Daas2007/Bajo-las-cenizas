@@ -2,6 +2,7 @@
 
 public class CanvasController : MonoBehaviour
 {
+    //---------------Paneles principales---------------
     [Header("Paneles principales")]
     [SerializeField] GameObject panelMainMenu;
     [SerializeField] GameObject panelPausa;
@@ -9,15 +10,13 @@ public class CanvasController : MonoBehaviour
     [SerializeField] GameObject panelMuerte;
     [SerializeField] GameObject panelTutorial;
     [SerializeField] GameObject panelDialogo;
-    [SerializeField] GameObject panelPuzzleCandado;
-    [SerializeField] GameObject panelPuzzleRompecabezas;
-    [SerializeField] GameObject panelPista;
 
+    //---------------HUD---------------
     [Header("HUD siempre visible")]
     [SerializeField] GameObject panelHUD;
 
     private GameObject panelActivo;
-    private GameObject panelAnterior; // 👈 nuevo: recuerda el panel debajo de Opciones
+    private GameObject panelAnterior; // recuerda el panel debajo de Opciones
 
     void Start()
     {
@@ -26,7 +25,65 @@ public class CanvasController : MonoBehaviour
         MostrarMainMenu(); // arranca en menú principal
     }
 
-    // ---------------- OPCIONES ----------------
+    //---------------MainMenu---------------
+    public void MostrarMainMenu()
+    {
+        ActivarPanel(panelMainMenu, true);
+    }
+
+    public void Jugar()
+    {
+        GameManager gm = GameManager.Instancia;
+        MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
+
+        if (jugador != null && gm != null && gm.spawnInicial != null)
+        {
+            jugador.transform.position = gm.spawnInicial.position;
+            gm.ReiniciarEstado();
+        }
+
+        // cerrar menú principal y activar tutorial
+        CerrarPanelActivo();
+        Time.timeScale = 1f;
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
+        MostrarTutorial();
+    }
+
+    public void CargarPartida()
+    {
+        MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
+        GameManager gm = GameManager.Instancia;
+        if (jugador != null && gm != null)
+        {
+            SistemaGuardar.Cargar(jugador, gm);
+        }
+        CerrarPanelActivo();
+    }
+
+    public void SalirJuego() => Application.Quit();
+
+    //---------------Pausa---------------
+    public void MostrarPausa()
+    {
+        ActivarPanel(panelPausa, true);
+    }
+
+    public void Reanudar()
+    {
+        if (panelActivo == panelPausa)
+        {
+            panelPausa.SetActive(false);
+            panelActivo = null;
+
+            Time.timeScale = 1f;
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+    }
+
+    //---------------Opciones---------------
     public void MostrarOpciones()
     {
         // Guardar el panel que estaba activo antes
@@ -57,100 +114,43 @@ public class CanvasController : MonoBehaviour
         }
     }
 
-    // ---------------- MENÚ PRINCIPAL ----------------
-    public void MostrarMainMenu()
-    {
-        ActivarPanel(panelMainMenu, true);
-    }
-
-    public void Jugar()
-    {
-        GameManager gm = GameManager.Instancia;
-        MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
-
-        if (jugador != null && gm != null && gm.spawnInicial != null)
-        {
-            // Colocar al jugador en el spawn inicial
-            jugador.transform.position = gm.spawnInicial.position;
-
-            // Reiniciar estado del juego
-            gm.ReiniciarEstado();
-        }
-
-        // Cerrar el menú principal
-        if (panelMainMenu != null) panelMainMenu.SetActive(false);
-
-        // Reanudar el tiempo
-        Time.timeScale = 1f;
-
-        // Bloquear cursor para gameplay
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-
-        // Activar HUD
-        if (panelHUD != null) panelHUD.SetActive(true);
-
-        // Activar tutorial
-        CanvasController cc = FindObjectOfType<CanvasController>();
-        if (cc != null)
-        {
-            cc.MostrarTutorial();
-        }
-
-        Debug.Log("✅ Juego iniciado en el checkpoint inicial con tutorial activo.");
-    }
-
-
-
-    public void CargarPartida()
-    {
-        MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
-        GameManager gm = GameManager.Instancia;
-        if (jugador != null && gm != null)
-        {
-            SistemaGuardar.Cargar(jugador, gm);
-        }
-        CerrarPanelActivo();
-    }
-
-    public void SalirJuego() => Application.Quit();
-    //----------------- TUTORIAL----------------------
+    //---------------Tutorial---------------
     public void MostrarTutorial()
     {
-        // Busca el CanvasController y activa el panel de tutorial
-        CanvasController cc = FindObjectOfType<CanvasController>();
-        if (cc != null)
+        DesactivarTodos();
+        panelTutorial.SetActive(true);
+        panelActivo = panelTutorial;
+
+        // Pausar juego y bloquear movimiento
+        Time.timeScale = 0f;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
+        if (jugador != null) jugador.enabled = false;
+    }
+
+    public void CerrarTutorial()
+    {
+        if (panelActivo == panelTutorial)
         {
-            cc.MostrarTutorial(); // llama al método que activa el panel tutorial
+            panelTutorial.SetActive(false);
+            panelActivo = null;
+
+            // Reanudar juego y habilitar movimiento
+            Time.timeScale = 1f;
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+
+            MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
+            if (jugador != null) jugador.enabled = true;
         }
     }
 
+    //---------------Dialogo---------------
+    public void MostrarDialogo() => ActivarPanel(panelDialogo, true);
 
-    // ---------------- MENÚ DE PAUSA ----------------
-    public void MostrarPausa()
-    {
-        ActivarPanel(panelPausa, true);
-    }
-
-    public void Reanudar()
-    {
-        CerrarPanelActivo();
-        Time.timeScale = 1f;
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-    }
-
-    public void SalirAlMenu() => MostrarMainMenu();
-
-    // ---------------- PANTALLA DE MUERTE ----------------
-    public void MostrarPantallaMuerte()
-    {
-        ActivarPanel(panelMuerte, true);
-    }
-
-    public void Reintentar() => CargarPartida();
-
-    // ---------------- CONTROL GENERAL ----------------
+    //---------------Control general---------------
     public void CerrarPanelActivo()
     {
         if (panelActivo != null)
@@ -185,8 +185,5 @@ public class CanvasController : MonoBehaviour
         if (panelMuerte != null) panelMuerte.SetActive(false);
         if (panelTutorial != null) panelTutorial.SetActive(false);
         if (panelDialogo != null) panelDialogo.SetActive(false);
-        if (panelPuzzleCandado != null) panelPuzzleCandado.SetActive(false);
-        if (panelPuzzleRompecabezas != null) panelPuzzleRompecabezas.SetActive(false);
-        if (panelPista != null) panelPista.SetActive(false);
     }
 }
