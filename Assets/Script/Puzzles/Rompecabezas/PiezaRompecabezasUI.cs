@@ -1,21 +1,22 @@
-// PiezaRompecabezasUI.cs
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class PiezaRompecabezasUI : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
 {
+    //---------------Configuración---------------
     [Header("Configuración de la pieza")]
     public RectTransform casillaObjetivo; // slot objetivo dentro de AreaGrid
     public bool puedeRotar = false;
     public int pasoRotacion = 90; // grados por rotación
-    public float distanciaSnap = 40f; // px para hacer snap
-    public float toleranciaRotacion = 12f; // grados de tolerancia
+    public float distanciaSnap = 40f; // tolerancia de distancia
+    public float toleranciaRotacion = 12f; // tolerancia de rotación
 
-    RectTransform rect;
-    Canvas canvasPadre;
-    Vector2 posicionOriginal;
-    bool colocada = false;
+    //---------------Estado interno---------------
+    private RectTransform rect;
+    private Canvas canvasPadre;
+    private Vector2 posicionOriginal;
+    private bool colocada = false;
 
     void Awake()
     {
@@ -24,6 +25,7 @@ public class PiezaRompecabezasUI : MonoBehaviour, IPointerDownHandler, IDragHand
         posicionOriginal = rect.anchoredPosition;
     }
 
+    //---------------Eventos de interacción---------------
     public void OnPointerDown(PointerEventData eventData)
     {
         if (colocada) return;
@@ -48,6 +50,7 @@ public class PiezaRompecabezasUI : MonoBehaviour, IPointerDownHandler, IDragHand
         IntentarSnap();
     }
 
+    //---------------Validación de encaje---------------
     public void IntentarSnap()
     {
         if (casillaObjetivo == null) return;
@@ -64,23 +67,23 @@ public class PiezaRompecabezasUI : MonoBehaviour, IPointerDownHandler, IDragHand
         }
         else
         {
-            // volver a la posición original si no encaja
-            rect.anchoredPosition = posicionOriginal;
+            rect.anchoredPosition = posicionOriginal; // volver si no encaja
         }
     }
 
-    // Llamar desde UI o tecla para rotar 90 grados
+    //---------------Rotación---------------
     public void Rotar90()
     {
         if (!puedeRotar || colocada) return;
         rect.Rotate(0, 0, -pasoRotacion);
     }
 
-    // Activar la pieza faltante cuando el jugador la recoge
+    //---------------Activación especial---------------
     public void ActivarComoFaltante()
     {
         gameObject.SetActive(true);
     }
 
+    //---------------Estado---------------
     public bool EstaColocada() => colocada;
 }

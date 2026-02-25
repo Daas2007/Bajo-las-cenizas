@@ -1,4 +1,3 @@
-// GestorRompecabezas.cs
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -8,21 +7,23 @@ public class GestorRompecabezas : MonoBehaviour
 {
     public static GestorRompecabezas Instancia;
 
+    //---------------UI---------------
     [Header("UI")]
-    public GameObject panelRompecabezas; // PanelRompecabezas
-    public RectTransform areaGrid; // AreaGrid
-    public GameObject prefabPieza; // PrefabPieza
-    public TMP_Text textoMensaje; // TextoMensaje
+    [SerializeField] private GameObject panelRompecabezas; // Panel principal del puzzle
+    [SerializeField] private RectTransform areaGrid;       // Contenedor de slots
+    [SerializeField] private GameObject prefabPieza;       // Prefab de cada pieza
+    [SerializeField] private TMP_Text textoMensaje;        // Texto de feedback
 
+    //---------------Configuración---------------
     [Header("Configuración del rompecabezas")]
-    public Sprite[] spritesPiezas; // sprites por pieza (orden)
-    public int cantidadPiezas = 9;
-    public int cantidadRotables = 3; // cuántas piezas serán rotables
-    public int indicePiezaFaltante = 4; // índice de la pieza que falta (0..n-1)
+    [SerializeField] private Sprite[] spritesPiezas; // sprites por pieza (orden)
+    [SerializeField] private int cantidadPiezas = 9;
+    [SerializeField] private int cantidadRotables = 3; // cuántas piezas serán rotables
+    [SerializeField] private int indicePiezaFaltante = 4; // índice de la pieza que falta (0..n-1)
 
-    List<PiezaRompecabezasUI> listaPiezas = new List<PiezaRompecabezasUI>();
-    int contadorColocadas = 0;
-    bool puzzleActivo = false;
+    //---------------Estado interno---------------
+    private List<PiezaRompecabezasUI> listaPiezas = new List<PiezaRompecabezasUI>();
+    private bool puzzleActivo = false;
 
     void Awake()
     {
@@ -30,18 +31,20 @@ public class GestorRompecabezas : MonoBehaviour
         else Destroy(gameObject);
     }
 
+    //---------------Inicio puzzle---------------
     public void IniciarPuzzle()
     {
         ControladorPuzzle.Instancia.EntrarModoPuzzle();
         panelRompecabezas.SetActive(true);
         puzzleActivo = true;
-        contadorColocadas = 0;
+
         LimpiarGrid();
         GenerarPiezas();
         SeleccionarRotablesAleatorias();
         MostrarMensaje("Resuelve el rompecabezas");
     }
 
+    //---------------Salir puzzle---------------
     public void SalirPuzzle()
     {
         panelRompecabezas.SetActive(false);
@@ -49,13 +52,14 @@ public class GestorRompecabezas : MonoBehaviour
         ControladorPuzzle.Instancia.SalirModoPuzzle();
     }
 
-    void LimpiarGrid()
+    //---------------Generación piezas---------------
+    private void LimpiarGrid()
     {
         foreach (Transform t in areaGrid) Destroy(t.gameObject);
         listaPiezas.Clear();
     }
 
-    void GenerarPiezas()
+    private void GenerarPiezas()
     {
         for (int i = 0; i < cantidadPiezas; i++)
         {
@@ -63,7 +67,7 @@ public class GestorRompecabezas : MonoBehaviour
             GameObject casilla = new GameObject("Casilla_" + i, typeof(RectTransform));
             casilla.transform.SetParent(areaGrid, false);
             RectTransform rt = casilla.GetComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(100, 100); // ajustar según UI
+            rt.sizeDelta = new Vector2(100, 100);
 
             // Instanciar pieza
             GameObject p = Instantiate(prefabPieza, areaGrid);
@@ -76,17 +80,14 @@ public class GestorRompecabezas : MonoBehaviour
             Image img = p.GetComponent<Image>();
             if (img != null && i < spritesPiezas.Length) img.sprite = spritesPiezas[i];
 
-            // Si es la pieza faltante, mantenerla desactivada hasta recogerla
             if (i == indicePiezaFaltante)
-            {
                 p.SetActive(false);
-            }
 
             listaPiezas.Add(piezaUI);
         }
     }
 
-    void SeleccionarRotablesAleatorias()
+    private void SeleccionarRotablesAleatorias()
     {
         List<int> indices = new List<int>();
         for (int i = 0; i < listaPiezas.Count; i++)
@@ -101,28 +102,36 @@ public class GestorRompecabezas : MonoBehaviour
             PiezaRompecabezasUI p = listaPiezas[indicePieza];
             p.puedeRotar = true;
 
-            // Rotar aleatoriamente en múltiplos de 90 para desordenar
             int pasos = Random.Range(1, 4);
             p.GetComponent<RectTransform>().Rotate(0, 0, -90 * pasos);
         }
     }
 
+    //---------------Validación puzzle---------------
     public void PiezaColocada()
     {
-        contadorColocadas++;
-        if (contadorColocadas >= cantidadPiezas - 1) // -1 porque falta una pieza
+        bool todasCorrectas = true;
+        foreach (var pieza in listaPiezas)
         {
-            AlCompletarPuzzle();
+            if (!pieza.EstaColocada())
+            {
+                todasCorrectas = false;
+                break;
+            }
         }
+
+        if (todasCorrectas)
+            AlCompletarPuzzle();
     }
 
-    void AlCompletarPuzzle()
+    private void AlCompletarPuzzle()
     {
         MostrarMensaje("Rompecabezas completado");
         // Aquí puedes desbloquear algo o dar un objeto
         Invoke(nameof(SalirPuzzle), 1.2f);
     }
 
+    //---------------Activar pieza faltante---------------
     public void ActivarPiezaFaltante()
     {
         if (indicePiezaFaltante >= 0 && indicePiezaFaltante < listaPiezas.Count)
@@ -132,7 +141,8 @@ public class GestorRompecabezas : MonoBehaviour
         }
     }
 
-    void MostrarMensaje(string msg)
+    //---------------Mensajes---------------
+    private void MostrarMensaje(string msg)
     {
         if (textoMensaje != null)
         {
@@ -142,18 +152,15 @@ public class GestorRompecabezas : MonoBehaviour
         }
     }
 
-    void LimpiarMensaje()
+    private void LimpiarMensaje()
     {
         if (textoMensaje != null) textoMensaje.text = "";
     }
 
+    //---------------Update---------------
     void Update()
     {
-        // Cerrar con ESC
         if (puzzleActivo && Input.GetKeyDown(KeyCode.Escape))
-        {
             SalirPuzzle();
-        }
     }
 }
-

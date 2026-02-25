@@ -1,33 +1,35 @@
-// ControladorPuzzle.cs
 using UnityEngine;
 
 public class ControladorPuzzle : MonoBehaviour
 {
     public static ControladorPuzzle Instancia;
 
+    //---------------Referencias---------------
     [Header("Referencias")]
-    public MonoBehaviour scriptMovimientoJugador; // arrastra aquí tu script de movimiento
-    public MonoBehaviour scriptControlCamara; // arrastra aquí tu script de control de cámara
+    public MonoBehaviour scriptMovimientoJugador; // arrastra tu script de movimiento
+    public MonoBehaviour scriptControlCamara;     // arrastra tu script de cámara
 
-    bool enPuzzle = false;
-
+    private bool enPuzzle = false;
 
     void Awake()
     {
         if (Instancia == null) Instancia = this;
         else Destroy(gameObject);
     }
+
     void Start()
     {
-        if (ControladorPuzzle.Instancia != null)
-            ControladorPuzzle.Instancia.SalirModoPuzzle();
+        if (Instancia != null)
+            Instancia.SalirModoPuzzle();
     }
 
+    //---------------Entrar puzzle---------------
     public void EntrarModoPuzzle()
     {
         if (enPuzzle) return;
         enPuzzle = true;
-        Debug.Log("Se activo puzzle");
+        Debug.Log("Puzzle activado");
+
         if (scriptMovimientoJugador != null) scriptMovimientoJugador.enabled = false;
         if (scriptControlCamara != null) scriptControlCamara.enabled = false;
 
@@ -35,6 +37,7 @@ public class ControladorPuzzle : MonoBehaviour
         Cursor.visible = true;
     }
 
+    //---------------Salir puzzle---------------
     public void SalirModoPuzzle()
     {
         if (!enPuzzle) return;
