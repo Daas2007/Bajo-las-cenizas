@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class CanvasController : MonoBehaviour
+public class CanvasController: MonoBehaviour
 {
     //---------------Paneles principales---------------
     [Header("Paneles principales")]
@@ -8,7 +8,6 @@ public class CanvasController : MonoBehaviour
     [SerializeField] GameObject panelPausa;
     [SerializeField] GameObject panelOpciones;
     [SerializeField] GameObject panelMuerte;
-    [SerializeField] GameObject panelTutorial;
     [SerializeField] GameObject panelDialogo;
 
     //---------------HUD---------------
@@ -24,6 +23,7 @@ public class CanvasController : MonoBehaviour
         if (panelHUD != null) panelHUD.SetActive(true);
         MostrarMainMenu(); // arranca en menú principal
     }
+
     void Update()
     {
         //---------------Control ESC---------------
@@ -46,11 +46,13 @@ public class CanvasController : MonoBehaviour
             }
         }
     }
+
     //---------------MainMenu---------------
     public void MostrarMainMenu()
     {
         ActivarPanel(panelMainMenu, true);
     }
+
     public void Jugar()
     {
         GameManager gm = GameManager.Instancia;
@@ -67,8 +69,10 @@ public class CanvasController : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
-        MostrarTutorial();
+        // 🔧 Ya no mostramos tutorial bloqueante aquí.
+        // El nuevo TutorialInteractivo se encarga de mostrar instrucciones en HUD.
     }
+
     public void CargarPartidaDesdeMenu()
     {
         MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
@@ -76,17 +80,12 @@ public class CanvasController : MonoBehaviour
 
         if (jugador != null && gm != null)
         {
-            // Reinicia estado general
             gm.ReiniciarEstado();
-
-            // Carga último guardado
             SistemaGuardar.Cargar(jugador, gm);
 
-            // 🔧 Si el jugador no tiene linterna, aseguramos que el pickup esté activo
             if (!gm.tieneLinterna && gm.linternaPickup != null)
                 gm.linternaPickup.SetActive(true);
 
-            // Reactivar movimiento y cámara
             jugador.enabled = true;
             Camera cam = jugador.GetComponentInChildren<Camera>();
             if (cam != null) cam.enabled = true;
@@ -94,19 +93,21 @@ public class CanvasController : MonoBehaviour
 
         CerrarPanelActivo();
 
-        // 🔧 Ajustar tiempo y cursor para volver al juego
         Time.timeScale = 1f;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
         Debug.Log("📂 Partida cargada desde menú principal.");
     }
+
     public void SalirJuego() => Application.Quit();
+
     //---------------Pausa---------------
     public void MostrarPausa()
     {
         ActivarPanel(panelPausa, true);
     }
+
     public void Reanudar()
     {
         panelPausa.SetActive(false);
@@ -115,6 +116,7 @@ public class CanvasController : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
+
     public void SalirAlMenuDesdePausa()
     {
         if (panelPausa != null) panelPausa.SetActive(false);
@@ -129,6 +131,7 @@ public class CanvasController : MonoBehaviour
 
         Debug.Log("✅ Volviendo al menú principal desde pausa.");
     }
+
     //---------------Opciones---------------
     public void MostrarOpciones()
     {
@@ -141,6 +144,7 @@ public class CanvasController : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
+
     public void CerrarOpciones()
     {
         if (panelActivo == panelOpciones)
@@ -163,6 +167,7 @@ public class CanvasController : MonoBehaviour
             }
         }
     }
+
     //---------------Opciones: Guardar/Cargar---------------
     public void GuardarPartida()
     {
@@ -175,6 +180,7 @@ public class CanvasController : MonoBehaviour
             Debug.Log("💾 Partida guardada desde menú de opciones.");
         }
     }
+
     public void CargarPartida()
     {
         MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
@@ -186,6 +192,7 @@ public class CanvasController : MonoBehaviour
             Debug.Log("📂 Último punto de guardado cargado desde menú de opciones.");
         }
     }
+
     //---------------Pantalla de Muerte---------------
     public void MostrarPantallaMuerte()
     {
@@ -193,12 +200,12 @@ public class CanvasController : MonoBehaviour
         if (panelMuerte != null) panelMuerte.SetActive(true);
         panelActivo = panelMuerte;
 
-        // Disparar el fade desde PantallaDeMuerte
         PantallaDeMuerte pm = panelMuerte.GetComponent<PantallaDeMuerte>();
         if (pm != null) pm.ActivarPantallaMuerte();
 
         Debug.Log("☠️ Pantalla de muerte activada.");
     }
+
     public void ReintentarDesdeMuerte()
     {
         if (panelMuerte != null) panelMuerte.SetActive(false);
@@ -213,12 +220,10 @@ public class CanvasController : MonoBehaviour
             gm.ReiniciarEstado();
             SistemaGuardar.Cargar(jugador, gm);
 
-            // 🔧 Si el jugador no tiene linterna, aseguramos que el pickup esté activo
             if (!gm.tieneLinterna && gm.linternaPickup != null)
                 gm.linternaPickup.SetActive(true);
         }
 
-        // Reactivar movimiento y cámara
         if (jugador != null) jugador.enabled = true;
         Camera cam = jugador.GetComponentInChildren<Camera>();
         if (cam != null) cam.enabled = true;
@@ -229,6 +234,7 @@ public class CanvasController : MonoBehaviour
 
         Debug.Log("🔄 Reintentando partida desde pantalla de muerte.");
     }
+
     public void SalirAlMenuDesdeMuerte()
     {
         if (panelMuerte != null) panelMuerte.SetActive(false);
@@ -237,7 +243,6 @@ public class CanvasController : MonoBehaviour
         if (panelMainMenu != null) panelMainMenu.SetActive(true);
         panelActivo = panelMainMenu;
 
-        // 🔧 Cambiar a 1 para evitar bug
         Time.timeScale = 1f;
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
@@ -245,37 +250,9 @@ public class CanvasController : MonoBehaviour
         Debug.Log("✅ Volviendo al menú principal desde pantalla de muerte.");
     }
 
-    //---------------Tutorial---------------
-    public void MostrarTutorial()
-    {
-        DesactivarTodos();
-        panelTutorial.SetActive(true);
-        panelActivo = panelTutorial;
-
-        Time.timeScale = 0f;
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
-
-        MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
-        if (jugador != null) jugador.enabled = false;
-    }
-    public void CerrarTutorial()
-    {
-        if (panelActivo == panelTutorial)
-        {
-            panelTutorial.SetActive(false);
-            panelActivo = null;
-
-            Time.timeScale = 1f;
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-
-            MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
-            if (jugador != null) jugador.enabled = true;
-        }
-    }
     //---------------Dialogo---------------
     public void MostrarDialogo() => ActivarPanel(panelDialogo, true);
+
     //---------------Control general---------------
     public void CerrarPanelActivo()
     {
@@ -285,6 +262,7 @@ public class CanvasController : MonoBehaviour
             panelActivo = null;
         }
     }
+
     private void ActivarPanel(GameObject panel, bool pausarJuego)
     {
         DesactivarTodos();
@@ -301,13 +279,14 @@ public class CanvasController : MonoBehaviour
             }
         }
     }
+
     private void DesactivarTodos()
     {
         if (panelMainMenu != null) panelMainMenu.SetActive(false);
         if (panelPausa != null) panelPausa.SetActive(false);
         if (panelOpciones != null) panelOpciones.SetActive(false);
         if (panelMuerte != null) panelMuerte.SetActive(false);
-        if (panelTutorial != null) panelTutorial.SetActive(false);
         if (panelDialogo != null) panelDialogo.SetActive(false);
+        // 🔧 Ya no desactivamos tutorial aquí, porque ahora es parte del HUD interactivo.
     }
 }

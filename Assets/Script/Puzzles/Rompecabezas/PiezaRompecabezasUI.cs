@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class PiezaRompecabezasUI : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
+public class PiezaRompecabezasUI : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     //---------------Configuración---------------
     [Header("Configuración de la pieza")]
@@ -18,11 +18,11 @@ public class PiezaRompecabezasUI : MonoBehaviour, IPointerDownHandler, IDragHand
     private Vector2 posicionOriginal;
     private bool colocada = false;
 
+    //---------------Inicio---------------
     void Awake()
     {
         rect = GetComponent<RectTransform>();
         canvasPadre = GetComponentInParent<Canvas>();
-        posicionOriginal = rect.anchoredPosition;
     }
 
     //---------------Eventos de interacción---------------
@@ -32,26 +32,26 @@ public class PiezaRompecabezasUI : MonoBehaviour, IPointerDownHandler, IDragHand
         rect.SetAsLastSibling(); // traer al frente mientras arrastra
     }
 
+    public void OnBeginDrag(PointerEventData eventData)
+    {
+        if (colocada) return;
+        posicionOriginal = rect.anchoredPosition; // guardar posición actual antes de arrastrar
+    }
+
     public void OnDrag(PointerEventData eventData)
     {
         if (colocada) return;
-        Vector2 puntoLocal;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            canvasPadre.transform as RectTransform,
-            eventData.position,
-            canvasPadre.worldCamera,
-            out puntoLocal);
-        rect.anchoredPosition = puntoLocal;
+        rect.anchoredPosition += eventData.delta / canvasPadre.scaleFactor;
     }
 
-    public void OnPointerUp(PointerEventData eventData)
+    public void OnEndDrag(PointerEventData eventData)
     {
         if (colocada) return;
         IntentarSnap();
     }
 
     //---------------Validación de encaje---------------
-    public void IntentarSnap()
+    private void IntentarSnap()
     {
         if (casillaObjetivo == null) return;
 
@@ -67,7 +67,7 @@ public class PiezaRompecabezasUI : MonoBehaviour, IPointerDownHandler, IDragHand
         }
         else
         {
-            rect.anchoredPosition = posicionOriginal; // volver si no encaja
+            rect.anchoredPosition = posicionOriginal; // volver a la posición previa
         }
     }
 

@@ -1,27 +1,65 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class PapelInteractuable : MonoBehaviour, IInteractuable
 {
-    //---------------Opcional---------------
     [Header("Opcional")]
-    [Tooltip("Sonido que se reproducirá al abrir el puzzle")]
+    [Tooltip("Sonido que se reproducirÃ¡ al abrir el puzzle")]
     public AudioClip sonidoAbrir;
 
-    [Tooltip("Si está en true, el objeto se destruirá al interactuar; si está en false, solo se ocultará")]
-    public bool desaparecerAlInteractuar = false;
+    [Header("Referencias")]
+    [Tooltip("Panel del puzzle que se abrirÃ¡")]
+    public GameObject panelPuzzle;
 
-    //---------------Interacción---------------
+    [Tooltip("Puertas del armario que se activarÃ¡n al completar el puzzle")]
+    public GameObject puertaArmarioIzquierda;
+    public GameObject puertaArmarioDerecha;
+
+    [Tooltip("Tag que se asignarÃ¡ a las puertas para poder interactuar")]
+    public string tagInteraccionPuerta = "Interaccion";
+
+    private bool puzzleCompletado = false;
+
     public void Interactuar()
     {
+        if (puzzleCompletado) return;
+
         if (sonidoAbrir != null)
             AudioSource.PlayClipAtPoint(sonidoAbrir, transform.position);
 
         if (GestorRompecabezas.Instancia != null)
             GestorRompecabezas.Instancia.IniciarPuzzle();
 
-        if (desaparecerAlInteractuar)
-            Destroy(gameObject);
-        else
-            gameObject.SetActive(false);
+        // âœ… Mostrar puzzle con PuzzleController
+        PuzzleController pc = FindObjectOfType<PuzzleController>();
+        if (pc != null)
+            pc.MostrarPanelPuzzle();
+    }
+
+    public void PuzzleCompletado()
+    {
+        puzzleCompletado = true;
+
+        // âœ… Cerrar puzzle con PuzzleController
+        PuzzleController pc = FindObjectOfType<PuzzleController>();
+        if (pc != null)
+            pc.CerrarPanelPuzzle();
+
+        // Ocultar el papel permanentemente
+        gameObject.SetActive(false);
+
+        // Activar las dos puertas del armario
+        if (puertaArmarioIzquierda != null)
+        {
+            puertaArmarioIzquierda.SetActive(true);
+            puertaArmarioIzquierda.tag = tagInteraccionPuerta;
+        }
+
+        if (puertaArmarioDerecha != null)
+        {
+            puertaArmarioDerecha.SetActive(true);
+            puertaArmarioDerecha.tag = tagInteraccionPuerta;
+        }
+
+        Debug.Log("âœ… Puzzle completado, puertas del armario activadas.");
     }
 }
