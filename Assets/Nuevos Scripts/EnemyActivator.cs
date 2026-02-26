@@ -6,7 +6,7 @@ public class EnemyActivator : MonoBehaviour
 
     private void Awake()
     {
-       
+       EnemigoVentana EV=(GetComponent<EnemigoVentana>());
     }
     void Start()
     {
