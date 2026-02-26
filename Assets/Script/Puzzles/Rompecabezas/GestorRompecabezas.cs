@@ -1,7 +1,7 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using System.Collections.Generic;
 
 public class GestorRompecabezas : MonoBehaviour
 {
@@ -11,15 +11,15 @@ public class GestorRompecabezas : MonoBehaviour
     [Header("UI")]
     [SerializeField] private GameObject panelRompecabezas; // Panel principal del puzzle
     [SerializeField] private RectTransform areaGrid;       // Contenedor de slots
-    [SerializeField] private GameObject prefabPieza;       // Prefab de cada pieza
+    [SerializeField] private GameObject prefabPieza;       // Prefab de cada pieza (Image + CanvasGroup + PiezaRompecabezasUI)
     [SerializeField] private TMP_Text textoMensaje;        // Texto de feedback
 
     //---------------Configuración---------------
     [Header("Configuración del rompecabezas")]
-    [SerializeField] private Sprite[] spritesPiezas; // sprites por pieza (orden)
+    [SerializeField] private Sprite[] spritesPiezas;       // Sprites de las piezas (arrastrar desde Assets, no desde Hierarchy)
     [SerializeField] private int cantidadPiezas = 9;
-    [SerializeField] private int cantidadRotables = 3; // cuántas piezas serán rotables
-    [SerializeField] private int indicePiezaFaltante = 4; // índice de la pieza que falta (0..n-1)
+    [SerializeField] private int cantidadRotables = 3;     // cuántas piezas serán rotables
+    [SerializeField] private int indicePiezaFaltante = 4;  // índice de la pieza que falta (0..n-1)
 
     //---------------Estado interno---------------
     private List<PiezaRompecabezasUI> listaPiezas = new List<PiezaRompecabezasUI>();
@@ -35,12 +35,14 @@ public class GestorRompecabezas : MonoBehaviour
     public void IniciarPuzzle()
     {
         ControladorPuzzle.Instancia.EntrarModoPuzzle();
+
         panelRompecabezas.SetActive(true);
         puzzleActivo = true;
 
         LimpiarGrid();
         GenerarPiezas();
         SeleccionarRotablesAleatorias();
+
         MostrarMensaje("Resuelve el rompecabezas");
     }
 
@@ -49,6 +51,7 @@ public class GestorRompecabezas : MonoBehaviour
     {
         panelRompecabezas.SetActive(false);
         puzzleActivo = false;
+
         ControladorPuzzle.Instancia.SalirModoPuzzle();
     }
 
@@ -63,23 +66,27 @@ public class GestorRompecabezas : MonoBehaviour
     {
         for (int i = 0; i < cantidadPiezas; i++)
         {
-            // Crear casilla (slot)
+            // Crear casilla (slot objetivo)
             GameObject casilla = new GameObject("Casilla_" + i, typeof(RectTransform));
             casilla.transform.SetParent(areaGrid, false);
             RectTransform rt = casilla.GetComponent<RectTransform>();
             rt.sizeDelta = new Vector2(100, 100);
 
-            // Instanciar pieza
+            // Instanciar pieza desde prefab
             GameObject p = Instantiate(prefabPieza, areaGrid);
             p.name = "Pieza_" + i;
+
             PiezaRompecabezasUI piezaUI = p.GetComponent<PiezaRompecabezasUI>();
             piezaUI.casillaObjetivo = rt;
             piezaUI.distanciaSnap = 40f;
             piezaUI.toleranciaRotacion = 12f;
 
+            // Asignar sprite correcto
             Image img = p.GetComponent<Image>();
-            if (img != null && i < spritesPiezas.Length) img.sprite = spritesPiezas[i];
+            if (img != null && i < spritesPiezas.Length)
+                img.sprite = spritesPiezas[i];
 
+            // Desactivar pieza faltante
             if (i == indicePiezaFaltante)
                 p.SetActive(false);
 
@@ -127,7 +134,6 @@ public class GestorRompecabezas : MonoBehaviour
     private void AlCompletarPuzzle()
     {
         MostrarMensaje("Rompecabezas completado");
-        // Aquí puedes desbloquear algo o dar un objeto
         Invoke(nameof(SalirPuzzle), 1.2f);
     }
 
