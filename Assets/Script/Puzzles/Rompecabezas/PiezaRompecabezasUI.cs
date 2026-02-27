@@ -2,88 +2,62 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class PiezaRompecabezasUI : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
+public class PiezaRompecabezasUI : MonoBehaviour,
+    IPointerDownHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    //---------------Configuración---------------
-    [Header("Configuración de la pieza")]
-    public RectTransform casillaObjetivo; // slot objetivo dentro de AreaGrid
+    public RectTransform casillaObjetivo;
+    public float distanciaSnap = 40f;
+    public float toleranciaRotacion = 12f;
     public bool puedeRotar = false;
-    public int pasoRotacion = 90; // grados por rotación
-    public float distanciaSnap = 40f; // tolerancia de distancia
-    public float toleranciaRotacion = 12f; // tolerancia de rotación
 
-    //---------------Estado interno---------------
-    private RectTransform rect;
-    private Canvas canvasPadre;
-    private Vector2 posicionOriginal;
-    private bool colocada = false;
+    private RectTransform rectTransform;
+    private CanvasGroup canvasGroup;
+    private Vector2 posicionInicial;
+    private Quaternion rotacionInicial;
 
-    //---------------Inicio---------------
     void Awake()
     {
-        rect = GetComponent<RectTransform>();
-        canvasPadre = GetComponentInParent<Canvas>();
+        rectTransform = GetComponent<RectTransform>();
+        canvasGroup = GetComponent<CanvasGroup>();
+        posicionInicial = rectTransform.anchoredPosition;
+        rotacionInicial = rectTransform.rotation;
     }
 
-    //---------------Eventos de interacción---------------
-    public void OnPointerDown(PointerEventData eventData)
-    {
-        if (colocada) return;
-        rect.SetAsLastSibling(); // traer al frente mientras arrastra
-    }
+    public void OnPointerDown(PointerEventData eventData) { }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        if (colocada) return;
-        posicionOriginal = rect.anchoredPosition; // guardar posición actual antes de arrastrar
+        canvasGroup.alpha = 0.6f;
+        canvasGroup.blocksRaycasts = false;
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        if (colocada) return;
-        rect.anchoredPosition += eventData.delta / canvasPadre.scaleFactor;
+        rectTransform.anchoredPosition += eventData.delta / rectTransform.lossyScale.x;
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        if (colocada) return;
-        IntentarSnap();
-    }
+        canvasGroup.alpha = 1f;
+        canvasGroup.blocksRaycasts = true;
 
-    //---------------Validación de encaje---------------
-    private void IntentarSnap()
-    {
-        if (casillaObjetivo == null) return;
-
-        float distancia = Vector2.Distance(rect.anchoredPosition, casillaObjetivo.anchoredPosition);
-        float diferenciaAngulo = Mathf.Abs(Mathf.DeltaAngle(rect.eulerAngles.z, casillaObjetivo.eulerAngles.z));
-
-        if (distancia <= distanciaSnap && diferenciaAngulo <= toleranciaRotacion)
+        if (Vector2.Distance(rectTransform.anchoredPosition, casillaObjetivo.anchoredPosition) <= distanciaSnap &&
+            Mathf.Abs(Quaternion.Angle(rectTransform.rotation, casillaObjetivo.rotation)) <= toleranciaRotacion)
         {
-            rect.anchoredPosition = casillaObjetivo.anchoredPosition;
-            rect.eulerAngles = new Vector3(0, 0, casillaObjetivo.eulerAngles.z);
-            colocada = true;
+            rectTransform.anchoredPosition = casillaObjetivo.anchoredPosition;
+            rectTransform.rotation = casillaObjetivo.rotation;
             GestorRompecabezas.Instancia.PiezaColocada();
         }
         else
         {
-            rect.anchoredPosition = posicionOriginal; // volver a la posición previa
+            rectTransform.anchoredPosition = posicionInicial;
+            rectTransform.rotation = rotacionInicial;
         }
     }
 
-    //---------------Rotación---------------
-    public void Rotar90()
+    public bool EstaColocada()
     {
-        if (!puedeRotar || colocada) return;
-        rect.Rotate(0, 0, -pasoRotacion);
+        return Vector2.Distance(rectTransform.anchoredPosition, casillaObjetivo.anchoredPosition) <= distanciaSnap &&
+               Mathf.Abs(Quaternion.Angle(rectTransform.rotation, casillaObjetivo.rotation)) <= toleranciaRotacion;
     }
-
-    //---------------Activación especial---------------
-    public void ActivarComoFaltante()
-    {
-        gameObject.SetActive(true);
-    }
-
-    //---------------Estado---------------
-    public bool EstaColocada() => colocada;
 }

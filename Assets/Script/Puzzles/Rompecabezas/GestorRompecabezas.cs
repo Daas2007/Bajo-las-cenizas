@@ -32,19 +32,25 @@ public class GestorRompecabezas : MonoBehaviour
     }
 
     //---------------Inicio puzzle---------------
+    private bool puzzleGenerado = false;
+
     public void IniciarPuzzle()
     {
         ControladorPuzzle.Instancia.EntrarModoPuzzle();
-
         panelRompecabezas.SetActive(true);
         puzzleActivo = true;
 
-        LimpiarGrid();
-        GenerarPiezas();
-        SeleccionarRotablesAleatorias();
+        if (!puzzleGenerado)
+        {
+            LimpiarGrid();
+            GenerarPiezas();
+            SeleccionarRotablesAleatorias();
+            puzzleGenerado = true;
+        }
 
         MostrarMensaje("Resuelve el rompecabezas");
     }
+
 
     //---------------Salir puzzle---------------
     public void SalirPuzzle()

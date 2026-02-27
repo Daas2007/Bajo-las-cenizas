@@ -9,11 +9,6 @@ public class TutorialInteractivo : MonoBehaviour
     [SerializeField] private GameObject panelTutorial;
     [SerializeField] private TMP_Text textoTutorial;
 
-    //---------------Imágenes especiales---------------
-    [Header("Imágenes especiales")]
-    [SerializeField] private Image imagenGuardar;
-    [SerializeField] private Image imagenCargar;
-
     //---------------Pasos del tutorial---------------
     [Header("Pasos del tutorial")]
     [SerializeField]
@@ -22,15 +17,7 @@ public class TutorialInteractivo : MonoBehaviour
         "Presiona SHIFT mientras te mueves para correr",
         "Presiona E para interactuar",
         "Presiona F para encender la linterna",
-        "Presiona ESC para activar el menu de pausa",
-        "Usar \"Simbolo de guardado\" para guardar partida",
-        "Usa \"simbolo de cargado de partida\" para cargar el punto de guardado"
     };
-
-    //---------------Índices de pasos especiales---------------
-    [Header("Índices de pasos especiales")]
-    [SerializeField] private int pasoImagenGuardar = 5;
-    [SerializeField] private int pasoImagenCargar = 6;
 
     //---------------Estado interno---------------
     private int pasoActual = 0;
@@ -47,8 +34,6 @@ public class TutorialInteractivo : MonoBehaviour
     void Start()
     {
         if (panelTutorial != null) panelTutorial.SetActive(true);
-        if (imagenGuardar != null) imagenGuardar.gameObject.SetActive(false);
-        if (imagenCargar != null) imagenCargar.gameObject.SetActive(false);
         MostrarPaso();
     }
 
@@ -100,27 +85,6 @@ public class TutorialInteractivo : MonoBehaviour
                     SiguientePaso();
                 }
                 break;
-
-            case 4: // ESC
-                if (Input.GetKeyDown(KeyCode.Escape))
-                {
-                    pasoActual = pasoImagenGuardar;
-                    MostrarPaso();
-
-                    // Después de 3 segundos → pasar al paso de cargar
-                    EsperarYAccion(3f, () =>
-                    {
-                        pasoActual = pasoImagenCargar;
-                        MostrarPaso();
-
-                        // Después de otros 3 segundos → cerrar tutorial
-                        EsperarYAccion(3f, () =>
-                        {
-                            CompletarTutorial();
-                        });
-                    });
-                }
-                break;
         }
     }
 
@@ -131,12 +95,6 @@ public class TutorialInteractivo : MonoBehaviour
         {
             textoTutorial.text = pasos[pasoActual];
         }
-
-        if (imagenGuardar != null)
-            imagenGuardar.gameObject.SetActive(pasoActual == pasoImagenGuardar);
-
-        if (imagenCargar != null)
-            imagenCargar.gameObject.SetActive(pasoActual == pasoImagenCargar);
     }
 
     //---------------Siguiente paso---------------
@@ -172,10 +130,6 @@ public class TutorialInteractivo : MonoBehaviour
     {
         tutorialActivo = false;
         if (panelTutorial != null) panelTutorial.SetActive(false);
-
-        if (imagenGuardar != null) imagenGuardar.gameObject.SetActive(false);
-        if (imagenCargar != null) imagenCargar.gameObject.SetActive(false);
-
         Debug.Log("✅ Tutorial completado y panel apagado.");
     }
 }
