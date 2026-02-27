@@ -33,7 +33,6 @@ public class GestorRompecabezas : MonoBehaviour
 
     //---------------Inicio puzzle---------------
     private bool puzzleGenerado = false;
-
     public void IniciarPuzzle()
     {
         ControladorPuzzle.Instancia.EntrarModoPuzzle();
@@ -51,7 +50,6 @@ public class GestorRompecabezas : MonoBehaviour
         MostrarMensaje("Resuelve el rompecabezas");
     }
 
-
     //---------------Salir puzzle---------------
     public void SalirPuzzle()
     {
@@ -68,6 +66,8 @@ public class GestorRompecabezas : MonoBehaviour
         listaPiezas.Clear();
     }
 
+    [SerializeField] private RectTransform panelPiezas; // Nuevo panel para piezas
+
     private void GenerarPiezas()
     {
         for (int i = 0; i < cantidadPiezas; i++)
@@ -78,8 +78,8 @@ public class GestorRompecabezas : MonoBehaviour
             RectTransform rt = casilla.GetComponent<RectTransform>();
             rt.sizeDelta = new Vector2(100, 100);
 
-            // Instanciar pieza desde prefab
-            GameObject p = Instantiate(prefabPieza, areaGrid);
+            // Instanciar pieza en panel de piezas (NO en areaGrid)
+            GameObject p = Instantiate(prefabPieza, panelPiezas);
             p.name = "Pieza_" + i;
 
             PiezaRompecabezasUI piezaUI = p.GetComponent<PiezaRompecabezasUI>();
@@ -136,7 +136,6 @@ public class GestorRompecabezas : MonoBehaviour
         if (todasCorrectas)
             AlCompletarPuzzle();
     }
-
     private void AlCompletarPuzzle()
     {
         MostrarMensaje("Rompecabezas completado");
@@ -163,7 +162,6 @@ public class GestorRompecabezas : MonoBehaviour
             Invoke(nameof(LimpiarMensaje), 3f);
         }
     }
-
     private void LimpiarMensaje()
     {
         if (textoMensaje != null) textoMensaje.text = "";

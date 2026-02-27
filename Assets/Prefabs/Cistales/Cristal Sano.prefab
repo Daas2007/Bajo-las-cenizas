@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 5420447263235239656}
   - component: {fileID: 6545781477836238806}
   - component: {fileID: 4245601512433280042}
+  - component: {fileID: -4678994698313788632}
   m_Layer: 0
   m_Name: Cristal Sano
   m_TagString: Untagged
@@ -100,4 +101,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab38ca6eddeeb234cba3e74af1dfd3a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  escenaHabitacionInicial: HabitacionInicial
+  idHabitacion: 
+--- !u!65 &-4678994698313788632
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6282170565116065448}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.040552016, y: 0.019999996, z: 0.052776914}
+  m_Center: {x: -0.00079050474, y: 0, z: 0.000664397}
