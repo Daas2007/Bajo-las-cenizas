@@ -13,6 +13,9 @@ public class InteraccionJugador : MonoBehaviour
     [SerializeField] TMP_Text textoInteraccion;
     [SerializeField] GameObject dialogoCanvas;
 
+    [Header("Referencias")]
+    [SerializeField] private Transform manoIzquierda; // Empty object para la mano
+
     private IInteractuable objetoActual;
     private Transform objetoTransform;
 
@@ -24,13 +27,24 @@ public class InteraccionJugador : MonoBehaviour
         {
             if (!panelInteraccion.activeSelf) panelInteraccion.SetActive(true);
 
-            textoInteraccion.text = objetoTransform.CompareTag("Pickup")
-                ? "Presiona [E] para agarrar"
-                : "Presiona [E] para interactuar";
+            // Mensajes según el tag
+            if (objetoTransform.CompareTag("Pickup") || objetoTransform.CompareTag("Agarrar"))
+                textoInteraccion.text = "Presiona [E] para agarrar";
+            else if (objetoTransform.CompareTag("Slot") || objetoTransform.CompareTag("Colocar"))
+                textoInteraccion.text = "Presiona [E] para colocar";
+            else
+                textoInteraccion.text = "Presiona [E] para interactuar";
 
             if (Input.GetKeyDown(KeyCode.E))
             {
-                objetoActual.Interactuar();
+                if (objetoTransform.CompareTag("Colocar"))
+                {
+                    IntentarColocar();
+                }
+                else
+                {
+                    objetoActual.Interactuar();
+                }
             }
         }
         else
@@ -58,5 +72,23 @@ public class InteraccionJugador : MonoBehaviour
         objetoActual = null;
         objetoTransform = null;
     }
-}
 
+    // Método para que otros scripts (como PiezaPuzzle) accedan a la mano izquierda
+    public Transform GetManoIzquierda()
+    {
+        return manoIzquierda;
+    }
+
+    // Intentar colocar lo que esté en la mano izquierda
+    private void IntentarColocar()
+    {
+        if (manoIzquierda.childCount > 0)
+        {
+            PiezaPuzzle pieza = manoIzquierda.GetChild(0).GetComponent<PiezaPuzzle>();
+            if (pieza != null)
+            {
+                pieza.Interactuar(); // reutiliza la lógica de la pieza para colocarla
+            }
+        }
+    }
+}

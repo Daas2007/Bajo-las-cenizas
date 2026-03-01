@@ -8,6 +8,9 @@ TagManager:
   - Pickup
   - EnemigoVentana
   - Nivel1
+  - Agarrar
+  - EnemigoPerseguidor
+  - Colocar
   layers:
   - Default
   - TransparentFX

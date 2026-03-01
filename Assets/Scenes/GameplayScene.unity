@@ -14,7 +14,7 @@ OcclusionCullingSettings:
 RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 10
-  m_Fog: 0
+  m_Fog: 1
   m_FogColor: {r: 0, g: 0, b: 0, a: 1}
   m_FogMode: 3
   m_FogDensity: 0.35
@@ -307,9 +307,9 @@ GameObject:
   - component: {fileID: 14219965}
   - component: {fileID: 14219964}
   - component: {fileID: 14219967}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Pieza6
-  m_TagString: Untagged
+  m_TagString: Agarrar
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -416,6 +416,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   piezaID: 6
+  toleranciaRotacion: 5
 --- !u!1 &15688700
 GameObject:
   m_ObjectHideFlags: 0
@@ -685,9 +686,9 @@ GameObject:
   - component: {fileID: 24168167}
   - component: {fileID: 24168166}
   - component: {fileID: 24168169}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SlotPieza 8
-  m_TagString: Untagged
+  m_TagString: Colocar
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -7193,9 +7194,9 @@ GameObject:
   - component: {fileID: 165496046}
   - component: {fileID: 165496045}
   - component: {fileID: 165496048}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SlotPieza 5
-  m_TagString: Untagged
+  m_TagString: Colocar
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -7693,9 +7694,9 @@ GameObject:
   - component: {fileID: 215579370}
   - component: {fileID: 215579369}
   - component: {fileID: 215579372}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Pieza5
-  m_TagString: Untagged
+  m_TagString: Agarrar
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -7802,6 +7803,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   piezaID: 5
+  toleranciaRotacion: 5
 --- !u!1 &224928274
 GameObject:
   m_ObjectHideFlags: 0
@@ -7951,9 +7953,9 @@ GameObject:
   - component: {fileID: 245232853}
   - component: {fileID: 245232852}
   - component: {fileID: 245232855}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SlotPieza 4
-  m_TagString: Untagged
+  m_TagString: Colocar
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -8295,9 +8297,9 @@ GameObject:
   - component: {fileID: 312726990}
   - component: {fileID: 312726989}
   - component: {fileID: 312726992}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Pieza9
-  m_TagString: Untagged
+  m_TagString: Agarrar
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -8404,6 +8406,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   piezaID: 9
+  toleranciaRotacion: 5
 --- !u!1 &321941648
 GameObject:
   m_ObjectHideFlags: 0
@@ -9277,9 +9280,9 @@ GameObject:
   - component: {fileID: 335637803}
   - component: {fileID: 335637802}
   - component: {fileID: 335637805}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Pieza3
-  m_TagString: Untagged
+  m_TagString: Agarrar
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -9386,6 +9389,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   piezaID: 3
+  toleranciaRotacion: 5
 --- !u!1 &335683300
 GameObject:
   m_ObjectHideFlags: 0
@@ -9399,9 +9403,9 @@ GameObject:
   - component: {fileID: 335683303}
   - component: {fileID: 335683302}
   - component: {fileID: 335683305}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Pieza1
-  m_TagString: Untagged
+  m_TagString: Agarrar
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -9508,6 +9512,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   piezaID: 1
+  toleranciaRotacion: 5
 --- !u!1 &336999982 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5508673059605404534, guid: 40444cfeaf8c39e43aa9ad1822d8af57, type: 3}
@@ -9883,7 +9888,7 @@ Transform:
   m_GameObject: {fileID: 375568674}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -31.087, y: -0.5051038, z: -2.8237984}
+  m_LocalPosition: {x: -30.37, y: -0.5051038, z: -2.8237984}
   m_LocalScale: {x: 0.0015553436, y: 0.25, z: 0.25}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -10414,9 +10419,9 @@ GameObject:
   - component: {fileID: 450469914}
   - component: {fileID: 450469913}
   - component: {fileID: 450469916}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Pieza4
-  m_TagString: Untagged
+  m_TagString: Agarrar
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -10523,6 +10528,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   piezaID: 4
+  toleranciaRotacion: 5
 --- !u!1 &460629526
 GameObject:
   m_ObjectHideFlags: 0
@@ -11223,9 +11229,9 @@ GameObject:
   - component: {fileID: 500565722}
   - component: {fileID: 500565721}
   - component: {fileID: 500565724}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SlotPieza 7
-  m_TagString: Untagged
+  m_TagString: Colocar
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -11764,9 +11770,9 @@ GameObject:
   - component: {fileID: 555087999}
   - component: {fileID: 555087998}
   - component: {fileID: 555088001}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Pieza7
-  m_TagString: Untagged
+  m_TagString: Agarrar
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -11873,6 +11879,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   piezaID: 7
+  toleranciaRotacion: 5
 --- !u!1 &584001936
 GameObject:
   m_ObjectHideFlags: 0
@@ -11886,9 +11893,9 @@ GameObject:
   - component: {fileID: 584001939}
   - component: {fileID: 584001938}
   - component: {fileID: 584001941}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SlotPieza 1
-  m_TagString: Untagged
+  m_TagString: Colocar
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -14842,9 +14849,9 @@ GameObject:
   - component: {fileID: 600882027}
   - component: {fileID: 600882026}
   - component: {fileID: 600882029}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SlotPieza 3
-  m_TagString: Untagged
+  m_TagString: Colocar
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -22227,9 +22234,9 @@ GameObject:
   - component: {fileID: 1085538033}
   - component: {fileID: 1085538032}
   - component: {fileID: 1085538035}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SlotPieza 9
-  m_TagString: Untagged
+  m_TagString: Colocar
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -22550,9 +22557,9 @@ GameObject:
   - component: {fileID: 1096210256}
   - component: {fileID: 1096210255}
   - component: {fileID: 1096210258}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SlotPieza 2
-  m_TagString: Untagged
+  m_TagString: Colocar
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -33539,6 +33546,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5508673059605404534, guid: 40444cfeaf8c39e43aa9ad1822d8af57, type: 3}
+      propertyPath: m_TagString
+      value: EnemigoPerseguidor
+      objectReference: {fileID: 0}
     - target: {fileID: 7315320048840773818, guid: 40444cfeaf8c39e43aa9ad1822d8af57, type: 3}
       propertyPath: objetivo
       value: 
@@ -33933,9 +33944,9 @@ GameObject:
   - component: {fileID: 1241251241}
   - component: {fileID: 1241251240}
   - component: {fileID: 1241251243}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Pieza8
-  m_TagString: Untagged
+  m_TagString: Agarrar
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -34042,6 +34053,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   piezaID: 8
+  toleranciaRotacion: 5
 --- !u!1 &1245651993
 GameObject:
   m_ObjectHideFlags: 0
@@ -44637,9 +44649,9 @@ GameObject:
   - component: {fileID: 1405831227}
   - component: {fileID: 1405831226}
   - component: {fileID: 1405831229}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Pieza2
-  m_TagString: Untagged
+  m_TagString: Agarrar
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -44746,6 +44758,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   piezaID: 2
+  toleranciaRotacion: 5
 --- !u!1 &1425304750
 GameObject:
   m_ObjectHideFlags: 0
@@ -45070,9 +45083,9 @@ GameObject:
   - component: {fileID: 1455854678}
   - component: {fileID: 1455854677}
   - component: {fileID: 1455854680}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SlotPieza 6
-  m_TagString: Untagged
+  m_TagString: Colocar
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -52351,6 +52364,7 @@ Transform:
   - {fileID: 590427457}
   - {fileID: 1954815677}
   - {fileID: 590230580}
+  - {fileID: 1890465246}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1884031668
@@ -52474,6 +52488,63 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!1 &1890465245
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1890465246}
+  - component: {fileID: 1890465247}
+  m_Layer: 0
+  m_Name: RompecabezasController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1890465246
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1890465245}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1879645398}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1890465247
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1890465245}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eadeda34a41906346b0ff3fedb2f55fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  slots:
+  - {fileID: 584001941}
+  - {fileID: 1096210258}
+  - {fileID: 600882029}
+  - {fileID: 245232855}
+  - {fileID: 165496048}
+  - {fileID: 1455854680}
+  - {fileID: 500565724}
+  - {fileID: 24168169}
+  - {fileID: 1085538035}
+  puertasBloqueadas:
+  - {fileID: 1920263184}
+  - {fileID: 74377369}
 --- !u!1 &1906451395
 GameObject:
   m_ObjectHideFlags: 0
@@ -62835,6 +62906,7 @@ MonoBehaviour:
   panelInteraccion: {fileID: 72864458529708803}
   textoInteraccion: {fileID: 751093171719598563}
   dialogoCanvas: {fileID: 1321037364}
+  manoIzquierda: {fileID: 144870013}
 --- !u!1 &3969450543941203793
 GameObject:
   m_ObjectHideFlags: 0
@@ -63632,7 +63704,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!1 &4905892024236910094
 GameObject:
   m_ObjectHideFlags: 0
