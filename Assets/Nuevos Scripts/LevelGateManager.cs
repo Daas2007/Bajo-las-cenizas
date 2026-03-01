@@ -31,7 +31,7 @@ public class LevelGateManager : MonoBehaviour
     {
         if (Instancia != null && Instancia != this)
         {
-            Debug.LogWarning("LevelGateManager: ya existe una instancia. Destruyendo esta.");
+           // Debug.LogWarning("LevelGateManager: ya existe una instancia. Destruyendo esta.");
             Destroy(gameObject);
             return;
         }
@@ -42,13 +42,13 @@ public class LevelGateManager : MonoBehaviour
         {
             if (string.IsNullOrEmpty(r.id))
             {
-                Debug.LogWarning($"LevelGateManager: Una RoomData no tiene id asignado (GameObject: {name}).");
+            //    Debug.LogWarning($"LevelGateManager: Una RoomData no tiene id asignado (GameObject: {name}).");
                 continue;
             }
 
             if (habitacionesMap.ContainsKey(r.id))
             {
-                Debug.LogWarning($"LevelGateManager: id duplicado '{r.id}'. Ignorando duplicado.");
+           //     Debug.LogWarning($"LevelGateManager: id duplicado '{r.id}'. Ignorando duplicado.");
                 continue;
             }
 
@@ -89,14 +89,14 @@ public class LevelGateManager : MonoBehaviour
     {
         if (!habitacionesMap.TryGetValue(id, out var room))
         {
-            Debug.LogWarning($"LevelGateManager.SalirHabitacion: id '{id}' no encontrado.");
+         //   Debug.LogWarning($"LevelGateManager.SalirHabitacion: id '{id}' no encontrado.");
             return;
         }
 
         if (room.estado == RoomState.EnCurso)
         {
             // Ya no existe OnPlayerLeft, dejamos solo el log
-            Debug.Log($"SalirHabitacion: '{id}' jugador salió del trigger (estado EnCurso).");
+       //     Debug.Log($"SalirHabitacion: '{id}' jugador salió del trigger (estado EnCurso).");
         }
     }
 
@@ -123,7 +123,7 @@ public class LevelGateManager : MonoBehaviour
 
         if (id == "Habitacion1")
         {
-            Debug.Log("Iniciando juego en Habitación 1");
+       //     Debug.Log("Iniciando juego en Habitación 1");
             // Aquí llamas a tu GameManager o activas la lógica del nivel 1
             // GameManager.Instancia.IniciarNivel1();
         }
@@ -133,7 +133,7 @@ public class LevelGateManager : MonoBehaviour
     {
         if (!habitacionesMap.TryGetValue(id, out var room))
         {
-            Debug.LogWarning($"LevelGateManager.ResetHabitacion: id '{id}' no encontrado.");
+       //     Debug.LogWarning($"LevelGateManager.ResetHabitacion: id '{id}' no encontrado.");
             return;
         }
 
@@ -142,14 +142,14 @@ public class LevelGateManager : MonoBehaviour
         if (room.muroRetorno != null) room.muroRetorno.SetActive(false);
         if (room.enemyActivator != null) room.enemyActivator.ActivarVentana(false);
         room.estado = RoomState.NoEntrado;
-        Debug.Log($"ResetHabitacion: '{id}' reiniciada a NoEntrado.");
+       // Debug.Log($"ResetHabitacion: '{id}' reiniciada a NoEntrado.");
     }
 
     public RoomState GetRoomState(string id)
     {
         if (!habitacionesMap.TryGetValue(id, out var room))
         {
-            Debug.LogWarning($"LevelGateManager.GetRoomState: id '{id}' no encontrado.");
+          //  Debug.LogWarning($"LevelGateManager.GetRoomState: id '{id}' no encontrado.");
             return RoomState.NoEntrado;
         }
         return room.estado;
@@ -158,20 +158,20 @@ public class LevelGateManager : MonoBehaviour
     {
         if (!habitacionesMap.TryGetValue(id, out var room)) return;
         if (room.muroRetorno != null) room.muroRetorno.SetActive(true);
-        Debug.Log($"Muro de retorno activado en '{id}'.");
+       // Debug.Log($"Muro de retorno activado en '{id}'.");
     }
     public void DesactivarMuroRetorno(string id)
     {
         if (!habitacionesMap.TryGetValue(id, out var room)) return;
         if (room.muroRetorno != null) room.muroRetorno.SetActive(true);
-        Debug.Log($"Muro de retorno activado en '{id}'.");
+        //Debug.Log($"Muro de retorno activado en '{id}'.");
     }
 
     public void CerrarPuertaLobby(string id)
     {
         if (!habitacionesMap.TryGetValue(id, out var room)) return;
         if (room.puertaLobby != null) room.puertaLobby.Lock();
-        Debug.Log($"Puerta lobby cerrada en '{id}'.");
+       // Debug.Log($"Puerta lobby cerrada en '{id}'.");
     }
 
 }

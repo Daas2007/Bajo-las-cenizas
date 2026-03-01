@@ -40,7 +40,7 @@ public class EnemigoVentana : MonoBehaviour
 
     void Start()
     {
-        Debug.Log("[Ventana] Iniciado en estado 1 (observando).");
+    //    Debug.Log("[Ventana] Iniciado en estado 1 (observando).");
         ActualizarColorVentana();
 
         if (enemigoEnEscena != null)
@@ -58,7 +58,7 @@ public class EnemigoVentana : MonoBehaviour
         {
             nivelAgresividad++;
             tiempoParaAvanzar = Mathf.Max(tiempoMinimoAvance, tiempoParaAvanzar - reduccionPorNivel);
-            Debug.Log($"[Ventana] Nivel agresividad {nivelAgresividad}, avanza cada {tiempoParaAvanzar}s sin luz.");
+        //    Debug.Log($"[Ventana] Nivel agresividad {nivelAgresividad}, avanza cada {tiempoParaAvanzar}s sin luz.");
         }
 
         // Reacción a la linterna
@@ -79,7 +79,7 @@ public class EnemigoVentana : MonoBehaviour
             {
                 cuentaRegresivaActiva = false;
                 tiempoRestanteParaEntrar = 0f;
-                Debug.Log("[Ventana] Lo iluminaste a tiempo, el enemigo se retira!");
+             //   Debug.Log("[Ventana] Lo iluminaste a tiempo, el enemigo se retira!");
             }
         }
         else
@@ -99,13 +99,13 @@ public class EnemigoVentana : MonoBehaviour
             {
                 cuentaRegresivaActiva = true;
                 tiempoRestanteParaEntrar = tiempoAntesDeEntrar;
-                Debug.Log($"[Ventana] Estado 3, tienes {tiempoAntesDeEntrar}s para iluminarlo!");
+            //    Debug.Log($"[Ventana] Estado 3, tienes {tiempoAntesDeEntrar}s para iluminarlo!");
             }
 
             if (cuentaRegresivaActiva)
             {
                 tiempoRestanteParaEntrar -= deltaT;
-                Debug.Log($"[Ventana] Tiempo restante para entrar: {tiempoRestanteParaEntrar:F2}");
+           //     Debug.Log($"[Ventana] Tiempo restante para entrar: {tiempoRestanteParaEntrar:F2}");
 
                 if (tiempoRestanteParaEntrar <= 0f && !enemigoSpawned)
                 {
@@ -119,7 +119,7 @@ public class EnemigoVentana : MonoBehaviour
     {
         tiempoEnEstado = 0f;
         estadoActual = Mathf.Min(estadoActual + 1, 3);
-        Debug.Log($"[Ventana] Avanza a estado {estadoActual}");
+     //   Debug.Log($"[Ventana] Avanza a estado {estadoActual}");
         ActualizarColorVentana();
     }
 
@@ -133,7 +133,7 @@ public class EnemigoVentana : MonoBehaviour
             estadoActual = 1;
             cuentaRegresivaActiva = false;
             tiempoRestanteParaEntrar = 0f;
-            Debug.Log("[Ventana] La luz lo ha repelido, vuelve al estado 1.");
+      //      Debug.Log("[Ventana] La luz lo ha repelido, vuelve al estado 1.");
         }
 
         ActualizarColorVentana();
@@ -141,7 +141,7 @@ public class EnemigoVentana : MonoBehaviour
 
     void EntrarAHabitacion()
     {
-        Debug.Log("[Ventana] El enemigo ha entrado en la habitación!");
+     //   Debug.Log("[Ventana] El enemigo ha entrado en la habitación!");
         cuentaRegresivaActiva = false;
         tiempoRestanteParaEntrar = 0f;
         enemigoSpawned = true;
@@ -162,14 +162,14 @@ public class EnemigoVentana : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[Ventana] No hay enemigo asignado en la escena.");
+       //     Debug.LogWarning("[Ventana] No hay enemigo asignado en la escena.");
         }
     }
 
     public void SetIluminado(bool valor)
     {
         recibiendoLuz = valor;
-        Debug.Log("[Ventana] SetIluminado llamado → " + valor);
+     //   Debug.Log("[Ventana] SetIluminado llamado → " + valor);
     }
 
     void ActualizarColorVentana()
