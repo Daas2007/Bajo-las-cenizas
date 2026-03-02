@@ -5,6 +5,7 @@ using System.Text;
 public static class SistemaGuardar
 {
     private static string Ubicacion = Application.persistentDataPath + "/ArchivoGuardado";
+
     public static void Guardar(MovimientoPersonaje player, GameManager gm)
     {
         var archivo = File.Open(Ubicacion, FileMode.Create);
@@ -35,8 +36,23 @@ public static class SistemaGuardar
         foreach (var p in puertas)
             escribir.Write(p.abierta);
 
+        // 🔧 Guardar estado de los slots del puzzle
+        SlotPuzzle[] slots = Object.FindObjectsOfType<SlotPuzzle>();
+        escribir.Write(slots.Length);
+        foreach (var slot in slots)
+        {
+            bool ocupado = slot.piezaActual != null;
+            escribir.Write(ocupado);
+            if (ocupado)
+            {
+                escribir.Write(slot.piezaActual.piezaID);
+                escribir.Write(slot.piezaActual.colocada);
+            }
+        }
+
         archivo.Close();
     }
+
     public static void Cargar(MovimientoPersonaje player, GameManager gm)
     {
         if (!File.Exists(Ubicacion)) return;
@@ -53,7 +69,6 @@ public static class SistemaGuardar
 
         // Estado del juego desde GameManager
         gm.enemigo.SetActive(leer.ReadBoolean());
-
         gm.tieneLinterna = leer.ReadBoolean();
         bool pickupActivo = leer.ReadBoolean();
         if (gm.linternaPickup != null) gm.linternaPickup.SetActive(pickupActivo);
@@ -81,6 +96,41 @@ public static class SistemaGuardar
                 puertas[i].ResetPuerta();
         }
 
+        // 🔧 Cargar estado de los slots del puzzle
+        int cantidadSlots = leer.ReadInt32();
+        SlotPuzzle[] slots = Object.FindObjectsOfType<SlotPuzzle>();
+        for (int i = 0; i < cantidadSlots && i < slots.Length; i++)
+        {
+            bool ocupado = leer.ReadBoolean();
+            if (ocupado)
+            {
+                int piezaID = leer.ReadInt32();
+                bool colocada = leer.ReadBoolean();
+
+                // Buscar pieza con ese ID
+                PiezaPuzzle[] piezas = Object.FindObjectsOfType<PiezaPuzzle>();
+                foreach (var pieza in piezas)
+                {
+                    if (pieza.piezaID == piezaID)
+                    {
+                        slots[i].piezaActual = pieza;
+                        if (colocada)
+                        {
+                            pieza.MarcarColocada();
+                            pieza.transform.position = slots[i].transform.position;
+                            pieza.transform.rotation = Quaternion.identity;
+                        }
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                slots[i].piezaActual = null;
+                slots[i].ResetSlot(); // método que puedes crear para limpiar slot
+            }
+        }
+
         archivo.Close();
 
         // 🔧 Sincronizar JugadorLinterna con GameManager
@@ -89,7 +139,7 @@ public static class SistemaGuardar
         {
             if (gm.tieneLinterna)
             {
-                jugadorLinterna.DarLinterna(); // o DarLinternaEncendida() si quieres que aparezca encendida
+                jugadorLinterna.DarLinterna();
             }
             else
             {
@@ -98,3 +148,4 @@ public static class SistemaGuardar
         }
     }
 }
+

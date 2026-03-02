@@ -3,8 +3,11 @@ using UnityEngine;
 public class SlotPuzzle : MonoBehaviour, IInteractuable
 {
     [Header("Configuración")]
-    public int slotID; // ID esperado
+    public int slotID;
     public PiezaPuzzle piezaActual;
+
+    [Header("Punto de colocación")]
+    public Transform puntoColocacion; // Empty en la posición exacta
 
     public void Interactuar()
     {
@@ -15,23 +18,23 @@ public class SlotPuzzle : MonoBehaviour, IInteractuable
         if (interaccion == null) return;
 
         Transform manoIzquierda = interaccion.GetManoIzquierda();
-        if (manoIzquierda.childCount == 0) return; // no hay nada en la mano
+        if (manoIzquierda.childCount == 0) return;
 
         PiezaPuzzle pieza = manoIzquierda.GetChild(0).GetComponent<PiezaPuzzle>();
         if (pieza == null) return;
 
-        // Validar si la pieza corresponde a este slot
         if (pieza.piezaID == slotID)
         {
-            pieza.transform.SetParent(null);
-            pieza.transform.position = transform.position;
-            pieza.transform.rotation = Quaternion.identity;
+            // ✅ Colocar en el punto de colocación
+            pieza.transform.SetParent(puntoColocacion);
+            pieza.transform.localPosition = Vector3.zero;
+            pieza.transform.localRotation = Quaternion.identity;
+
             piezaActual = pieza;
-            pieza.MarcarColocada(); // ahora sí queda fija
+            pieza.MarcarColocada();
         }
         else
         {
-            // Si no coincide, soltar la pieza al suelo (no queda fija)
             pieza.Soltar();
         }
     }
@@ -40,6 +43,11 @@ public class SlotPuzzle : MonoBehaviour, IInteractuable
     {
         if (piezaActual == null) return false;
         return piezaActual.piezaID == slotID &&
-               Mathf.Approximately(piezaActual.transform.rotation.eulerAngles.z, 0f);
+               Mathf.Approximately(piezaActual.transform.localRotation.eulerAngles.z, 0f);
+    }
+
+    public void ResetSlot()
+    {
+        piezaActual = null;
     }
 }

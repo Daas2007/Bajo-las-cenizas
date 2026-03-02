@@ -7,13 +7,12 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
     public float toleranciaRotacion = 5f;
 
     private bool enMano = false;
-    private bool colocada = false;
+    public bool colocada { get; private set; }
     private Transform manoIzquierda;
     private SlotPuzzle slotActual;
 
     void Start()
     {
-        // Buscar la mano izquierda en el jugador
         GameObject jugador = GameObject.FindWithTag("Player");
         if (jugador != null)
         {
@@ -27,7 +26,6 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
     {
         if (enMano && !colocada)
         {
-            // Rotar con R mientras está en la mano
             if (Input.GetKeyDown(KeyCode.R))
                 transform.Rotate(0, 0, -90);
         }
@@ -39,7 +37,7 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
 
         if (!enMano)
         {
-            // Agarrar: parentar a la mano izquierda
+            // Agarrar
             enMano = true;
             transform.SetParent(manoIzquierda);
             transform.localPosition = Vector3.zero;
@@ -47,26 +45,37 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
         }
         else
         {
-            // Intentar colocar en slot
             if (slotActual != null && slotActual.slotID == piezaID)
             {
-                transform.SetParent(null);
-                transform.position = slotActual.transform.position;
-                transform.rotation = Quaternion.identity; // rotación correcta
-                slotActual.piezaActual = this;
                 colocada = true;
                 enMano = false;
+
+                // ✅ Usar el punto de colocación del slot
+                Transform punto = slotActual.puntoColocacion != null ? slotActual.puntoColocacion : slotActual.transform;
+
+                transform.SetParent(punto);
+                transform.localPosition = Vector3.zero;
+                transform.localRotation = Quaternion.identity;
+
+                slotActual.piezaActual = this;
             }
             else
             {
-                // Si no hay slot correcto, soltar al suelo
                 Soltar();
             }
         }
     }
+
+
     public void MarcarColocada()
     {
         colocada = true;
+        enMano = false;
+    }
+
+    public void ResetColocada()
+    {
+        colocada = false;
         enMano = false;
     }
 
@@ -74,7 +83,6 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
     {
         enMano = false;
         transform.SetParent(null);
-        // Aquí puedes añadir lógica para que caiga al suelo (ej. aplicar Rigidbody)
     }
 
     private void OnTriggerEnter(Collider other)
@@ -94,7 +102,7 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
     public bool EstaCorrecta()
     {
         if (!colocada) return false;
-        float rotZ = transform.rotation.eulerAngles.z;
+        float rotZ = transform.localRotation.eulerAngles.z;
         return Mathf.Abs(rotZ) < toleranciaRotacion;
     }
 }
