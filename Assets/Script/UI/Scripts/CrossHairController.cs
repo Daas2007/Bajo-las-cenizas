@@ -33,16 +33,24 @@ public class CrosshairSwap : MonoBehaviour
         Ray ray = new Ray(camara.transform.position, camara.transform.forward);
         RaycastHit hit;
 
-        if (Physics.Raycast(ray, out hit, distanciaRaycast, capaInteractuable))
+        if (Physics.Raycast(ray, out hit, distanciaRaycast))
         {
-            crosshairCirculo.enabled = false;
-            crosshairMano.enabled = true;
+            // Verificamos que esté en la capa interactuable
+            if (((1 << hit.collider.gameObject.layer) & capaInteractuable) != 0)
+            {
+                // Verificamos que tenga la interfaz IInteractuable
+                IInteractuable interactuable = hit.collider.GetComponent<IInteractuable>();
+                if (interactuable != null)
+                {
+                    crosshairCirculo.enabled = false;
+                    crosshairMano.enabled = true;
+                    return;
+                }
+            }
         }
-        else
-        {
-            crosshairCirculo.enabled = true;
-            crosshairMano.enabled = false;
-        }
+
+        // Si no cumple condiciones → mostrar círculo
+        crosshairCirculo.enabled = true;
+        crosshairMano.enabled = false;
     }
 }
-

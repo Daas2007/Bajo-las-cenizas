@@ -2,11 +2,10 @@
 
 public class CandadoPuzzle : MonoBehaviour
 {
-    //---------------Referencias---------------
     [Header("Referencias")]
     [SerializeField] private GameObject candado;    // objeto candado
-    [SerializeField] private GameObject puertaCaja; // puerta/caja que se abre
     [SerializeField] private GameObject fragmento;  // fragmento que aparece
+    [SerializeField] private TapaInteractuable tapa; // referencia al script de la tapa
 
     private bool desbloqueado = false;
 
@@ -16,10 +15,21 @@ public class CandadoPuzzle : MonoBehaviour
         if (desbloqueado) return;
         desbloqueado = true;
 
+        // Ocultar el candado
         if (candado != null) candado.SetActive(false);
-        if (puertaCaja != null) puertaCaja.SetActive(false);
+
+        // Mostrar el fragmento
         if (fragmento != null) fragmento.SetActive(true);
 
-        Debug.Log("🔓 Candado desbloqueado. Fragmento revelado.");
+        // Avisar a la tapa que ya puede interactuar
+        if (tapa != null) tapa.HabilitarInteraccion();
+
+        Debug.Log("🔓 Candado desbloqueado. Fragmento revelado. La tapa ahora puede abrirse.");
+    }
+
+    //---------------Estado del candado---------------
+    public bool EstaDesbloqueado()
+    {
+        return desbloqueado;
     }
 }

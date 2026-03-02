@@ -58,20 +58,26 @@ public class InteraccionJugador : MonoBehaviour
         Ray rayo = new Ray(camara.transform.position, camara.transform.forward);
         RaycastHit hit;
 
-        if (Physics.Raycast(rayo, out hit, distanciaInteraccion, layerInteractuable))
+        // IMPORTANTE: usamos Physics.Raycast con un único hit, no AllRaycast
+        if (Physics.Raycast(rayo, out hit, distanciaInteraccion))
         {
-            IInteractuable interactuable = hit.collider.GetComponent<IInteractuable>();
-            if (interactuable != null)
+            // Verificamos si el objeto impactado está en el layer interactuable
+            if (((1 << hit.collider.gameObject.layer) & layerInteractuable) != 0)
             {
-                objetoActual = interactuable;
-                objetoTransform = hit.collider.transform;
-                return;
+                IInteractuable interactuable = hit.collider.GetComponent<IInteractuable>();
+                if (interactuable != null)
+                {
+                    objetoActual = interactuable;
+                    objetoTransform = hit.collider.transform;
+                    return;
+                }
             }
         }
 
         objetoActual = null;
         objetoTransform = null;
     }
+
 
     // Método para que otros scripts (como PiezaPuzzle) accedan a la mano izquierda
     public Transform GetManoIzquierda()

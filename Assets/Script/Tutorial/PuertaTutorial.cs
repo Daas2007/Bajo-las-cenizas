@@ -42,25 +42,24 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
         if (panelDialogo != null) panelDialogo.SetActive(false);
         if (textoSaltar != null) textoSaltar.gameObject.SetActive(false);
     }
+
     void Update()
     {
         if (panelDialogo != null && panelDialogo.activeSelf && Input.GetKeyDown(KeyCode.Space))
         {
             if (escribiendo)
             {
-                // Terminar escritura inmediatamente
                 if (rutinaTexto != null) StopCoroutine(rutinaTexto);
                 textoDialogo.text = mensajeActual;
                 escribiendo = false;
             }
             else
             {
-                // Cerrar diálogo si ya terminó
                 CerrarDialogo();
             }
         }
     }
-    //---------------Interfaz---------------
+
     public void Interactuar()
     {
         JugadorLinterna jugadorLinterna = FindObjectOfType<JugadorLinterna>();
@@ -74,8 +73,12 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
             if (puedeActivar && !panelDialogo.activeSelf)
                 MostrarDialogo("Mmm... está bastante oscuro afuera, será mejor que busque algo para iluminar");
         }
+
+        // 🔑 Notificar al tutorial
+        TutorialInteractivo tutorial = FindObjectOfType<TutorialInteractivo>();
+        if (tutorial != null) tutorial.NotificarPuerta();
     }
-    //---------------Reset---------------
+
     public void ResetPuerta()
     {
         abierta = false;
@@ -83,7 +86,6 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
         gameObject.layer = LayerMask.NameToLayer("Interaccion");
     }
 
-    //---------------Apertura simultánea---------------
     private void AbrirPuertasSimultaneas()
     {
         abierta = true;
@@ -115,7 +117,6 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
         }
     }
 
-    //---------------Diálogo---------------
     private void MostrarDialogo(string mensaje)
     {
         if (panelDialogo == null || textoDialogo == null) return;

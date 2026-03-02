@@ -1,48 +1,42 @@
 using UnityEngine;
 using TMPro;
-using UnityEngine.UI;
 
 public class TutorialInteractivo : MonoBehaviour
 {
-    //---------------UI---------------
     [Header("UI")]
     [SerializeField] private GameObject panelTutorial;
     [SerializeField] private TMP_Text textoTutorial;
 
-    //---------------Pasos del tutorial---------------
     [Header("Pasos del tutorial")]
     [SerializeField]
     private string[] pasos = {
         "Presiona W A S D para moverte",
         "Presiona SHIFT mientras te mueves para correr",
-        "Presiona E para interactuar",
+        "Presiona E para abrir puertas",
+        "Presiona E para recoger la linterna",
         "Presiona F para encender la linterna",
     };
 
-    //---------------Estado interno---------------
     private int pasoActual = 0;
     private bool tutorialActivo = true;
 
-    // Cooldown entre pasos
-    private float cooldown = 1.5f;
+    private float cooldown = 0.7f;   // ⏱ Tiempo de espera reducido a 0.7 segundos
     private float tiempoCooldown = 0f;
 
-    // Para el paso WASD
+    // Flags de acciones
     private bool presionoW, presionoA, presionoS, presionoD;
+    private bool corrio, abrioPuerta, agarroLinterna, encendioLinterna;
 
-    //---------------Inicio---------------
     void Start()
     {
         if (panelTutorial != null) panelTutorial.SetActive(true);
         MostrarPaso();
     }
 
-    //---------------Update---------------
     void Update()
     {
         if (!tutorialActivo) return;
 
-        // Cooldown entre pasos
         if (tiempoCooldown > 0f)
         {
             tiempoCooldown -= Time.deltaTime;
@@ -51,16 +45,20 @@ public class TutorialInteractivo : MonoBehaviour
 
         switch (pasoActual)
         {
-            case 0: // WASD → debe presionar todas al menos una vez
+            case 0: // WASD → ahora solo necesita 2 teclas distintas
                 if (Input.GetKeyDown(KeyCode.W)) presionoW = true;
                 if (Input.GetKeyDown(KeyCode.A)) presionoA = true;
                 if (Input.GetKeyDown(KeyCode.S)) presionoS = true;
                 if (Input.GetKeyDown(KeyCode.D)) presionoD = true;
 
-                if (presionoW && presionoA && presionoS && presionoD)
-                {
+                int teclasPresionadas = 0;
+                if (presionoW) teclasPresionadas++;
+                if (presionoA) teclasPresionadas++;
+                if (presionoS) teclasPresionadas++;
+                if (presionoD) teclasPresionadas++;
+
+                if (teclasPresionadas >= 2)
                     SiguientePaso();
-                }
                 break;
 
             case 1: // SHIFT
@@ -68,40 +66,39 @@ public class TutorialInteractivo : MonoBehaviour
                      Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D)) &&
                     Input.GetKey(KeyCode.LeftShift))
                 {
+                    corrio = true;
                     SiguientePaso();
                 }
                 break;
 
-            case 2: // E
-                if (Input.GetKeyDown(KeyCode.E))
-                {
-                    SiguientePaso();
-                }
+            case 2: // Puerta
+                if (abrioPuerta) SiguientePaso();
                 break;
 
-            case 3: // F
+            case 3: // Linterna
+                if (agarroLinterna) SiguientePaso();
+                break;
+
+            case 4: // Encender linterna
                 if (Input.GetKeyDown(KeyCode.F))
                 {
+                    encendioLinterna = true;
                     SiguientePaso();
                 }
                 break;
         }
     }
 
-    //---------------Mostrar paso---------------
     private void MostrarPaso()
     {
         if (textoTutorial != null && pasoActual < pasos.Length)
-        {
             textoTutorial.text = pasos[pasoActual];
-        }
     }
 
-    //---------------Siguiente paso---------------
-    private void SiguientePaso()
+    public void SiguientePaso()
     {
         pasoActual++;
-        tiempoCooldown = cooldown; // aplicar cooldown de 1.5s
+        tiempoCooldown = cooldown; // ⏱ aplica cooldown de 0.7s
 
         if (pasoActual >= pasos.Length)
         {
@@ -113,23 +110,24 @@ public class TutorialInteractivo : MonoBehaviour
         }
     }
 
-    //---------------Esperar y ejecutar acción---------------
-    private void EsperarYAccion(float segundos, System.Action accion)
-    {
-        StartCoroutine(EsperarAccion(segundos, accion));
-    }
-
-    private System.Collections.IEnumerator EsperarAccion(float segundos, System.Action accion)
-    {
-        yield return new WaitForSeconds(segundos);
-        accion?.Invoke();
-    }
-
-    //---------------Completar tutorial---------------
     private void CompletarTutorial()
     {
         tutorialActivo = false;
         if (panelTutorial != null) panelTutorial.SetActive(false);
         Debug.Log("✅ Tutorial completado y panel apagado.");
+    }
+
+    // 🔑 Métodos públicos para que otros scripts notifiquen
+    public void NotificarPuerta()
+    {
+        abrioPuerta = true;
+        if (pasoActual == 2) SiguientePaso();
+    }
+
+    public void NotificarLinterna()
+    {
+        agarroLinterna = true;
+        if (pasoActual <= 3) pasoActual = 3; // saltar directo a linterna si aún no pasó
+        MostrarPaso();
     }
 }

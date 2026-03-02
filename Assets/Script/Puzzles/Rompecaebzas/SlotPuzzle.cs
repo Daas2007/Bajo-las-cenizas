@@ -6,10 +6,8 @@ public class SlotPuzzle : MonoBehaviour, IInteractuable
     public int slotID; // ID esperado
     public PiezaPuzzle piezaActual;
 
-    // Método de interacción: intentar colocar la pieza que esté en la mano izquierda
     public void Interactuar()
     {
-        // Buscar al jugador
         GameObject jugador = GameObject.FindWithTag("Player");
         if (jugador == null) return;
 
@@ -27,13 +25,13 @@ public class SlotPuzzle : MonoBehaviour, IInteractuable
         {
             pieza.transform.SetParent(null);
             pieza.transform.position = transform.position;
-            pieza.transform.rotation = Quaternion.identity; // rotación correcta
+            pieza.transform.rotation = Quaternion.identity;
             piezaActual = pieza;
-            pieza.MarcarColocada();
+            pieza.MarcarColocada(); // ahora sí queda fija
         }
         else
         {
-            // Si no coincide, soltar la pieza al suelo
+            // Si no coincide, soltar la pieza al suelo (no queda fija)
             pieza.Soltar();
         }
     }

@@ -74,9 +74,8 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
     {
         enMano = false;
         transform.SetParent(null);
-        // Opcional: dejar caer al suelo
+        // Aquí puedes añadir lógica para que caiga al suelo (ej. aplicar Rigidbody)
     }
-
 
     private void OnTriggerEnter(Collider other)
     {
