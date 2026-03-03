@@ -11,7 +11,11 @@ public class CheckpointInicial : MonoBehaviour
         {
             // Guardar automáticamente al inicio
             SistemaGuardar.Guardar(jugador, gm);
-            Debug.Log("✅ Checkpoint inicial guardado.");
+
+            // 🔧 Asegurar que el spawn inicial quede registrado
+            gm.spawnInicial = jugador.transform;
+
+            Debug.Log("✅ Checkpoint inicial guardado y spawn registrado.");
         }
     }
 }

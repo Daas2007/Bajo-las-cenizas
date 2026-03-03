@@ -22,7 +22,7 @@ public class GameManager : MonoBehaviour
     public Transform spawnInicial;
 
     [Header("Estado del juego")]
-    public int muertes = 0;                        // contador global de muertes
+    public int muertes = 0;
     public Dictionary<string, int> muertesPorHabitacion = new Dictionary<string, int>();
     public bool puzzle1Completado = false;
     public bool puzzle2Completado = false;
@@ -59,16 +59,13 @@ public class GameManager : MonoBehaviour
     public void RegistrarMuerte(string habitacion = "global")
     {
         muertes++;
-
         if (!muertesPorHabitacion.ContainsKey(habitacion))
             muertesPorHabitacion[habitacion] = 0;
-
         muertesPorHabitacion[habitacion]++;
     }
 
     public int GetMuertes() => muertes;
 
-    // Ejemplo: cristal dañado si muertes > 2
     public bool CristalDañado(string habitacion = "global")
     {
         if (!muertesPorHabitacion.ContainsKey(habitacion)) return false;
@@ -82,7 +79,9 @@ public class GameManager : MonoBehaviour
         JugadorLinterna linterna = FindObjectOfType<JugadorLinterna>();
         if (linterna != null) linterna.ResetLinterna();
 
-        if (linternaPickup != null) linternaPickup.SetActive(true); // 🔧 siempre reaparece
+        if (linternaPickup != null) linternaPickup.SetActive(true);
+        if (linternaEnMano != null) linternaEnMano.SetActive(false);
+        tieneLinterna = false;
 
         // Reset puertas
         foreach (PuertaTutorial puerta in FindObjectsOfType<PuertaTutorial>())
@@ -103,4 +102,46 @@ public class GameManager : MonoBehaviour
         cristalMetaActivo = false;
     }
 
+    // ------------------- NUEVA PARTIDA -------------------
+    public void NuevaPartida()
+    {
+        ReiniciarEstado();
+
+        // Resetear jugador al spawn inicial
+        MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
+        if (jugador != null && spawnInicial != null)
+        {
+            jugador.transform.position = spawnInicial.position;
+            jugador.transform.rotation = spawnInicial.rotation;
+
+            CharacterController cc = jugador.GetComponent<CharacterController>();
+            if (cc != null)
+            {
+                cc.enabled = false;
+                cc.enabled = true;
+            }
+        }
+
+        // Dar linterna inicial
+        if (linternaEnMano != null) linternaEnMano.SetActive(true);
+        if (linternaPickup != null) linternaPickup.SetActive(false);
+        tieneLinterna = true;
+
+        // Reactivar UI
+        GameObject gameplayUI = GameObject.Find("GameplayUI");
+        if (gameplayUI != null) gameplayUI.SetActive(true);
+
+        muertes = 0;
+        muertesPorHabitacion.Clear();
+    }
+
+    // ------------------- CARGAR PARTIDA -------------------
+    public void CargarPartida()
+    {
+        MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
+        if (jugador != null)
+        {
+            SistemaGuardar.Cargar(jugador, this);
+        }
+    }
 }

@@ -36,7 +36,7 @@ public static class SistemaGuardar
         foreach (var p in puertas)
             escribir.Write(p.abierta);
 
-        // 🔧 Guardar estado de los slots del puzzle
+        // Guardar estado de los slots del puzzle
         SlotPuzzle[] slots = Object.FindObjectsOfType<SlotPuzzle>();
         escribir.Write(slots.Length);
         foreach (var slot in slots)
@@ -79,12 +79,12 @@ public static class SistemaGuardar
         gm.puzzle2Completado = leer.ReadBoolean();
         gm.cristalMetaActivo = leer.ReadBoolean();
 
-        // 🔧 Cargar estado del muro
+        // Cargar estado del muro
         bool muroActivo = leer.ReadBoolean();
         MuroBloqueo muro = Object.FindObjectOfType<MuroBloqueo>();
         if (muro != null) muro.gameObject.SetActive(muroActivo);
 
-        // 🔧 Cargar estado de las puertas tutorial
+        // Cargar estado de las puertas tutorial
         int cantidadPuertas = leer.ReadInt32();
         PuertaTutorial[] puertas = Object.FindObjectsOfType<PuertaTutorial>();
         for (int i = 0; i < cantidadPuertas && i < puertas.Length; i++)
@@ -96,7 +96,7 @@ public static class SistemaGuardar
                 puertas[i].ResetPuerta();
         }
 
-        // 🔧 Cargar estado de los slots del puzzle
+        // Cargar estado de los slots del puzzle
         int cantidadSlots = leer.ReadInt32();
         SlotPuzzle[] slots = Object.FindObjectsOfType<SlotPuzzle>();
         for (int i = 0; i < cantidadSlots && i < slots.Length; i++)
@@ -107,7 +107,6 @@ public static class SistemaGuardar
                 int piezaID = leer.ReadInt32();
                 bool colocada = leer.ReadBoolean();
 
-                // Buscar pieza con ese ID
                 PiezaPuzzle[] piezas = Object.FindObjectsOfType<PiezaPuzzle>();
                 foreach (var pieza in piezas)
                 {
@@ -117,8 +116,10 @@ public static class SistemaGuardar
                         if (colocada)
                         {
                             pieza.MarcarColocada();
+                            pieza.transform.SetParent(slots[i].transform);
                             pieza.transform.position = slots[i].transform.position;
-                            pieza.transform.rotation = Quaternion.identity;
+                            pieza.transform.rotation = slots[i].transform.rotation;
+                            pieza.transform.localScale = Vector3.one; // 🔧 normalizar escala
                         }
                         break;
                     }
@@ -127,25 +128,30 @@ public static class SistemaGuardar
             else
             {
                 slots[i].piezaActual = null;
-                slots[i].ResetSlot(); // método que puedes crear para limpiar slot
+                slots[i].ResetSlot();
             }
         }
 
         archivo.Close();
 
-        // 🔧 Sincronizar JugadorLinterna con GameManager
+        // Sincronizar linterna con GameManager
         JugadorLinterna jugadorLinterna = Object.FindObjectOfType<JugadorLinterna>();
         if (jugadorLinterna != null)
         {
             if (gm.tieneLinterna)
             {
                 jugadorLinterna.DarLinterna();
+                if (gm.linternaEnMano != null) gm.linternaEnMano.SetActive(true);
             }
             else
             {
                 jugadorLinterna.ResetLinterna();
+                if (gm.linternaPickup != null) gm.linternaPickup.SetActive(true);
             }
         }
+
+        // Reactivar UI
+        GameObject gameplayUI = GameObject.Find("GameplayUI");
+        if (gameplayUI != null) gameplayUI.SetActive(true);
     }
 }
-

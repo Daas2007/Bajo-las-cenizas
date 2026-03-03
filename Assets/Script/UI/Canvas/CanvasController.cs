@@ -56,21 +56,15 @@ public class CanvasController: MonoBehaviour
     public void Jugar()
     {
         GameManager gm = GameManager.Instancia;
-        MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
-
-        if (jugador != null && gm != null && gm.spawnInicial != null)
+        if (gm != null)
         {
-            jugador.transform.position = gm.spawnInicial.position;
-            gm.ReiniciarEstado();
+            gm.NuevaPartida(); // 🔧 reinicia todo al inicio
         }
 
         CerrarPanelActivo();
         Time.timeScale = 1f;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-
-        // 🔧 Ya no mostramos tutorial bloqueante aquí.
-        // El nuevo TutorialInteractivo se encarga de mostrar instrucciones en HUD.
     }
 
     public void CargarPartidaDesdeMenu()
@@ -217,11 +211,7 @@ public class CanvasController: MonoBehaviour
         MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
         if (gm != null && jugador != null)
         {
-            gm.ReiniciarEstado();
-            SistemaGuardar.Cargar(jugador, gm);
-
-            if (!gm.tieneLinterna && gm.linternaPickup != null)
-                gm.linternaPickup.SetActive(true);
+            gm.CargarPartida(); // 🔧 carga último guardado
         }
 
         if (jugador != null) jugador.enabled = true;
@@ -243,7 +233,13 @@ public class CanvasController: MonoBehaviour
         if (panelMainMenu != null) panelMainMenu.SetActive(true);
         panelActivo = panelMainMenu;
 
-        Time.timeScale = 1f;
+        GameManager gm = GameManager.Instancia;
+        if (gm != null)
+        {
+            gm.NuevaPartida(); // 🔧 reinicia desde inicio
+        }
+
+        Time.timeScale = 0f;
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 

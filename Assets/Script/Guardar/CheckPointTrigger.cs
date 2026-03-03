@@ -14,7 +14,7 @@ public class CheckpointTrigger : MonoBehaviour
             if (mov != null && gm != null)
             {
                 SistemaGuardar.Guardar(mov, gm);
-              //  Debug.Log($"Checkpoint {checkpointID} activado.");
+                Debug.Log($"✅ Checkpoint {checkpointID} activado y guardado.");
             }
         }
     }
