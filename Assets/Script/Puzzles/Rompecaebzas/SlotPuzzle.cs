@@ -6,44 +6,38 @@ public class SlotPuzzle : MonoBehaviour, IInteractuable
     public int slotID;
     public PiezaPuzzle piezaActual;
 
-    [Header("Punto de colocación")]
-    public Transform puntoColocacion; // Empty en la posición exacta
+    private BoxCollider boxCollider;
 
-    public void Interactuar()
+    void Awake()
     {
-        GameObject jugador = GameObject.FindWithTag("Player");
-        if (jugador == null) return;
+        boxCollider = GetComponent<BoxCollider>();
+    }
 
-        InteraccionJugador interaccion = jugador.GetComponent<InteraccionJugador>();
-        if (interaccion == null) return;
-
-        Transform manoIzquierda = interaccion.GetManoIzquierda();
-        if (manoIzquierda.childCount == 0) return;
-
-        PiezaPuzzle pieza = manoIzquierda.GetChild(0).GetComponent<PiezaPuzzle>();
-        if (pieza == null) return;
-
-        if (pieza.piezaID == slotID)
+    void Update()
+    {
+        // ✅ Si no tiene hijo, tag = "Colocar" y collider activo
+        if (transform.childCount == 0)
         {
-            // ✅ Colocar en el punto de colocación
-            pieza.transform.SetParent(puntoColocacion);
-            pieza.transform.localPosition = Vector3.zero;
-            pieza.transform.localRotation = Quaternion.identity;
-
-            piezaActual = pieza;
-            pieza.MarcarColocada();
+            gameObject.tag = "Colocar";
+            if (boxCollider != null) boxCollider.enabled = true;
         }
         else
         {
-            pieza.Soltar();
+            // ✅ Si tiene hijo, tag vacío y collider desactivado
+            gameObject.tag = "Untagged";
+            if (boxCollider != null) boxCollider.enabled = false;
         }
+    }
+
+    public void Interactuar()
+    {
+        // La lógica de colocar la maneja InteraccionJugador.IntentarColocar()
     }
 
     public bool EstaCorrecta()
     {
         if (piezaActual == null) return false;
-        return piezaActual.piezaID == slotID &&
-               Mathf.Approximately(piezaActual.transform.localRotation.eulerAngles.z, 0f);
+        return piezaActual.piezaID == slotID;
     }
 
     public void ResetSlot()

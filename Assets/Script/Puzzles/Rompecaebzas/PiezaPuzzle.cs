@@ -8,8 +8,17 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
 
     private bool enMano = false;
     public bool colocada { get; private set; }
+    private bool puedeRotarX = false;
     private Transform manoIzquierda;
-    private SlotPuzzle slotActual;
+
+    // ✅ Guardamos la escala original
+    private Vector3 escalaOriginal;
+
+    void Awake()
+    {
+        this.enabled = true;
+        escalaOriginal = transform.localScale; // guardamos la escala inicial
+    }
 
     void Start()
     {
@@ -29,6 +38,11 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
             if (Input.GetKeyDown(KeyCode.R))
                 transform.Rotate(0, 0, -90);
         }
+
+        if (colocada && puedeRotarX && Input.GetKeyDown(KeyCode.X))
+        {
+            transform.Rotate(90, 0, 0);
+        }
     }
 
     public void Interactuar()
@@ -37,72 +51,45 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
 
         if (!enMano)
         {
-            // Agarrar
-            enMano = true;
-            transform.SetParent(manoIzquierda);
-            transform.localPosition = Vector3.zero;
-            transform.localRotation = Quaternion.identity;
-        }
-        else
-        {
-            if (slotActual != null && slotActual.slotID == piezaID)
+            // ✅ Solo agarrar si la mano está vacía
+            if (manoIzquierda.childCount == 0)
             {
-                colocada = true;
-                enMano = false;
-
-                // ✅ Usar el punto de colocación del slot
-                Transform punto = slotActual.puntoColocacion != null ? slotActual.puntoColocacion : slotActual.transform;
-
-                transform.SetParent(punto);
+                enMano = true;
+                transform.SetParent(manoIzquierda);
                 transform.localPosition = Vector3.zero;
                 transform.localRotation = Quaternion.identity;
 
-                slotActual.piezaActual = this;
+                // ✅ Restaurar la escala original al agarrar
+                transform.localScale = escalaOriginal;
             }
-            else
-            {
-                Soltar();
-            }
+        }
+        else
+        {
+            Soltar();
         }
     }
 
-
-    public void MarcarColocada()
+    public void MarcarColocada(bool estado = true)
     {
-        colocada = true;
+        colocada = estado;
         enMano = false;
+    }
+
+    public void PermitirRotacionX(bool estado)
+    {
+        puedeRotarX = estado;
     }
 
     public void ResetColocada()
     {
         colocada = false;
         enMano = false;
+        puedeRotarX = false;
     }
 
     public void Soltar()
     {
         enMano = false;
         transform.SetParent(null);
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        SlotPuzzle slot = other.GetComponent<SlotPuzzle>();
-        if (slot != null)
-            slotActual = slot;
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        SlotPuzzle slot = other.GetComponent<SlotPuzzle>();
-        if (slot != null && slot == slotActual)
-            slotActual = null;
-    }
-
-    public bool EstaCorrecta()
-    {
-        if (!colocada) return false;
-        float rotZ = transform.localRotation.eulerAngles.z;
-        return Mathf.Abs(rotZ) < toleranciaRotacion;
     }
 }

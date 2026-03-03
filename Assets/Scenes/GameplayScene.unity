@@ -797,7 +797,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slotID: 8
   piezaActual: {fileID: 1241251243}
-  puntoColocacion: {fileID: 0}
 --- !u!1 &35707622
 GameObject:
   m_ObjectHideFlags: 0
@@ -7482,7 +7481,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slotID: 5
   piezaActual: {fileID: 215579372}
-  puntoColocacion: {fileID: 0}
 --- !u!43 &167164901
 Mesh:
   m_ObjectHideFlags: 0
@@ -8243,7 +8241,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slotID: 4
   piezaActual: {fileID: 450469916}
-  puntoColocacion: {fileID: 0}
 --- !u!1 &257370108
 GameObject:
   m_ObjectHideFlags: 0
@@ -14907,7 +14904,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slotID: 7
   piezaActual: {fileID: 555088001}
-  puntoColocacion: {fileID: 0}
 --- !u!43 &500788072
 Mesh:
   m_ObjectHideFlags: 0
@@ -15605,7 +15601,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slotID: 1
   piezaActual: {fileID: 335683305}
-  puntoColocacion: {fileID: 0}
 --- !u!1 &590230579
 GameObject:
   m_ObjectHideFlags: 0
@@ -18563,7 +18558,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slotID: 3
   piezaActual: {fileID: 335637805}
-  puntoColocacion: {fileID: 0}
 --- !u!1 &657089380
 GameObject:
   m_ObjectHideFlags: 0
@@ -29937,7 +29931,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slotID: 9
   piezaActual: {fileID: 312726992}
-  puntoColocacion: {fileID: 0}
 --- !u!43 &1086884217
 Mesh:
   m_ObjectHideFlags: 0
@@ -30262,7 +30255,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slotID: 2
   piezaActual: {fileID: 1405831229}
-  puntoColocacion: {fileID: 0}
 --- !u!43 &1105501614
 Mesh:
   m_ObjectHideFlags: 0
@@ -52880,7 +52872,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slotID: 6
   piezaActual: {fileID: 14219967}
-  puntoColocacion: {fileID: 0}
 --- !u!43 &1460902039
 Mesh:
   m_ObjectHideFlags: 0

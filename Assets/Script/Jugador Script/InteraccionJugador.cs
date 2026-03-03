@@ -1,9 +1,9 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using TMPro;
 
 public class InteraccionJugador : MonoBehaviour
 {
-    [Header("Configuración")]
+    [Header("ConfiguraciÃ³n")]
     [SerializeField] float distanciaInteraccion = 2f;
     [SerializeField] LayerMask layerInteractuable;
     [SerializeField] Camera camara;
@@ -27,7 +27,6 @@ public class InteraccionJugador : MonoBehaviour
         {
             if (!panelInteraccion.activeSelf) panelInteraccion.SetActive(true);
 
-            // Mensajes según el tag
             if (objetoTransform.CompareTag("Pickup") || objetoTransform.CompareTag("Agarrar"))
                 textoInteraccion.text = "Presiona [E] para agarrar";
             else if (objetoTransform.CompareTag("Slot") || objetoTransform.CompareTag("Colocar"))
@@ -39,7 +38,7 @@ public class InteraccionJugador : MonoBehaviour
             {
                 if (objetoTransform.CompareTag("Colocar"))
                 {
-                    IntentarColocar();
+                    IntentarColocar(objetoTransform.GetComponent<SlotPuzzle>());
                 }
                 else
                 {
@@ -58,10 +57,8 @@ public class InteraccionJugador : MonoBehaviour
         Ray rayo = new Ray(camara.transform.position, camara.transform.forward);
         RaycastHit hit;
 
-        // IMPORTANTE: usamos Physics.Raycast con un único hit, no AllRaycast
         if (Physics.Raycast(rayo, out hit, distanciaInteraccion))
         {
-            // Verificamos si el objeto impactado está en el layer interactuable
             if (((1 << hit.collider.gameObject.layer) & layerInteractuable) != 0)
             {
                 IInteractuable interactuable = hit.collider.GetComponent<IInteractuable>();
@@ -78,22 +75,38 @@ public class InteraccionJugador : MonoBehaviour
         objetoTransform = null;
     }
 
-
-    // Método para que otros scripts (como PiezaPuzzle) accedan a la mano izquierda
     public Transform GetManoIzquierda()
     {
         return manoIzquierda;
     }
 
-    // Intentar colocar lo que esté en la mano izquierda
-    private void IntentarColocar()
+    private void IntentarColocar(SlotPuzzle slot)
     {
-        if (manoIzquierda.childCount > 0)
+        if (manoIzquierda.childCount > 0 && slot != null)
         {
             PiezaPuzzle pieza = manoIzquierda.GetChild(0).GetComponent<PiezaPuzzle>();
             if (pieza != null)
             {
-                pieza.Interactuar(); // reutiliza la lógica de la pieza para colocarla
+                // âœ… La pieza deja de ser hija de la mano y se vuelve hija del slot
+                pieza.transform.SetParent(slot.transform);
+                pieza.transform.position = slot.transform.position;
+                pieza.transform.rotation = slot.transform.rotation;
+
+                // âœ… Forzar escala a 1,1,1 en el slot
+                pieza.transform.localScale = Vector3.one;
+
+                slot.piezaActual = pieza;
+
+                if (pieza.piezaID == slot.slotID)
+                {
+                    pieza.MarcarColocada(true);
+                    pieza.PermitirRotacionX(true);
+                }
+                else
+                {
+                    pieza.MarcarColocada(false);
+                    pieza.PermitirRotacionX(false);
+                }
             }
         }
     }
