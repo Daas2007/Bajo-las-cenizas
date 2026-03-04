@@ -181,4 +181,20 @@ public class EnemigoVentana : MonoBehaviour
             case 3: ventanaRenderer.material = rojoMat; break;
         }
     }
+    public void ResetVentana()
+    {
+        estadoActual = 1;
+        tiempoEnEstado = 0f;
+        tiempoTotalJuego = 0f;
+        contadorLuz = 0f;
+        cuentaRegresivaActiva = false;
+        tiempoRestanteParaEntrar = 0f;
+        enemigoSpawned = false;
+
+        if (enemigoEnEscena != null)
+            enemigoEnEscena.SetActive(false);
+
+        ActualizarColorVentana();
+    }
+
 }

@@ -15,8 +15,12 @@ public class CandadoPuzzle : MonoBehaviour
         if (desbloqueado) return;
         desbloqueado = true;
 
-        // Ocultar el candado
-        if (candado != null) candado.SetActive(false);
+        // Ocultar el candado y quitarle el layer
+        if (candado != null)
+        {
+            candado.SetActive(false);
+            candado.layer = LayerMask.NameToLayer("Default"); // 🔧 quitar interacción
+        }
 
         // Mostrar el fragmento
         if (fragmento != null) fragmento.SetActive(true);

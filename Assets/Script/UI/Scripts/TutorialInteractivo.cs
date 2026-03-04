@@ -12,20 +12,16 @@ public class TutorialInteractivo : MonoBehaviour
     private string[] pasos = {
         "Presiona W A S D para moverte",
         "Presiona SHIFT mientras te mueves para correr",
-        "Presiona E para abrir puertas",
-        "Presiona E para recoger la linterna",
-        "Presiona F para encender la linterna",
+        "Presiona E para interactuar y recoger objetos",
+        "Presiona F para encender la linterna (si la tienes)"
     };
 
     private int pasoActual = 0;
     private bool tutorialActivo = true;
 
-    private float cooldown = 0.7f;   // ⏱ Tiempo de espera reducido a 0.7 segundos
-    private float tiempoCooldown = 0f;
-
     // Flags de acciones
-    private bool presionoW, presionoA, presionoS, presionoD;
-    private bool corrio, abrioPuerta, agarroLinterna, encendioLinterna;
+    private bool presionoMovimiento, corrio, interactuo, encendioLinterna;
+    private bool tieneLinterna;
 
     void Start()
     {
@@ -37,28 +33,15 @@ public class TutorialInteractivo : MonoBehaviour
     {
         if (!tutorialActivo) return;
 
-        if (tiempoCooldown > 0f)
-        {
-            tiempoCooldown -= Time.deltaTime;
-            return;
-        }
-
         switch (pasoActual)
         {
-            case 0: // WASD → ahora solo necesita 2 teclas distintas
-                if (Input.GetKeyDown(KeyCode.W)) presionoW = true;
-                if (Input.GetKeyDown(KeyCode.A)) presionoA = true;
-                if (Input.GetKeyDown(KeyCode.S)) presionoS = true;
-                if (Input.GetKeyDown(KeyCode.D)) presionoD = true;
-
-                int teclasPresionadas = 0;
-                if (presionoW) teclasPresionadas++;
-                if (presionoA) teclasPresionadas++;
-                if (presionoS) teclasPresionadas++;
-                if (presionoD) teclasPresionadas++;
-
-                if (teclasPresionadas >= 2)
+            case 0: // WASD
+                if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.A) ||
+                    Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.D))
+                {
+                    presionoMovimiento = true;
                     SiguientePaso();
+                }
                 break;
 
             case 1: // SHIFT
@@ -71,16 +54,12 @@ public class TutorialInteractivo : MonoBehaviour
                 }
                 break;
 
-            case 2: // Puerta
-                if (abrioPuerta) SiguientePaso();
+            case 2: // Interactuar
+                if (interactuo) SiguientePaso();
                 break;
 
-            case 3: // Linterna
-                if (agarroLinterna) SiguientePaso();
-                break;
-
-            case 4: // Encender linterna
-                if (Input.GetKeyDown(KeyCode.F))
+            case 3: // Encender linterna
+                if (tieneLinterna && Input.GetKeyDown(KeyCode.F))
                 {
                     encendioLinterna = true;
                     SiguientePaso();
@@ -98,8 +77,6 @@ public class TutorialInteractivo : MonoBehaviour
     public void SiguientePaso()
     {
         pasoActual++;
-        tiempoCooldown = cooldown; // ⏱ aplica cooldown de 0.7s
-
         if (pasoActual >= pasos.Length)
         {
             CompletarTutorial();
@@ -117,17 +94,21 @@ public class TutorialInteractivo : MonoBehaviour
         Debug.Log("✅ Tutorial completado y panel apagado.");
     }
 
-    // 🔑 Métodos públicos para que otros scripts notifiquen
-    public void NotificarPuerta()
+    // 🔑 Notificaciones externas
+    public void NotificarInteraccion()
     {
-        abrioPuerta = true;
+        interactuo = true;
         if (pasoActual == 2) SiguientePaso();
     }
 
-    public void NotificarLinterna()
+    public void NotificarLinternaRecogida()
     {
-        agarroLinterna = true;
-        if (pasoActual <= 3) pasoActual = 3; // saltar directo a linterna si aún no pasó
-        MostrarPaso();
+        tieneLinterna = true;
+        // No avanza automáticamente, solo habilita condición para paso 3
+    }
+
+    public bool EstaActivo()
+    {
+        return tutorialActivo;
     }
 }

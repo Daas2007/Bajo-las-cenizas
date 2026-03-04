@@ -62,8 +62,15 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
 
     public void Interactuar()
     {
-        JugadorLinterna jugadorLinterna = FindObjectOfType<JugadorLinterna>();
-        if (jugadorLinterna != null && jugadorLinterna.TieneLinterna())
+        TutorialInteractivo tutorial = FindObjectOfType<TutorialInteractivo>();
+        if (tutorial != null && tutorial.EstaActivo())
+        {
+            MostrarDialogo("Aun no puedo salir, me falta hacer algo");
+            return;
+        }
+
+        GameManager gm = GameManager.Instancia;
+        if (gm != null && gm.tieneLinterna)
         {
             if (!abierta)
                 AbrirPuertasSimultaneas();
@@ -73,10 +80,6 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
             if (puedeActivar && !panelDialogo.activeSelf)
                 MostrarDialogo("Mmm... está bastante oscuro afuera, será mejor que busque algo para iluminar");
         }
-
-        // 🔑 Notificar al tutorial
-        TutorialInteractivo tutorial = FindObjectOfType<TutorialInteractivo>();
-        if (tutorial != null) tutorial.NotificarPuerta();
     }
 
     public void ResetPuerta()

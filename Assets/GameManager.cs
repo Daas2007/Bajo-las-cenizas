@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.IO;
 
 public class GameManager : MonoBehaviour
 {
@@ -91,6 +92,10 @@ public class GameManager : MonoBehaviour
         foreach (EnemigoPerseguidor enemigo in FindObjectsOfType<EnemigoPerseguidor>())
             enemigo.ResetEnemigo();
 
+        // Reset ventanas
+        foreach (EnemigoVentana ventana in FindObjectsOfType<EnemigoVentana>())
+            ventana.ResetVentana();
+
         // Reset muro
         MuroBloqueo muro = FindObjectOfType<MuroBloqueo>();
         if (muro != null) muro.ResetMuro();
@@ -105,35 +110,66 @@ public class GameManager : MonoBehaviour
     // ------------------- NUEVA PARTIDA -------------------
     public void NuevaPartida()
     {
-        ReiniciarEstado();
-
-        // Resetear jugador al spawn inicial
-        MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
-        if (jugador != null && spawnInicial != null)
-        {
-            jugador.transform.position = spawnInicial.position;
-            jugador.transform.rotation = spawnInicial.rotation;
-
-            CharacterController cc = jugador.GetComponent<CharacterController>();
-            if (cc != null)
-            {
-                cc.enabled = false;
-                cc.enabled = true;
-            }
-        }
-
-        // Dar linterna inicial
-        if (linternaEnMano != null) linternaEnMano.SetActive(true);
-        if (linternaPickup != null) linternaPickup.SetActive(false);
-        tieneLinterna = true;
-
+        ReiniciarEstado(); 
+        // Borrar archivo de guardado para asegurar inicio limpio
+        SistemaGuardar.BorrarArchivo(); 
+        // Teleport seguro al spawn inicial (maneja Rigidbody/CharacterController y el script de movimiento)
+        TeleportarASpawnInicial(); 
+        // Linterna inicial
+         if (linternaEnMano != null) linternaEnMano.SetActive(false); if (linternaPickup != null) linternaPickup.SetActive(true); tieneLinterna = false; 
         // Reactivar UI
         GameObject gameplayUI = GameObject.Find("GameplayUI");
         if (gameplayUI != null) gameplayUI.SetActive(true);
-
         muertes = 0;
         muertesPorHabitacion.Clear();
+        Debug.Log("[GameManager] NuevaPartida: inicio limpio aplicado."); }
+    //-------------------- SPAWN INICIAL---------------------
+    // GameManager.cs (añadir dentro de la clase)
+    public void TeleportarASpawnInicial()
+    {
+        MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
+        if (jugador == null)
+        {
+            Debug.LogWarning("[GameManager] TeleportarASpawnInicial: no se encontró jugador.");
+            return;
+        }
+        if (spawnInicial == null)
+        {
+            Debug.LogWarning("[GameManager] TeleportarASpawnInicial: spawnInicial no asignado.");
+            return;
+        }
+
+        // Desactivar temporalmente el script de movimiento para evitar que sobrescriba la posición
+        var movimientoScript = jugador.GetComponent<MovimientoPersonaje>();
+        if (movimientoScript != null) movimientoScript.enabled = false;
+
+        // Si tiene CharacterController, desactivarlo temporalmente
+        var cc = jugador.GetComponent<CharacterController>();
+        if (cc != null) cc.enabled = false;
+
+        // Si tiene Rigidbody, ponerlo en kinematic y limpiar velocidades
+        var rb = jugador.GetComponent<Rigidbody>();
+        bool rbWasKinematic = false;
+        if (rb != null)
+        {
+            rbWasKinematic = rb.isKinematic;
+            rb.isKinematic = true;
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+
+        // Teleportar
+        jugador.transform.position = spawnInicial.position;
+        jugador.transform.rotation = spawnInicial.rotation;
+
+        // Restaurar Rigidbody/CharacterController y script
+        if (rb != null) rb.isKinematic = rbWasKinematic;
+        if (cc != null) cc.enabled = true;
+        if (movimientoScript != null) movimientoScript.enabled = true;
+
+        Debug.Log($"[GameManager] Jugador teletransportado a spawnInicial {spawnInicial.position}");
     }
+
 
     // ------------------- CARGAR PARTIDA -------------------
     public void CargarPartida()
@@ -142,6 +178,13 @@ public class GameManager : MonoBehaviour
         if (jugador != null)
         {
             SistemaGuardar.Cargar(jugador, this);
+
+            // 🔧 Reset enemigos y ventanas al cargar
+            foreach (EnemigoPerseguidor enemigo in FindObjectsOfType<EnemigoPerseguidor>())
+                enemigo.ResetEnemigo();
+
+            foreach (EnemigoVentana ventana in FindObjectsOfType<EnemigoVentana>())
+                ventana.ResetVentana();
         }
     }
 }

@@ -9,13 +9,12 @@ public class CheckpointInicial : MonoBehaviour
 
         if (jugador != null && gm != null)
         {
-            // Guardar automáticamente al inicio
-            SistemaGuardar.Guardar(jugador, gm);
-
-            // 🔧 Asegurar que el spawn inicial quede registrado
-            gm.spawnInicial = jugador.transform;
-
-            Debug.Log("✅ Checkpoint inicial guardado y spawn registrado.");
+            gm.spawnInicial = this.transform; // usar el transform del objeto spawn
+            Debug.Log($"[CheckpointInicial] Spawn inicial registrado en {transform.position}");
+        }
+        else
+        {
+            Debug.LogWarning("[CheckpointInicial] No se encontró jugador o GameManager.");
         }
     }
 }

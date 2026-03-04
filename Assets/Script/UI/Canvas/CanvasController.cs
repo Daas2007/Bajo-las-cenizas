@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class CanvasController: MonoBehaviour
+public class CanvasController : MonoBehaviour
 {
     //---------------Paneles principales---------------
     [Header("Paneles principales")]
@@ -53,20 +53,25 @@ public class CanvasController: MonoBehaviour
         ActivarPanel(panelMainMenu, true);
     }
 
+    // Jugar: siempre inicia desde spawnInicial con estado inicial
     public void Jugar()
     {
         GameManager gm = GameManager.Instancia;
         if (gm != null)
         {
-            gm.NuevaPartida(); // 🔧 reinicia todo al inicio
+            gm.NuevaPartida(); // reinicia todo al inicio y borra guardado
         }
 
+        // Cerrar cualquier panel y reanudar juego
         CerrarPanelActivo();
         Time.timeScale = 1f;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        Debug.Log("▶️ Jugar: inicio limpio desde spawn inicial.");
     }
 
+    // Cargar desde menú principal: si hay guardado, cargar; si no, respawnear en spawnInicial
     public void CargarPartidaDesdeMenu()
     {
         MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
@@ -74,11 +79,28 @@ public class CanvasController: MonoBehaviour
 
         if (jugador != null && gm != null)
         {
-            gm.ReiniciarEstado();
-            SistemaGuardar.Cargar(jugador, gm);
+            // Intentar cargar; SistemaGuardar.Cargar devuelve true si cargó desde archivo
+            bool cargado = SistemaGuardar.Cargar(jugador, gm);
+            if (!cargado)
+            {
+                // No hay guardado: dejar estado inicial y colocar en spawn inicial
+                gm.ReiniciarEstado();
+                if (gm.spawnInicial != null)
+                {
+                    jugador.transform.position = gm.spawnInicial.position;
+                    jugador.transform.rotation = gm.spawnInicial.rotation;
+                }
 
-            if (!gm.tieneLinterna && gm.linternaPickup != null)
-                gm.linternaPickup.SetActive(true);
+                if (gm.linternaPickup != null) gm.linternaPickup.SetActive(true);
+                if (gm.linternaEnMano != null) gm.linternaEnMano.SetActive(false);
+                gm.tieneLinterna = false;
+
+                Debug.Log("📂 No había guardado: respawneado en spawn inicial.");
+            }
+            else
+            {
+                Debug.Log("📂 Guardado cargado desde menú.");
+            }
 
             jugador.enabled = true;
             Camera cam = jugador.GetComponentInChildren<Camera>();
@@ -90,8 +112,6 @@ public class CanvasController: MonoBehaviour
         Time.timeScale = 1f;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-
-        Debug.Log("📂 Partida cargada desde menú principal.");
     }
 
     public void SalirJuego() => Application.Quit();
@@ -104,13 +124,14 @@ public class CanvasController: MonoBehaviour
 
     public void Reanudar()
     {
-        panelPausa.SetActive(false);
+        if (panelPausa != null) panelPausa.SetActive(false);
         panelActivo = null;
         Time.timeScale = 1f;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
 
+    // Salir al menú desde pausa: reiniciar estado y mostrar menú principal (no conservar guardado activo al volver a jugar)
     public void SalirAlMenuDesdePausa()
     {
         if (panelPausa != null) panelPausa.SetActive(false);
@@ -119,11 +140,18 @@ public class CanvasController: MonoBehaviour
         if (panelMainMenu != null) panelMainMenu.SetActive(true);
         panelActivo = panelMainMenu;
 
+        // Reiniciar estado del juego para asegurar que al volver a Jugar se inicie limpio
+        GameManager gm = GameManager.Instancia;
+        if (gm != null)
+        {
+            gm.NuevaPartida(); // borra guardado y deja todo en estado inicial
+        }
+
         Time.timeScale = 0f;
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
-        Debug.Log("✅ Volviendo al menú principal desde pausa.");
+        Debug.Log("✅ Volviendo al menú principal desde pausa (estado inicial aplicado).");
     }
 
     //---------------Opciones---------------
@@ -132,7 +160,7 @@ public class CanvasController: MonoBehaviour
         panelAnterior = panelActivo;
         if (panelAnterior != null) panelAnterior.SetActive(false);
 
-        panelOpciones.SetActive(true);
+        if (panelOpciones != null) panelOpciones.SetActive(true);
         panelActivo = panelOpciones;
 
         Cursor.lockState = CursorLockMode.None;
@@ -175,6 +203,7 @@ public class CanvasController: MonoBehaviour
         }
     }
 
+    // Cargar desde opciones: intenta cargar, si no existe guardado respawnea en spawn inicial
     public void CargarPartida()
     {
         MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
@@ -182,8 +211,25 @@ public class CanvasController: MonoBehaviour
 
         if (jugador != null && gm != null)
         {
-            SistemaGuardar.Cargar(jugador, gm);
-            Debug.Log("📂 Último punto de guardado cargado desde menú de opciones.");
+            bool cargado = SistemaGuardar.Cargar(jugador, gm);
+            if (!cargado)
+            {
+                gm.ReiniciarEstado();
+                if (gm.spawnInicial != null)
+                {
+                    jugador.transform.position = gm.spawnInicial.position;
+                    jugador.transform.rotation = gm.spawnInicial.rotation;
+                }
+                if (gm.linternaPickup != null) gm.linternaPickup.SetActive(true);
+                if (gm.linternaEnMano != null) gm.linternaEnMano.SetActive(false);
+                gm.tieneLinterna = false;
+
+                Debug.Log("📂 No había guardado: respawneado en spawn inicial desde opciones.");
+            }
+            else
+            {
+                Debug.Log("📂 Guardado cargado desde opciones.");
+            }
         }
     }
 
@@ -200,6 +246,7 @@ public class CanvasController: MonoBehaviour
         Debug.Log("☠️ Pantalla de muerte activada.");
     }
 
+    // Reintentar desde muerte: cargar último guardado si existe; si no, respawnear en spawn inicial
     public void ReintentarDesdeMuerte()
     {
         if (panelMuerte != null) panelMuerte.SetActive(false);
@@ -211,7 +258,26 @@ public class CanvasController: MonoBehaviour
         MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
         if (gm != null && jugador != null)
         {
-            gm.CargarPartida(); // 🔧 carga último guardado
+            bool cargado = SistemaGuardar.Cargar(jugador, gm);
+            if (!cargado)
+            {
+                // No hay guardado: respawnear en spawn inicial con estado inicial
+                gm.ReiniciarEstado();
+                if (gm.spawnInicial != null)
+                {
+                    jugador.transform.position = gm.spawnInicial.position;
+                    jugador.transform.rotation = gm.spawnInicial.rotation;
+                }
+                if (gm.linternaPickup != null) gm.linternaPickup.SetActive(true);
+                if (gm.linternaEnMano != null) gm.linternaEnMano.SetActive(false);
+                gm.tieneLinterna = false;
+
+                Debug.Log("🔄 Reintentar: no había guardado, respawneado en spawn inicial.");
+            }
+            else
+            {
+                Debug.Log("🔄 Reintentar: guardado cargado correctamente.");
+            }
         }
 
         if (jugador != null) jugador.enabled = true;
@@ -221,10 +287,9 @@ public class CanvasController: MonoBehaviour
         Time.timeScale = 1f;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-
-        Debug.Log("🔄 Reintentando partida desde pantalla de muerte.");
     }
 
+    // Salir al menú desde muerte: reiniciar estado y mostrar menú principal
     public void SalirAlMenuDesdeMuerte()
     {
         if (panelMuerte != null) panelMuerte.SetActive(false);
@@ -236,14 +301,14 @@ public class CanvasController: MonoBehaviour
         GameManager gm = GameManager.Instancia;
         if (gm != null)
         {
-            gm.NuevaPartida(); // 🔧 reinicia desde inicio
+            gm.NuevaPartida(); // reinicia desde inicio y borra guardado
         }
 
         Time.timeScale = 0f;
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
-        Debug.Log("✅ Volviendo al menú principal desde pantalla de muerte.");
+        Debug.Log("✅ Volviendo al menú principal desde pantalla de muerte (estado inicial).");
     }
 
     //---------------Dialogo---------------

@@ -48,21 +48,21 @@ public class JugadorLinterna : MonoBehaviour
             enemigoDetectado = null;
         }
     }
-
     public void DarLinterna()
     {
         tieneLinterna = true;
-        linternaObjeto.SetActive(true);
-        luzLinterna.SetActive(false);
+        if (linternaObjeto != null) linternaObjeto.SetActive(true);
+        if (luzLinterna != null) luzLinterna.SetActive(false); // empieza apagada
 
         GameManager gm = GameManager.Instancia;
         if (gm != null) gm.tieneLinterna = true;
 
-        // 🔑 Notificar al tutorial
+        // Notificar al tutorial
         TutorialInteractivo tutorial = FindObjectOfType<TutorialInteractivo>();
-        if (tutorial != null) tutorial.NotificarLinterna();
-    }
+        if (tutorial != null) tutorial.NotificarLinternaRecogida();
 
+        Debug.Log("🔦 Linterna entregada al jugador.");
+    }
     public void DarLinternaEncendida()
     {
         tieneLinterna = true;
@@ -72,11 +72,10 @@ public class JugadorLinterna : MonoBehaviour
         if (source != null && sonidoEncender != null)
             source.PlayOneShot(sonidoEncender);
 
-        // 🔑 Notificar al tutorial
+        // Notificar al tutorial
         TutorialInteractivo tutorial = FindObjectOfType<TutorialInteractivo>();
-        if (tutorial != null) tutorial.NotificarLinterna();
+        if (tutorial != null) tutorial.NotificarLinternaRecogida();
     }
-
     private void ToggleLinterna()
     {
         bool nuevoEstado = !luzLinterna.activeSelf;

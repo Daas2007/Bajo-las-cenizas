@@ -62,6 +62,7 @@ public class EnemigoPerseguidor : MonoBehaviour
     {
         transform.position = posicionInicial;
         velocidad = 3f;
-        gameObject.SetActive(false); // 🔧 desactivado al reiniciar
+        gameObject.SetActive(true); // 🔧 mantener activo al reiniciar
     }
+
 }

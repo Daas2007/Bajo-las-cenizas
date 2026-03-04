@@ -41,5 +41,10 @@ public class TapaInteractuable : MonoBehaviour, IInteractuable
             pivote.rotation = Quaternion.Slerp(rotInicial, rotFinal, t);
             yield return null;
         }
+
+        // 🔧 Una vez abierta, quitar interacción
+        gameObject.layer = LayerMask.NameToLayer("Default");
+        habilitada = false;
+        Debug.Log("✅ Tapa abierta y desactivada la interacción.");
     }
 }
