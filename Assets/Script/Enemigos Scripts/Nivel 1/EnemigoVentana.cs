@@ -25,6 +25,10 @@ public class EnemigoVentana : MonoBehaviour
     [Tooltip("Arrastra aquí el GameObject del enemigo que se activará cuando entre en la habitación")]
     [SerializeField] GameObject enemigoEnEscena;
 
+    [Header("Spawn parent (objeto vacío que define la posición local 0,0,0)")]
+    [Tooltip("Arrastra aquí el Transform del objeto vacío que debe ser el padre del enemigo (su localPosition 0,0,0 será la posición de spawn)")]
+    [SerializeField] Transform spawnParent;
+
     [Header("Temporizador fase 3")]
     [SerializeField] float tiempoAntesDeEntrar = 10f;
     bool cuentaRegresivaActiva = false;
@@ -40,14 +44,13 @@ public class EnemigoVentana : MonoBehaviour
     [SerializeField] Renderer ventanaRenderer;
 
     [Header("Audio")]
-    [SerializeField] AudioSource audioSource;               // referencia al AudioSource (puede estar en el mismo GameObject)
-    [SerializeField] AudioClip clipAvanzar;                 // sonido cuando avanza de estado (1->2, 2->3)
-    [SerializeField] AudioClip clipRetroceder;              // sonido cuando retrocede a estado 1
-    [SerializeField] AudioClip clipEntrar;                  // sonido cuando entra el enemigo a la habitación
-    [SerializeField] float cooldownAudio = 0.25f;           // evita spam de sonidos muy seguidos
-    [SerializeField] float pitchVariance = 0.05f;           // variación ligera de pitch para evitar repetición
+    [SerializeField] AudioSource audioSource;
+    [SerializeField] AudioClip clipAvanzar;
+    [SerializeField] AudioClip clipRetroceder;
+    [SerializeField] AudioClip clipEntrar;
+    [SerializeField] float cooldownAudio = 0.25f;
+    [SerializeField] float pitchVariance = 0.05f;
 
-    // campo privado para cooldown
     float tiempoUltimoAudio = -999f;
 
     void Start()
@@ -64,14 +67,12 @@ public class EnemigoVentana : MonoBehaviour
         tiempoTotalJuego += deltaT;
         tiempoEnEstado += deltaT;
 
-        // Escalado de agresividad
         if (tiempoTotalJuego >= nivelAgresividad * tiempoPorNivel)
         {
             nivelAgresividad++;
             tiempoParaAvanzar = Mathf.Max(tiempoMinimoAvance, tiempoParaAvanzar - reduccionPorNivel);
         }
 
-        // Reacción a la linterna
         if (recibiendoLuz)
         {
             contadorLuz += deltaT;
@@ -101,7 +102,6 @@ public class EnemigoVentana : MonoBehaviour
             }
         }
 
-        // Lógica especial en estado 3
         if (estadoActual == 3 && !recibiendoLuz)
         {
             if (!cuentaRegresivaActiva)
@@ -127,8 +127,6 @@ public class EnemigoVentana : MonoBehaviour
         tiempoEnEstado = 0f;
         estadoActual = Mathf.Min(estadoActual + 1, 3);
         ActualizarColorVentana();
-
-        // reproducir sonido de avance
         ReproducirAudio(clipAvanzar);
     }
 
@@ -145,8 +143,6 @@ public class EnemigoVentana : MonoBehaviour
         }
 
         ActualizarColorVentana();
-
-        // reproducir sonido de retroceso
         ReproducirAudio(clipRetroceder);
     }
 
@@ -156,38 +152,53 @@ public class EnemigoVentana : MonoBehaviour
         tiempoRestanteParaEntrar = 0f;
         enemigoSpawned = true;
 
-        // reproducir sonido de entrada
         ReproducirAudio(clipEntrar);
 
-        if (enemigoEnEscena != null)
+        if (enemigoEnEscena == null)
         {
-            EnemigoPerseguidor script = enemigoEnEscena.GetComponent<EnemigoPerseguidor>();
-            if (script != null)
-            {
-                // Resetear estado del perseguidor antes de activarlo
-                script.ResetEnemigo();
+            Debug.LogWarning("[EnemigoVentana] EntrarAHabitacion: enemigoEnEscena no asignado.");
+            return;
+        }
 
-                // Asegurar que el GameObject esté activo
-                enemigoEnEscena.SetActive(true);
+        // Si hay spawnParent configurado, parentar al enemigo a ese transform y usar localPosition = Vector3.zero
+        if (spawnParent != null)
+        {
+            // 1) Parentar (sin mantener posición mundial)
+            enemigoEnEscena.transform.SetParent(spawnParent, worldPositionStays: false);
 
-                // Asignar objetivo (player) si existe
-                GameObject jugador = GameObject.FindGameObjectWithTag("Player");
-                if (jugador != null)
-                {
-                    script.objetivo = jugador.transform;
-                }
-
-                // Asegurar que el script esté habilitado
-                script.enabled = true;
-            }
-            else
-            {
-                enemigoEnEscena.SetActive(true);
-            }
+            // 2) Asegurar localPosition/localRotation en cero
+            enemigoEnEscena.transform.localPosition = Vector3.zero;
+            enemigoEnEscena.transform.localRotation = Quaternion.identity;
         }
         else
         {
-            Debug.LogWarning("[EnemigoVentana] EntrarAHabitacion: enemigoEnEscena no asignado.");
+            // Si no hay spawnParent, por compatibilidad colocamos en world 0,0,0
+            enemigoEnEscena.transform.SetParent(null, worldPositionStays: true);
+            enemigoEnEscena.transform.position = Vector3.zero;
+            enemigoEnEscena.transform.rotation = Quaternion.identity;
+        }
+
+        // Resetear física y estado del perseguidor de forma segura
+        EnemigoPerseguidor script = enemigoEnEscena.GetComponent<EnemigoPerseguidor>();
+        if (script != null)
+        {
+            script.ResetEnemigo();
+
+            // Activar después de reposicionar y resetear
+            enemigoEnEscena.SetActive(true);
+
+            // Asignar objetivo si existe
+            GameObject jugador = GameObject.FindGameObjectWithTag("Player");
+            if (jugador != null)
+            {
+                script.objetivo = jugador.transform;
+            }
+
+            script.enabled = true;
+        }
+        else
+        {
+            enemigoEnEscena.SetActive(true);
         }
     }
 
@@ -214,7 +225,6 @@ public class EnemigoVentana : MonoBehaviour
         }
     }
 
-    // Reset completo de la ventana y del enemigo asociado
     public void ResetVentana()
     {
         estadoActual = 1;
@@ -240,19 +250,16 @@ public class EnemigoVentana : MonoBehaviour
             }
         }
 
-        // detener audio en curso (opcional)
         if (audioSource != null) audioSource.Stop();
 
         ActualizarColorVentana();
     }
 
-    // Método público para que GameManager o SistemaGuardar forcen el reset
     public void ForzarReset()
     {
         ResetVentana();
     }
 
-    // Llamar desde EnemigoPerseguidor cuando se desactive o muera
     public void EnemigoDesactivado(GameObject enemigoObj)
     {
         if (enemigoEnEscena == enemigoObj)
@@ -261,7 +268,6 @@ public class EnemigoVentana : MonoBehaviour
         }
     }
 
-    // Reproducción de audio con cooldown y ligera variación de pitch
     void ReproducirAudio(AudioClip clip)
     {
         if (clip == null || audioSource == null) return;

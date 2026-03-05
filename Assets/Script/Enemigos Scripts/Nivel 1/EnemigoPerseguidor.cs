@@ -13,13 +13,19 @@ public class EnemigoPerseguidor : MonoBehaviour
     [SerializeField] private PantallaDeMuerte pantallaDeMuerte;
 
     private Rigidbody rb;
-    private Vector3 posicionInicial;
+
+    // Guardamos la posición/rotación local inicial (relativa al parent)
+    private Vector3 posicionInicialLocal;
+    private Quaternion rotInicialLocal;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
         rb.constraints = RigidbodyConstraints.FreezeRotation;
-        posicionInicial = transform.position;
+
+        // Guardar localPosition/localRotation para respetar el parent
+        posicionInicialLocal = transform.localPosition;
+        rotInicialLocal = transform.localRotation;
 
         if (pantallaDeMuerte == null)
         {
@@ -39,7 +45,7 @@ public class EnemigoPerseguidor : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player"))
         {
-            pantallaDeMuerte.ActivarPantallaMuerte();
+            if (pantallaDeMuerte != null) pantallaDeMuerte.ActivarPantallaMuerte();
         }
     }
 
@@ -47,7 +53,7 @@ public class EnemigoPerseguidor : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            pantallaDeMuerte.ActivarPantallaMuerte();
+            if (pantallaDeMuerte != null) pantallaDeMuerte.ActivarPantallaMuerte();
         }
     }
 
@@ -57,12 +63,34 @@ public class EnemigoPerseguidor : MonoBehaviour
         Debug.Log("⚡ Enemigo activado con velocidad extra!");
     }
 
-    //---------------Reset---------------
+    // Reset seguro que respeta el parent y usa localPosition/localRotation
     public void ResetEnemigo()
     {
-        transform.position = posicionInicial;
-        velocidad = 3f;
-        gameObject.SetActive(true); // 🔧 mantener activo al reiniciar
-    }
+        if (rb == null) rb = GetComponent<Rigidbody>();
 
+        // Limpiar velocidades
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+
+        // Guardar estado físico previo
+        bool prevKinematic = rb.isKinematic;
+        bool prevUseGravity = rb.useGravity;
+
+        // Desactivar física temporalmente para reposicionar sin que caiga
+        rb.isKinematic = true;
+        rb.useGravity = false;
+
+        // Reposicionar relativo al parent (si tiene parent, usa localPosition guardada)
+        transform.localPosition = posicionInicialLocal;
+        transform.localRotation = rotInicialLocal;
+
+        // Restaurar estado físico
+        rb.isKinematic = prevKinematic;
+        rb.useGravity = prevUseGravity;
+
+        // Asegurar que esté activo
+        gameObject.SetActive(true);
+
+        Debug.Log("[EnemigoPerseguidor] Reset: reposicionado en localPosition inicial.");
+    }
 }

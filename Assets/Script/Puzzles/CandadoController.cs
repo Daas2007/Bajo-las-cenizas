@@ -3,106 +3,107 @@ using UnityEngine.Events;
 
 public class CandadoController : MonoBehaviour
 {
-    //---------------Configuración---------------
     [Header("Configuración")]
-    [Min(1)] public int cantidadDigitos = 4; // número de dígitos del candado
-    [Tooltip("Código correcto (debe coincidir con cantidadDigitos)")]
-    public int[] codigoCorrecto; // combinación correcta
+    [Min(1)] public int cantidadDigitos = 4;
+    public int[] codigoCorrecto;
 
-    //---------------Referencias---------------
     [Header("Referencias")]
-    [Tooltip("Dígitos en orden de izquierda a derecha")]
-    public CandadoDigito[] digitos; // cada rueda del candado
+    public CandadoDigito[] digitos;
 
-    //---------------Eventos---------------
     [Header("Eventos")]
-    public UnityEvent AlDesbloquear;     // se dispara al acertar el código
-    public UnityEvent AlIntentoFallido;  // se dispara al fallar el código
+    public UnityEvent AlDesbloquear;
+    public UnityEvent AlIntentoFallido;
 
-    //---------------Integración con puzzle---------------
     [Header("Integración con puzzle de caja")]
-    [SerializeField] private CandadoPuzzle puzzle; // opcional, para abrir caja/fragmento
+    [SerializeField] private CandadoPuzzle puzzle;
 
-    //---------------Bloqueo de jugador/cámara---------------
     [Header("Bloqueo de jugador/cámara")]
-    [SerializeField] private MonoBehaviour scriptMovimientoJugador; // tu script de movimiento
-    [SerializeField] private MonoBehaviour scriptCamara;           // tu script de cámara
+    [SerializeField] private MonoBehaviour scriptMovimientoJugador;
+    [SerializeField] private MonoBehaviour scriptCamara;
 
     private bool puzzleActivo = false;
 
-    //---------------Validaciones iniciales---------------
     private void Awake()
     {
         if (digitos == null || digitos.Length != cantidadDigitos)
-            Debug.LogWarning("La cantidad de dígitos no coincide con 'cantidadDigitos'.");
+            Debug.LogWarning("[CandadoController] La cantidad de dígitos no coincide con 'cantidadDigitos'.");
+
         if (codigoCorrecto == null || codigoCorrecto.Length != cantidadDigitos)
-            Debug.LogWarning("El código correcto debe tener la misma cantidad de dígitos.");
+            Debug.LogWarning("[CandadoController] El código correcto debe tener la misma cantidad de dígitos.");
+
+        // Conectar automáticamente el evento AlDesbloquear con puzzle.Desbloquear si hay puzzle asignado
+        if (puzzle != null)
+        {
+            // Evitar añadir múltiples listeners si se vuelve a Awake por alguna razón
+            AlDesbloquear.RemoveListener(puzzle.Desbloquear);
+            AlDesbloquear.AddListener(puzzle.Desbloquear);
+            Debug.Log("[CandadoController] Listener agregado: AlDesbloquear -> puzzle.Desbloquear");
+        }
     }
 
-    //---------------Activar puzzle---------------
     public void ActivarPuzzle()
     {
         puzzleActivo = true;
-
-        // Bloquear movimiento y cámara
         if (scriptMovimientoJugador != null) scriptMovimientoJugador.enabled = false;
         if (scriptCamara != null) scriptCamara.enabled = false;
-
-        // Liberar cursor para interactuar con UI
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
 
-    //---------------Desactivar puzzle---------------
     public void DesactivarPuzzle()
     {
         puzzleActivo = false;
-
-        // Restaurar movimiento y cámara
         if (scriptMovimientoJugador != null) scriptMovimientoJugador.enabled = true;
         if (scriptCamara != null) scriptCamara.enabled = true;
-
-        // Bloquear cursor para gameplay normal
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
 
-    //---------------Verificar código---------------
     public void VerificarCodigo()
     {
-        if (digitos == null || codigoCorrecto == null) return;
-        if (digitos.Length != codigoCorrecto.Length) return;
+        if (digitos == null || codigoCorrecto == null)
+        {
+            Debug.LogWarning("[CandadoController] Digitos o codigoCorrecto no asignados.");
+            return;
+        }
+        if (digitos.Length != codigoCorrecto.Length)
+        {
+            Debug.LogWarning("[CandadoController] digitos.Length != codigoCorrecto.Length");
+            return;
+        }
 
         for (int i = 0; i < digitos.Length; i++)
         {
             if (digitos[i].valor != codigoCorrecto[i])
             {
-                AlIntentoFallido?.Invoke(); // evento de fallo
+                Debug.Log("[CandadoController] Código incorrecto. Disparando AlIntentoFallido.");
+                AlIntentoFallido?.Invoke();
                 return;
             }
         }
 
-        AlDesbloquear?.Invoke(); // evento de éxito
+        Debug.Log("[CandadoController] Código correcto. Disparando AlDesbloquear.");
+        AlDesbloquear?.Invoke();
 
+        // Si por alguna razón puzzle no está asignado, lo intentamos llamar aquí también
         if (puzzle != null)
+        {
             puzzle.Desbloquear();
+        }
 
-        // desbloquear jugador al terminar puzzle
         DesactivarPuzzle();
     }
 
-    //---------------Cambiar código---------------
     public void EstablecerCodigo(int[] nuevoCodigo)
     {
         if (nuevoCodigo == null || nuevoCodigo.Length != cantidadDigitos)
         {
-            Debug.LogWarning("El nuevo código no coincide con 'cantidadDigitos'.");
+            Debug.LogWarning("[CandadoController] El nuevo código no coincide con 'cantidadDigitos'.");
             return;
         }
         codigoCorrecto = nuevoCodigo;
     }
 
-    //---------------Obtener código actual---------------
     public int[] ObtenerCodigoActual()
     {
         int[] actual = new int[cantidadDigitos];
@@ -111,3 +112,4 @@ public class CandadoController : MonoBehaviour
         return actual;
     }
 }
+

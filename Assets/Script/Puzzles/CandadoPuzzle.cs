@@ -3,37 +3,58 @@
 public class CandadoPuzzle : MonoBehaviour
 {
     [Header("Referencias")]
-    [SerializeField] private GameObject candado;    // objeto candado
-    [SerializeField] private GameObject fragmento;  // fragmento que aparece
-    [SerializeField] private TapaInteractuable tapa; // referencia al script de la tapa
+    [SerializeField] private GameObject candado;
+    [SerializeField] private GameObject fragmento;
+    [SerializeField] private TapaInteractuable tapa;
 
     private bool desbloqueado = false;
 
-    //---------------Desbloquear puzzle---------------
     public void Desbloquear()
     {
-        if (desbloqueado) return;
-        desbloqueado = true;
+        if (desbloqueado)
+        {
+            Debug.Log("[CandadoPuzzle] Ya desbloqueado, ignorando.");
+            return;
+        }
 
-        // Ocultar el candado y quitarle el layer
+        desbloqueado = true;
+        Debug.Log("[CandadoPuzzle] Desbloqueando puzzle...");
+
         if (candado != null)
         {
             candado.SetActive(false);
-            candado.layer = LayerMask.NameToLayer("Default"); // 🔧 quitar interacción
+            candado.layer = LayerMask.NameToLayer("Default");
+            Debug.Log("[CandadoPuzzle] Candado ocultado y layer seteada a Default.");
+        }
+        else
+        {
+            Debug.LogWarning("[CandadoPuzzle] candado no asignado en el inspector.");
         }
 
-        // Mostrar el fragmento
-        if (fragmento != null) fragmento.SetActive(true);
+        if (fragmento != null)
+        {
+            fragmento.SetActive(true);
+            Debug.Log("[CandadoPuzzle] Fragmento activado.");
+        }
+        else
+        {
+            Debug.LogWarning("[CandadoPuzzle] fragmento no asignado en el inspector.");
+        }
 
-        // Avisar a la tapa que ya puede interactuar
-        if (tapa != null) tapa.HabilitarInteraccion();
-
-        Debug.Log("🔓 Candado desbloqueado. Fragmento revelado. La tapa ahora puede abrirse.");
+        if (tapa != null)
+        {
+            tapa.HabilitarInteraccion();
+            Debug.Log("[CandadoPuzzle] Tapa: HabilitarInteraccion() llamado.");
+        }
+        else
+        {
+            Debug.LogWarning("[CandadoPuzzle] tapa no asignada en el inspector.");
+        }
     }
 
-    //---------------Estado del candado---------------
     public bool EstaDesbloqueado()
     {
         return desbloqueado;
     }
 }
+
