@@ -22,7 +22,8 @@ public class EnemigoVentana : MonoBehaviour
     [SerializeField] float tiempoMinimoAvance = 3f;
 
     [Header("Enemigo en escena (desactivado al inicio)")]
-    [SerializeField] GameObject enemigoEnEscena; // arrastra aquí el enemigo ya colocado en la escena
+    [Tooltip("Arrastra aquí el GameObject del enemigo que se activará cuando entre en la habitación")]
+    [SerializeField] GameObject enemigoEnEscena;
 
     [Header("Temporizador fase 3")]
     [SerializeField] float tiempoAntesDeEntrar = 10f;
@@ -38,13 +39,23 @@ public class EnemigoVentana : MonoBehaviour
     [Header("Visual de la ventana")]
     [SerializeField] Renderer ventanaRenderer;
 
+    [Header("Audio")]
+    [SerializeField] AudioSource audioSource;               // referencia al AudioSource (puede estar en el mismo GameObject)
+    [SerializeField] AudioClip clipAvanzar;                 // sonido cuando avanza de estado (1->2, 2->3)
+    [SerializeField] AudioClip clipRetroceder;              // sonido cuando retrocede a estado 1
+    [SerializeField] AudioClip clipEntrar;                  // sonido cuando entra el enemigo a la habitación
+    [SerializeField] float cooldownAudio = 0.25f;           // evita spam de sonidos muy seguidos
+    [SerializeField] float pitchVariance = 0.05f;           // variación ligera de pitch para evitar repetición
+
+    // campo privado para cooldown
+    float tiempoUltimoAudio = -999f;
+
     void Start()
     {
-    //    Debug.Log("[Ventana] Iniciado en estado 1 (observando).");
         ActualizarColorVentana();
 
         if (enemigoEnEscena != null)
-            enemigoEnEscena.SetActive(false); // aseguramos que esté desactivado al inicio
+            enemigoEnEscena.SetActive(false);
     }
 
     void Update()
@@ -58,7 +69,6 @@ public class EnemigoVentana : MonoBehaviour
         {
             nivelAgresividad++;
             tiempoParaAvanzar = Mathf.Max(tiempoMinimoAvance, tiempoParaAvanzar - reduccionPorNivel);
-        //    Debug.Log($"[Ventana] Nivel agresividad {nivelAgresividad}, avanza cada {tiempoParaAvanzar}s sin luz.");
         }
 
         // Reacción a la linterna
@@ -79,7 +89,6 @@ public class EnemigoVentana : MonoBehaviour
             {
                 cuentaRegresivaActiva = false;
                 tiempoRestanteParaEntrar = 0f;
-             //   Debug.Log("[Ventana] Lo iluminaste a tiempo, el enemigo se retira!");
             }
         }
         else
@@ -99,13 +108,11 @@ public class EnemigoVentana : MonoBehaviour
             {
                 cuentaRegresivaActiva = true;
                 tiempoRestanteParaEntrar = tiempoAntesDeEntrar;
-            //    Debug.Log($"[Ventana] Estado 3, tienes {tiempoAntesDeEntrar}s para iluminarlo!");
             }
 
             if (cuentaRegresivaActiva)
             {
                 tiempoRestanteParaEntrar -= deltaT;
-           //     Debug.Log($"[Ventana] Tiempo restante para entrar: {tiempoRestanteParaEntrar:F2}");
 
                 if (tiempoRestanteParaEntrar <= 0f && !enemigoSpawned)
                 {
@@ -119,8 +126,10 @@ public class EnemigoVentana : MonoBehaviour
     {
         tiempoEnEstado = 0f;
         estadoActual = Mathf.Min(estadoActual + 1, 3);
-     //   Debug.Log($"[Ventana] Avanza a estado {estadoActual}");
         ActualizarColorVentana();
+
+        // reproducir sonido de avance
+        ReproducirAudio(clipAvanzar);
     }
 
     void RetrocederAEstado1()
@@ -133,54 +142,79 @@ public class EnemigoVentana : MonoBehaviour
             estadoActual = 1;
             cuentaRegresivaActiva = false;
             tiempoRestanteParaEntrar = 0f;
-      //      Debug.Log("[Ventana] La luz lo ha repelido, vuelve al estado 1.");
         }
 
         ActualizarColorVentana();
+
+        // reproducir sonido de retroceso
+        ReproducirAudio(clipRetroceder);
     }
 
     void EntrarAHabitacion()
     {
-     //   Debug.Log("[Ventana] El enemigo ha entrado en la habitación!");
         cuentaRegresivaActiva = false;
         tiempoRestanteParaEntrar = 0f;
         enemigoSpawned = true;
 
+        // reproducir sonido de entrada
+        ReproducirAudio(clipEntrar);
+
         if (enemigoEnEscena != null)
         {
-            enemigoEnEscena.SetActive(true); // activar el enemigo ya existente
-
             EnemigoPerseguidor script = enemigoEnEscena.GetComponent<EnemigoPerseguidor>();
             if (script != null)
             {
+                // Resetear estado del perseguidor antes de activarlo
+                script.ResetEnemigo();
+
+                // Asegurar que el GameObject esté activo
+                enemigoEnEscena.SetActive(true);
+
+                // Asignar objetivo (player) si existe
                 GameObject jugador = GameObject.FindGameObjectWithTag("Player");
                 if (jugador != null)
                 {
-                    script.objetivo = jugador.transform; // ya corregido como público o con SetObjetivo
+                    script.objetivo = jugador.transform;
                 }
+
+                // Asegurar que el script esté habilitado
+                script.enabled = true;
+            }
+            else
+            {
+                enemigoEnEscena.SetActive(true);
             }
         }
         else
         {
-       //     Debug.LogWarning("[Ventana] No hay enemigo asignado en la escena.");
+            Debug.LogWarning("[EnemigoVentana] EntrarAHabitacion: enemigoEnEscena no asignado.");
         }
     }
 
     public void SetIluminado(bool valor)
     {
         recibiendoLuz = valor;
-     //   Debug.Log("[Ventana] SetIluminado llamado → " + valor);
     }
 
     void ActualizarColorVentana()
     {
+        if (ventanaRenderer == null) return;
+
         switch (estadoActual)
         {
-            case 1: ventanaRenderer.material = azulMat; break;
-            case 2: ventanaRenderer.material = naranjaMat; break;
-            case 3: ventanaRenderer.material = rojoMat; break;
+            case 1:
+                if (azulMat != null) ventanaRenderer.material = azulMat;
+                break;
+            case 2:
+                if (naranjaMat != null) ventanaRenderer.material = naranjaMat;
+                break;
+            case 3:
+                if (rojoMat != null) ventanaRenderer.material = rojoMat;
+                break;
         }
     }
+
+    // Reset completo de la ventana y del enemigo asociado
     public void ResetVentana()
     {
         estadoActual = 1;
@@ -192,9 +226,55 @@ public class EnemigoVentana : MonoBehaviour
         enemigoSpawned = false;
 
         if (enemigoEnEscena != null)
-            enemigoEnEscena.SetActive(false);
+        {
+            EnemigoPerseguidor ep = enemigoEnEscena.GetComponent<EnemigoPerseguidor>();
+            if (ep != null)
+            {
+                ep.ResetEnemigo();
+                ep.gameObject.SetActive(false);
+                ep.enabled = false;
+            }
+            else
+            {
+                enemigoEnEscena.SetActive(false);
+            }
+        }
+
+        // detener audio en curso (opcional)
+        if (audioSource != null) audioSource.Stop();
 
         ActualizarColorVentana();
     }
 
+    // Método público para que GameManager o SistemaGuardar forcen el reset
+    public void ForzarReset()
+    {
+        ResetVentana();
+    }
+
+    // Llamar desde EnemigoPerseguidor cuando se desactive o muera
+    public void EnemigoDesactivado(GameObject enemigoObj)
+    {
+        if (enemigoEnEscena == enemigoObj)
+        {
+            enemigoSpawned = false;
+        }
+    }
+
+    // Reproducción de audio con cooldown y ligera variación de pitch
+    void ReproducirAudio(AudioClip clip)
+    {
+        if (clip == null || audioSource == null) return;
+
+        if (Time.time - tiempoUltimoAudio < cooldownAudio) return;
+        tiempoUltimoAudio = Time.time;
+
+        float originalPitch = audioSource.pitch;
+        if (pitchVariance > 0f)
+            audioSource.pitch = originalPitch + Random.Range(-pitchVariance, pitchVariance);
+
+        audioSource.PlayOneShot(clip);
+
+        audioSource.pitch = originalPitch;
+    }
 }
