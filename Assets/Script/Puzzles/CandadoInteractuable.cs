@@ -1,29 +1,36 @@
 ﻿using UnityEngine;
+using UnityEngine.Events;
 
+[RequireComponent(typeof(Collider))]
 public class CandadoInteractuable : MonoBehaviour, IInteractuable
 {
-    //---------------UI del puzzle---------------
     [Header("UI del puzzle")]
     [SerializeField] private GameObject panelPuzzle; // Canvas/Panel del candado
-    [SerializeField] private CandadoController controller; // opcional para cerrar al desbloquear
+    [SerializeField] private CandadoController controller; // referencia opcional al controller
 
     private bool resuelto = false;
 
-    //---------------Interacción---------------
     public void Interactuar()
     {
-        if (resuelto) return;
+        if (resuelto)
+        {
+            Debug.Log("[CandadoInteractuable] Ya resuelto, no se puede interactuar.");
+            return;
+        }
 
         if (panelPuzzle != null)
         {
             panelPuzzle.SetActive(true);
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
-            Debug.Log("Puzzle del candado abierto.");
+            Debug.Log("[CandadoInteractuable] Puzzle del candado abierto (UI activada).");
+        }
+        else
+        {
+            Debug.LogWarning("[CandadoInteractuable] panelPuzzle no asignado.");
         }
     }
 
-    //---------------Cerrar puzzle---------------
     public void CerrarPuzzle()
     {
         if (panelPuzzle != null)
@@ -31,28 +38,33 @@ public class CandadoInteractuable : MonoBehaviour, IInteractuable
             panelPuzzle.SetActive(false);
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
-            Debug.Log("Puzzle del candado cerrado.");
+            Debug.Log("[CandadoInteractuable] Puzzle del candado cerrado (UI desactivada).");
         }
     }
 
-    //---------------Marcar resuelto---------------
     public void MarcarResuelto()
     {
         resuelto = true;
         CerrarPuzzle();
-        Debug.Log("Candado resuelto.");
+        Debug.Log("[CandadoInteractuable] Candado marcado como resuelto.");
     }
 
-    //---------------Eventos al habilitar/deshabilitar---------------
     private void OnEnable()
     {
         if (controller != null)
+        {
             controller.AlDesbloquear.AddListener(MarcarResuelto);
+            Debug.Log("[CandadoInteractuable] Listener agregado a controller.AlDesbloquear.");
+        }
     }
 
     private void OnDisable()
     {
         if (controller != null)
+        {
             controller.AlDesbloquear.RemoveListener(MarcarResuelto);
+            Debug.Log("[CandadoInteractuable] Listener removido de controller.AlDesbloquear.");
+        }
     }
 }
+

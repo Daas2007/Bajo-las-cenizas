@@ -34,7 +34,6 @@ public class CandadoController : MonoBehaviour
         // Conectar automáticamente el evento AlDesbloquear con puzzle.Desbloquear si hay puzzle asignado
         if (puzzle != null)
         {
-            // Evitar añadir múltiples listeners si se vuelve a Awake por alguna razón
             AlDesbloquear.RemoveListener(puzzle.Desbloquear);
             AlDesbloquear.AddListener(puzzle.Desbloquear);
             Debug.Log("[CandadoController] Listener agregado: AlDesbloquear -> puzzle.Desbloquear");
@@ -48,6 +47,7 @@ public class CandadoController : MonoBehaviour
         if (scriptCamara != null) scriptCamara.enabled = false;
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
+        Debug.Log("[CandadoController] Puzzle activado: jugador y cámara bloqueados, cursor liberado.");
     }
 
     public void DesactivarPuzzle()
@@ -57,6 +57,7 @@ public class CandadoController : MonoBehaviour
         if (scriptCamara != null) scriptCamara.enabled = true;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        Debug.Log("[CandadoController] Puzzle desactivado: jugador y cámara restaurados, cursor bloqueado.");
     }
 
     public void VerificarCodigo()
@@ -85,7 +86,7 @@ public class CandadoController : MonoBehaviour
         Debug.Log("[CandadoController] Código correcto. Disparando AlDesbloquear.");
         AlDesbloquear?.Invoke();
 
-        // Si por alguna razón puzzle no está asignado, lo intentamos llamar aquí también
+        // Llamada redundante segura al puzzle
         if (puzzle != null)
         {
             puzzle.Desbloquear();
