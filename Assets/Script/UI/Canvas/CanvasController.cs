@@ -158,7 +158,7 @@ public class CanvasController : MonoBehaviour
     public void MostrarOpciones()
     {
         panelAnterior = panelActivo;
-        if (panelAnterior != null) panelAnterior.SetActive(false);
+        //if (panelAnterior != null) panelAnterior.SetActive(false);
 
         if (panelOpciones != null) panelOpciones.SetActive(true);
         panelActivo = panelOpciones;
