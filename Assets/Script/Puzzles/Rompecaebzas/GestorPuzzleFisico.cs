@@ -2,8 +2,11 @@ using UnityEngine;
 
 public class GestorPuzzleFisico : MonoBehaviour
 {
+    [Header("Slots del puzzle")]
     public SlotPuzzle[] slots;
-    public GameObject[] puertasBloqueadas;
+
+    [Header("Puertas que se desbloquean")]
+    public GameObject[] puertasBloqueadas; // aquí arrastras las 2 puertas del armario
 
     private bool puzzleCompletado = false;
 
@@ -30,6 +33,7 @@ public class GestorPuzzleFisico : MonoBehaviour
     {
         foreach (var puerta in puertasBloqueadas)
         {
+            // Cambia el layer a "Interaccion" para que ahora puedan abrirse
             puerta.layer = LayerMask.NameToLayer("Interaccion");
         }
     }
@@ -40,7 +44,8 @@ public class GestorPuzzleFisico : MonoBehaviour
         {
             if (slot.piezaActual != null)
             {
-                slot.piezaActual.enabled = false; // desactiva script de pieza
+                // Desactiva el script de la pieza para que ya no se pueda mover
+                slot.piezaActual.enabled = false;
             }
         }
     }
