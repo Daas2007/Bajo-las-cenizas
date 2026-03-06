@@ -33,7 +33,7 @@ public class JugadorLinterna : MonoBehaviour
         if (!tieneLinterna) return;
         if (panelDialogo != null && panelDialogo.activeSelf) return;
 
-        if (Input.GetKeyDown(KeyCode.F))
+        if (Input.GetKeyDown(KeyCode.F) && Time.deltaTime > 0)
         {
             ToggleLinterna();
         }
