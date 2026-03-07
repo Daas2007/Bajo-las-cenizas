@@ -14,6 +14,13 @@ public class CanvasController : MonoBehaviour
     [Header("HUD siempre visible")]
     [SerializeField] GameObject panelHUD;
 
+    //---------------Panel del candado (nuevo)---------------
+    [Header("Panel específico del candado")]
+    [Tooltip("Panel UI del puzzle del candado")]
+    [SerializeField] private GameObject panelCandado;
+    [Tooltip("Referencia opcional al CandadoController para restaurar controles al cerrar")]
+    [SerializeField] private CandadoController candadoControllerRef;
+
     private GameObject panelActivo;
     private GameObject panelAnterior;
 
@@ -29,20 +36,31 @@ public class CanvasController : MonoBehaviour
         //---------------Control ESC---------------
         if (Input.GetKeyDown(KeyCode.Escape))
         {
+            // Si está abierto el panel del candado, cerrarlo y abrir pausa
+            if (panelActivo == panelCandado)
+            {
+                CerrarPanelCandado();
+                MostrarPausa();
+                return;
+            }
+
             // Si estamos en juego (sin panel activo y tiempo corriendo)
             if (panelActivo == null && Time.timeScale == 1f)
             {
                 MostrarPausa();
+                return;
             }
             // Si estamos en pausa y no en opciones
             else if (panelActivo == panelPausa)
             {
                 Reanudar();
+                return;
             }
             // Si estamos en opciones, cerrarlas y volver al panel anterior
             else if (panelActivo == panelOpciones)
             {
                 CerrarOpciones();
+                return;
             }
         }
     }
@@ -314,6 +332,37 @@ public class CanvasController : MonoBehaviour
     //---------------Dialogo---------------
     public void MostrarDialogo() => ActivarPanel(panelDialogo, true);
 
+    //---------------Panel Candado (nuevo)---------------
+    public void MostrarPanelCandado()
+    {
+        ActivarPanel(panelCandado, true);
+
+        // Si el controller no está asignado, intentamos buscar uno en escena (fallback)
+        if (candadoControllerRef == null)
+        {
+            candadoControllerRef = FindObjectOfType<CandadoController>();
+        }
+    }
+
+    public void CerrarPanelCandado()
+    {
+        // Restaurar controles a través del controller si está asignado
+        if (candadoControllerRef != null)
+        {
+            candadoControllerRef.DesactivarPuzzle();
+        }
+        else
+        {
+            // Fallback: ocultar panel y restaurar cursor por seguridad
+            if (panelCandado != null) panelCandado.SetActive(false);
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+
+        panelActivo = null;
+        Debug.Log("[CanvasController] Panel candado cerrado y controles restaurados.");
+    }
+
     //---------------Control general---------------
     public void CerrarPanelActivo()
     {
@@ -348,6 +397,6 @@ public class CanvasController : MonoBehaviour
         if (panelOpciones != null) panelOpciones.SetActive(false);
         if (panelMuerte != null) panelMuerte.SetActive(false);
         if (panelDialogo != null) panelDialogo.SetActive(false);
-        // 🔧 Ya no desactivamos tutorial aquí, porque ahora es parte del HUD interactivo.
+        // NOTA: no desactivamos panelCandado aquí para evitar cerrar accidentalmente el candado si lo llamamos desde otro flujo.
     }
 }

@@ -31,7 +31,6 @@ public class LevelGateManager : MonoBehaviour
     {
         if (Instancia != null && Instancia != this)
         {
-           // Debug.LogWarning("LevelGateManager: ya existe una instancia. Destruyendo esta.");
             Destroy(gameObject);
             return;
         }
@@ -42,13 +41,13 @@ public class LevelGateManager : MonoBehaviour
         {
             if (string.IsNullOrEmpty(r.id))
             {
-            //    Debug.LogWarning($"LevelGateManager: Una RoomData no tiene id asignado (GameObject: {name}).");
+                Debug.LogWarning($"[LevelGateManager] Una RoomData no tiene id asignado. Ignorando entrada.");
                 continue;
             }
 
             if (habitacionesMap.ContainsKey(r.id))
             {
-           //     Debug.LogWarning($"LevelGateManager: id duplicado '{r.id}'. Ignorando duplicado.");
+                Debug.LogWarning($"[LevelGateManager] id duplicado '{r.id}'. Ignorando duplicado.");
                 continue;
             }
 
@@ -65,7 +64,11 @@ public class LevelGateManager : MonoBehaviour
 
     public void EntrarHabitacion(string id)
     {
-        if (!habitacionesMap.TryGetValue(id, out var room)) return;
+        if (!habitacionesMap.TryGetValue(id, out var room))
+        {
+            Debug.LogWarning($"[LevelGateManager] EntrarHabitacion: id '{id}' no encontrado.");
+            return;
+        }
 
         if (room.estado == RoomState.Completado)
         {
@@ -83,26 +86,31 @@ public class LevelGateManager : MonoBehaviour
         if (room.enemyActivator != null) room.enemyActivator.ActivarVentana(true);
 
         room.estado = RoomState.EnCurso;
+        Debug.Log($"[LevelGateManager] EntrarHabitacion: '{id}' marcado EnCurso. Muro activado.");
     }
 
     public void SalirHabitacion(string id)
     {
         if (!habitacionesMap.TryGetValue(id, out var room))
         {
-         //   Debug.LogWarning($"LevelGateManager.SalirHabitacion: id '{id}' no encontrado.");
+            Debug.LogWarning($"[LevelGateManager] SalirHabitacion: id '{id}' no encontrado.");
             return;
         }
 
         if (room.estado == RoomState.EnCurso)
         {
-            // Ya no existe OnPlayerLeft, dejamos solo el log
-       //     Debug.Log($"SalirHabitacion: '{id}' jugador salió del trigger (estado EnCurso).");
+            // Comportamiento por defecto: no hacemos nada especial aquí
+            Debug.Log($"[LevelGateManager] SalirHabitacion: '{id}' jugador salió del trigger (estado EnCurso).");
         }
     }
 
     public void CompletarHabitacion(string id)
     {
-        if (!habitacionesMap.TryGetValue(id, out var room)) return;
+        if (!habitacionesMap.TryGetValue(id, out var room))
+        {
+            Debug.LogWarning($"[LevelGateManager] CompletarHabitacion: id '{id}' no encontrado.");
+            return;
+        }
 
         if (room.estado == RoomState.Completado) return;
 
@@ -113,19 +121,23 @@ public class LevelGateManager : MonoBehaviour
         if (room.enemyActivator != null) room.enemyActivator.ActivarVentana(false);
 
         room.estado = RoomState.Completado;
+        Debug.Log($"[LevelGateManager] CompletarHabitacion: '{id}' completada. Muro desactivado.");
     }
 
     public void CerrarHabitacionYIniciar(string id)
     {
-        if (!habitacionesMap.TryGetValue(id, out var room)) return;
+        if (!habitacionesMap.TryGetValue(id, out var room))
+        {
+            Debug.LogWarning($"[LevelGateManager] CerrarHabitacionYIniciar: id '{id}' no encontrado.");
+            return;
+        }
 
         if (room.puertaInterna != null) room.puertaInterna.Lock();
 
         if (id == "Habitacion1")
         {
-       //     Debug.Log("Iniciando juego en Habitación 1");
-            // Aquí llamas a tu GameManager o activas la lógica del nivel 1
-            // GameManager.Instancia.IniciarNivel1();
+            Debug.Log("[LevelGateManager] Iniciando juego en Habitación 1");
+            // Aquí puedes llamar a GameManager.Instancia.IniciarNivel1() si lo necesitas
         }
     }
 
@@ -133,7 +145,7 @@ public class LevelGateManager : MonoBehaviour
     {
         if (!habitacionesMap.TryGetValue(id, out var room))
         {
-       //     Debug.LogWarning($"LevelGateManager.ResetHabitacion: id '{id}' no encontrado.");
+            Debug.LogWarning($"[LevelGateManager] ResetHabitacion: id '{id}' no encontrado.");
             return;
         }
 
@@ -142,36 +154,85 @@ public class LevelGateManager : MonoBehaviour
         if (room.muroRetorno != null) room.muroRetorno.SetActive(false);
         if (room.enemyActivator != null) room.enemyActivator.ActivarVentana(false);
         room.estado = RoomState.NoEntrado;
-       // Debug.Log($"ResetHabitacion: '{id}' reiniciada a NoEntrado.");
+        Debug.Log($"[LevelGateManager] ResetHabitacion: '{id}' reiniciada a NoEntrado.");
     }
 
     public RoomState GetRoomState(string id)
     {
         if (!habitacionesMap.TryGetValue(id, out var room))
         {
-          //  Debug.LogWarning($"LevelGateManager.GetRoomState: id '{id}' no encontrado.");
+            Debug.LogWarning($"[LevelGateManager] GetRoomState: id '{id}' no encontrado.");
             return RoomState.NoEntrado;
         }
         return room.estado;
     }
+
     public void ActivarMuroRetorno(string id)
     {
-        if (!habitacionesMap.TryGetValue(id, out var room)) return;
-        if (room.muroRetorno != null) room.muroRetorno.SetActive(true);
-       // Debug.Log($"Muro de retorno activado en '{id}'.");
+        if (!habitacionesMap.TryGetValue(id, out var room))
+        {
+            Debug.LogWarning($"[LevelGateManager] ActivarMuroRetorno: id '{id}' no encontrado.");
+            return;
+        }
+        if (room.muroRetorno != null)
+        {
+            room.muroRetorno.SetActive(true);
+            Debug.Log($"[LevelGateManager] Muro de retorno activado en '{id}'.");
+        }
     }
+
     public void DesactivarMuroRetorno(string id)
     {
-        if (!habitacionesMap.TryGetValue(id, out var room)) return;
-        if (room.muroRetorno != null) room.muroRetorno.SetActive(true);
-        //Debug.Log($"Muro de retorno activado en '{id}'.");
+        if (!habitacionesMap.TryGetValue(id, out var room))
+        {
+            Debug.LogWarning($"[LevelGateManager] DesactivarMuroRetorno: id '{id}' no encontrado.");
+            return;
+        }
+        if (room.muroRetorno != null)
+        {
+            room.muroRetorno.SetActive(false);
+            Debug.Log($"[LevelGateManager] Muro de retorno desactivado en '{id}'.");
+        }
     }
 
     public void CerrarPuertaLobby(string id)
     {
-        if (!habitacionesMap.TryGetValue(id, out var room)) return;
+        if (!habitacionesMap.TryGetValue(id, out var room))
+        {
+            Debug.LogWarning($"[LevelGateManager] CerrarPuertaLobby: id '{id}' no encontrado.");
+            return;
+        }
         if (room.puertaLobby != null) room.puertaLobby.Lock();
-       // Debug.Log($"Puerta lobby cerrada en '{id}'.");
+        Debug.Log($"[LevelGateManager] Puerta lobby cerrada en '{id}'.");
     }
 
+    // -----------------------
+    // Métodos adicionales útiles
+    // -----------------------
+
+    // Desactiva todos los muros de retorno registrados (útil cuando el jugador recoge el cristal)
+    public void DesactivarTodosLosMurosRetorno()
+    {
+        foreach (var kv in habitacionesMap)
+        {
+            var room = kv.Value;
+            if (room.muroRetorno != null)
+            {
+                room.muroRetorno.SetActive(false);
+            }
+        }
+        Debug.Log("[LevelGateManager] Todos los muros de retorno desactivados.");
+    }
+
+    // Notificar que el jugador recogió el cristal: actualiza PlayerPrefs y desactiva muros relevantes
+    public void NotificarCristalRecogidoGlobal()
+    {
+        PlayerPrefs.SetInt("TieneCristal", 1);
+        PlayerPrefs.Save();
+
+        // Desactivar todos los muros (o podrías desactivar solo los de ciertas habitaciones si lo prefieres)
+        DesactivarTodosLosMurosRetorno();
+
+        Debug.Log("[LevelGateManager] Notificado: cristal recogido. Muros desactivados.");
+    }
 }

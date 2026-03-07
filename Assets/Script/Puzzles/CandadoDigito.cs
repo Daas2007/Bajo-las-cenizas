@@ -1,3 +1,4 @@
+// CandadoDigito.cs
 using UnityEngine;
 using UnityEngine.Events;
 

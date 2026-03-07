@@ -4,30 +4,58 @@ using UnityEngine.Events;
 [RequireComponent(typeof(Collider))]
 public class CandadoInteractuable : MonoBehaviour, IInteractuable
 {
-    [Header("UI del puzzle")]
-    [SerializeField] private GameObject panelPuzzle; // Canvas/Panel del candado
-    [SerializeField] private CandadoController controller; // referencia opcional al controller
+    [Header("UI del puzzle (opcional si usas controller)")]
+    [SerializeField] private GameObject panelPuzzle; // usado si no hay controller
+    [SerializeField] private CandadoController controller; // referencia al controller (recomendada)
 
     private bool resuelto = false;
 
+    private void Reset()
+    {
+        var c = GetComponent<Collider>();
+        if (c != null) c.isTrigger = true;
+    }
+
+    private void Start()
+    {
+        int layerIndex = LayerMask.NameToLayer("Interaccion");
+        if (layerIndex != -1)
+        {
+            gameObject.layer = layerIndex;
+        }
+        else
+        {
+            Debug.LogWarning("[CandadoInteractuable] Layer 'Interaccion' no existe. Crea la layer para interacción.");
+        }
+    }
+
     public void Interactuar()
     {
+        Debug.Log($"[CandadoInteractuable] Interactuar() llamado. resuelto={resuelto} controller={(controller != null)} panelPuzzle={(panelPuzzle != null)}");
+
         if (resuelto)
         {
-            Debug.Log("[CandadoInteractuable] Ya resuelto, no se puede interactuar.");
+            Debug.Log("[CandadoInteractuable] Ya resuelto, ignorando.");
             return;
         }
 
+        if (controller != null)
+        {
+            controller.ActivarPuzzle();
+            return;
+        }
+
+        // Si no hay controller, abrir panel directamente
         if (panelPuzzle != null)
         {
             panelPuzzle.SetActive(true);
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
-            Debug.Log("[CandadoInteractuable] Puzzle del candado abierto (UI activada).");
+            Debug.Log("[CandadoInteractuable] Panel del puzzle activado directamente (sin controller).");
         }
         else
         {
-            Debug.LogWarning("[CandadoInteractuable] panelPuzzle no asignado.");
+            Debug.LogWarning("[CandadoInteractuable] No hay controller ni panelPuzzle asignado.");
         }
     }
 
@@ -38,7 +66,7 @@ public class CandadoInteractuable : MonoBehaviour, IInteractuable
             panelPuzzle.SetActive(false);
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
-            Debug.Log("[CandadoInteractuable] Puzzle del candado cerrado (UI desactivada).");
+            Debug.Log("[CandadoInteractuable] Panel del puzzle cerrado (directo).");
         }
     }
 
@@ -46,6 +74,7 @@ public class CandadoInteractuable : MonoBehaviour, IInteractuable
     {
         resuelto = true;
         CerrarPuzzle();
+        gameObject.layer = LayerMask.NameToLayer("Default");
         Debug.Log("[CandadoInteractuable] Candado marcado como resuelto.");
     }
 
@@ -67,4 +96,3 @@ public class CandadoInteractuable : MonoBehaviour, IInteractuable
         }
     }
 }
-

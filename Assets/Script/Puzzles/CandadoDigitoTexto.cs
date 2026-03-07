@@ -1,3 +1,4 @@
+// CandadoDigitoTexto.cs
 using TMPro;
 using UnityEngine;
 

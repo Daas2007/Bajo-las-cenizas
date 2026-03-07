@@ -38,7 +38,7 @@ public class TutorialInteractivo : MonoBehaviour
 
     // Identificación de la linterna: tag o componente
     [Header("Identificación de la linterna")]
-    [SerializeField] private string tagLinterna = "Linterna";
+    [SerializeField] private string Pickup = "Linterna";
 
     [Header("Mensajes")]
     [SerializeField] private float duracionMensajeTemporal = 2f;
@@ -142,7 +142,7 @@ public class TutorialInteractivo : MonoBehaviour
 
                             // ¿Es la linterna? (por tag o por componente LinternaPickup)
                             bool esLinterna = false;
-                            if (!string.IsNullOrEmpty(tagLinterna) && hitObj.CompareTag(tagLinterna))
+                            if (!string.IsNullOrEmpty(Pickup) && hitObj.CompareTag(Pickup))
                                 esLinterna = true;
                             else if (hitObj.GetComponent("LinternaPickup") != null) // chequeo por componente por nombre
                                 esLinterna = true;
@@ -283,7 +283,7 @@ public class TutorialInteractivo : MonoBehaviour
         {
             // Si el objeto es la linterna, marcar y avanzar
             bool esLinterna = false;
-            if (!string.IsNullOrEmpty(tagLinterna) && obj.CompareTag(tagLinterna))
+            if (!string.IsNullOrEmpty(Pickup) && obj.CompareTag(Pickup))
                 esLinterna = true;
             else if (obj.GetComponent("LinternaPickup") != null)
                 esLinterna = true;
