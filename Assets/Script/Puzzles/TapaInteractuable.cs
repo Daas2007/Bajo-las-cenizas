@@ -50,8 +50,9 @@ public class TapaInteractuable : MonoBehaviour, IInteractuable
             yield break;
         }
 
+        // Usamos localRotation y rotamos en Z
         Quaternion rotInicial = pivote.localRotation;
-        Quaternion rotFinal = rotInicial * Quaternion.Euler(0, anguloApertura, 0);
+        Quaternion rotFinal = rotInicial * Quaternion.Euler(0f, 0f, anguloApertura);
 
         float t = 0f;
         while (t < 1f)
