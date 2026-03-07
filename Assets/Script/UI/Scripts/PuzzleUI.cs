@@ -22,14 +22,20 @@ public class PuzzleUI : MonoBehaviour
 
         Debug.Log("[PuzzleUI] Confirmar pulsado -> VerificarCodigo()");
         controller.VerificarCodigo();
-        // controller.VerificarCodigo() ya llama a DesactivarPuzzle() si es correcto
-        // y a puzzle.Desbloquear() vía evento AlDesbloquear
     }
 
     // Llamar desde el botón Cancelar (OnClick) o Close
     public void Cancelar()
     {
-        Debug.Log("[PuzzleUI] Cancelar pulsado -> DesactivarPuzzle()");
+        Debug.Log("[PuzzleUI] Cancelar pulsado -> Cerrar panel via CanvasController");
+
+        CanvasController canvas = FindObjectOfType<CanvasController>();
+        if (canvas != null)
+        {
+            canvas.CerrarPanelCandado();
+            return;
+        }
+
         if (controller != null)
         {
             controller.DesactivarPuzzle();
@@ -40,6 +46,7 @@ public class PuzzleUI : MonoBehaviour
             if (panelRoot != null) panelRoot.SetActive(false);
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
+            Time.timeScale = 1f;
         }
     }
 

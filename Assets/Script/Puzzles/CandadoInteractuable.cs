@@ -13,11 +13,14 @@ public class CandadoInteractuable : MonoBehaviour, IInteractuable
     private void Reset()
     {
         var c = GetComponent<Collider>();
-        if (c != null) c.isTrigger = true;
+        if (c != null) c.isTrigger = false; // evitar triggers: usamos raycast
     }
 
     private void Start()
     {
+        var c = GetComponent<Collider>();
+        if (c != null) c.isTrigger = false; // forzamos collider físico
+
         int layerIndex = LayerMask.NameToLayer("Interaccion");
         if (layerIndex != -1)
         {
@@ -51,7 +54,8 @@ public class CandadoInteractuable : MonoBehaviour, IInteractuable
             panelPuzzle.SetActive(true);
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
-            Debug.Log("[CandadoInteractuable] Panel del puzzle activado directamente (sin controller).");
+            Time.timeScale = 0f;
+            Debug.Log("[CandadoInteractuable] Panel del candado activado directamente (sin controller).");
         }
         else
         {
@@ -66,6 +70,7 @@ public class CandadoInteractuable : MonoBehaviour, IInteractuable
             panelPuzzle.SetActive(false);
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
+            Time.timeScale = 1f;
             Debug.Log("[CandadoInteractuable] Panel del puzzle cerrado (directo).");
         }
     }

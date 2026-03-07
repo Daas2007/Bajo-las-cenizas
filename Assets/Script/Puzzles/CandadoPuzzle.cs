@@ -23,7 +23,6 @@ public class CandadoPuzzle : MonoBehaviour
         // 1) Desactivar el objeto candado (ya no debe ser interactuable)
         if (candado != null)
         {
-            // Si el candado tiene un componente CandadoInteractuable, marcarlo resuelto
             var interact = candado.GetComponent<CandadoInteractuable>();
             if (interact != null)
             {

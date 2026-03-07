@@ -176,7 +176,6 @@ public class CanvasController : MonoBehaviour
     public void MostrarOpciones()
     {
         panelAnterior = panelActivo;
-        //if (panelAnterior != null) panelAnterior.SetActive(false);
 
         if (panelOpciones != null) panelOpciones.SetActive(true);
         panelActivo = panelOpciones;
@@ -347,16 +346,22 @@ public class CanvasController : MonoBehaviour
     public void CerrarPanelCandado()
     {
         // Restaurar controles a través del controller si está asignado
+        if (candadoControllerRef == null)
+        {
+            candadoControllerRef = FindObjectOfType<CandadoController>();
+        }
+
         if (candadoControllerRef != null)
         {
             candadoControllerRef.DesactivarPuzzle();
         }
         else
         {
-            // Fallback: ocultar panel y restaurar cursor por seguridad
+            // Fallback: ocultar panel y restaurar cursor y tiempo por seguridad
             if (panelCandado != null) panelCandado.SetActive(false);
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
+            Time.timeScale = 1f;
         }
 
         panelActivo = null;
@@ -397,6 +402,7 @@ public class CanvasController : MonoBehaviour
         if (panelOpciones != null) panelOpciones.SetActive(false);
         if (panelMuerte != null) panelMuerte.SetActive(false);
         if (panelDialogo != null) panelDialogo.SetActive(false);
-        // NOTA: no desactivamos panelCandado aquí para evitar cerrar accidentalmente el candado si lo llamamos desde otro flujo.
+        if (panelCandado != null) panelCandado.SetActive(false); // aseguramos que se apague al resetear paneles
+        panelActivo = null;
     }
 }
