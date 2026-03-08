@@ -12,6 +12,7 @@ TagManager:
   - EnemigoPerseguidor
   - Colocar
   - Slot
+  - Linterna
   layers:
   - Default
   - TransparentFX
