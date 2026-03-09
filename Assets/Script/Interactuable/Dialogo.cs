@@ -8,6 +8,11 @@ public class Dialogo : MonoBehaviour, IInteractuable
     [SerializeField] public GameObject dialogoCanvas;
     [SerializeField] public TMP_Text dialogoTexto;
 
+    [Header("Audio")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip sonidoLetra;     // sonido tipo Undertale por letra
+    [SerializeField] private AudioClip sonidoInicio;    // sonido al empezar diálogo
+
     [Header("Líneas de diálogo")]
     [TextArea(2, 5)]
     [SerializeField] public string[] lineas;
@@ -23,12 +28,10 @@ public class Dialogo : MonoBehaviour, IInteractuable
 
     [SerializeField] public MonoBehaviour scriptMovimiento;
 
-    // Nuevo: evento y flag público para saber si el jugador ya habló con este NPC
     [Header("Eventos")]
     public UnityEvent OnDialogoCompleto;
     public bool HaHablado { get; private set; } = false;
 
-    // Guardar líneas originales para poder restaurarlas si usamos líneas temporales
     private string[] lineasOriginales;
 
     void Start()
@@ -36,7 +39,6 @@ public class Dialogo : MonoBehaviour, IInteractuable
         if (dialogoCanvas != null)
             dialogoCanvas.SetActive(false);
 
-        // clonar las líneas originales
         if (lineas != null)
             lineasOriginales = (string[])lineas.Clone();
     }
@@ -45,7 +47,6 @@ public class Dialogo : MonoBehaviour, IInteractuable
     {
         if (!mostrandoDialogo) return;
 
-        // Avanzar/saltar con Space (mantengo Space como control de avance)
         if (Input.GetKeyDown(KeyCode.Space))
         {
             if (escribiendoLinea)
@@ -109,39 +110,39 @@ public class Dialogo : MonoBehaviour, IInteractuable
         mostrandoDialogo = true;
         MostrarLinea();
         BloquearJugador(true);
+
+        // 🔊 reproducir sonido de inicio
+        if (audioSource != null && sonidoInicio != null)
+            audioSource.PlayOneShot(sonidoInicio);
     }
 
-    // Nuevo: iniciar diálogo con líneas temporales (no sobrescribe permanentemente las originales)
-    // marcarComoHablado: si true, al terminar se marcará HaHablado = true y disparará OnDialogoCompleto
+    // 🔹 Método que tu PuertaConCondicion necesita
     public void IniciarDialogoConLineas(string[] nuevasLineas, bool marcarComoHablado = false)
     {
         if (nuevasLineas == null || nuevasLineas.Length == 0)
             return;
 
-        // Guardar las originales si no están guardadas
         if (lineasOriginales == null && lineas != null)
             lineasOriginales = (string[])lineas.Clone();
 
-        // Reemplazar temporalmente
         lineas = (string[])nuevasLineas.Clone();
         indiceLinea = 0;
         mostrandoDialogo = true;
 
-        // Si queremos que al terminar esto marque como hablado, lo haremos en TerminarDialogo usando una bandera temporal
-        StartCoroutine(IniciarDialogoTemporalCoroutine(marcarComoHablado));
-    }
-
-    private IEnumerator IniciarDialogoTemporalCoroutine(bool marcarComoHablado)
-    {
-        // Mostrar la primera línea
         if (dialogoCanvas != null) dialogoCanvas.SetActive(true);
         MostrarLinea();
 
-        // Esperar hasta que el diálogo termine (TerminarDialogo restaurará las líneas originales)
+        StartCoroutine(RestaurarLineasAlTerminar(marcarComoHablado));
+    }
+
+    private IEnumerator RestaurarLineasAlTerminar(bool marcarComoHablado)
+    {
         while (mostrandoDialogo)
             yield return null;
 
-        // Si se pidió marcar como hablado, hacerlo
+        if (lineasOriginales != null)
+            lineas = (string[])lineasOriginales.Clone();
+
         if (marcarComoHablado)
         {
             HaHablado = true;
@@ -163,6 +164,11 @@ public class Dialogo : MonoBehaviour, IInteractuable
         foreach (char letra in linea)
         {
             dialogoTexto.text += letra;
+
+            // 🔊 reproducir sonido por cada letra
+            if (audioSource != null && sonidoLetra != null)
+                audioSource.PlayOneShot(sonidoLetra);
+
             yield return new WaitForSeconds(tiempoEntreLetras);
         }
         escribiendoLinea = false;
@@ -196,18 +202,14 @@ public class Dialogo : MonoBehaviour, IInteractuable
         mostrandoDialogo = false;
         BloquearJugador(false);
 
-        // Marcar que ya habló (solo si no estaba ya marcado)
         if (!HaHablado)
         {
             HaHablado = true;
             OnDialogoCompleto?.Invoke();
         }
 
-        // Si usamos líneas temporales, restaurar las originales
         if (lineasOriginales != null)
-        {
             lineas = (string[])lineasOriginales.Clone();
-        }
     }
 
     public void BloquearJugador(bool bloquear)
@@ -216,10 +218,8 @@ public class Dialogo : MonoBehaviour, IInteractuable
             scriptMovimiento.enabled = !bloquear;
     }
 
-    // Método público para resetear el estado de "ha hablado" (útil para testing o reinicios)
     public void ResetHaHablado()
     {
         HaHablado = false;
     }
 }
-
