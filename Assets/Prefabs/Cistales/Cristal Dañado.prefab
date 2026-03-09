@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: -8028801627501061888}
   m_Layer: 0
   m_Name: "Cristal Da\xF1ado"
-  m_TagString: Untagged
+  m_TagString: Cristal
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

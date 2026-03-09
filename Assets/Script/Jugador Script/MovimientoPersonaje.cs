@@ -5,7 +5,8 @@ using System.Collections;
 [RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider))]
 public class MovimientoPersonaje : MonoBehaviour
 {
-
+    [Header("Cristal Obtenido")]
+    [SerializeField] bool Cristal = false;
 
     [Header("Referencias")]
     [SerializeField] Transform camara;
@@ -137,6 +138,14 @@ public class MovimientoPersonaje : MonoBehaviour
     public void CargarPartida()
     {
         SistemaGuardar.Cargar(this, GameManager.Instancia);
+    }
+    private void OnTriggerEnter(Collider cristal)
+    {
+        if (cristal.CompareTag("Cristal")) CristalObtenido();
+    }
+    public void CristalObtenido()
+    {
+        Cristal = true;
     }
 }
 

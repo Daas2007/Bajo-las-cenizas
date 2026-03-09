@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: -4678994698313788632}
   m_Layer: 0
   m_Name: Cristal Sano
-  m_TagString: Untagged
+  m_TagString: Cristal
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -67,7 +67,7 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: -876546973899608171, guid: 891805601de40e544949e88086b589e6, type: 3}
-  - {fileID: -2950844259124949753, guid: 891805601de40e544949e88086b589e6, type: 3}
+  - {fileID: 2100000, guid: a8a4e6584a47b3f4698c8863eb2852b3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
