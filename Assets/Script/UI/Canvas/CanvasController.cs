@@ -74,19 +74,21 @@ public class CanvasController : MonoBehaviour
     // Jugar: siempre inicia desde spawnInicial con estado inicial
     public void Jugar()
     {
+        if (panelHUD !=null) panelHUD.SetActive(true);
         GameManager gm = GameManager.Instancia;
         if (gm != null)
         {
-            gm.NuevaPartida(); // reinicia todo al inicio y borra guardado
-        }
+            gm.NuevaPartida();
 
+        }
         // Cerrar cualquier panel y reanudar juego
         CerrarPanelActivo();
-        Time.timeScale = 1f;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-
+        Time.timeScale = 1f;
+        panelUIActivo();
         Debug.Log("▶️ Jugar: inicio limpio desde spawn inicial.");
+        Debug.Log("tiempo de juego" + Time.timeScale);
     }
 
     // Cargar desde menú principal: si hay guardado, cargar; si no, respawnear en spawnInicial
@@ -145,6 +147,7 @@ public class CanvasController : MonoBehaviour
         if (panelPausa != null) panelPausa.SetActive(false);
         panelActivo = null;
         Time.timeScale = 1f;
+        panelUIActivo();
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -310,10 +313,8 @@ public class CanvasController : MonoBehaviour
     public void SalirAlMenuDesdeMuerte()
     {
         if (panelMuerte != null) panelMuerte.SetActive(false);
-        panelActivo = null;
-
-        if (panelMainMenu != null) panelMainMenu.SetActive(true);
-        panelActivo = panelMainMenu;
+        MostrarMainMenu();
+        //if (panelMainMenu != null) panelMainMenu.SetActive(true);
 
         GameManager gm = GameManager.Instancia;
         if (gm != null)
@@ -394,9 +395,14 @@ public class CanvasController : MonoBehaviour
             }
         }
     }
-
+    public void panelUIActivo()
+    {
+        if (Time.timeScale !=0)
+        panelHUD.SetActive(true);
+    }
     private void DesactivarTodos()
     {
+        if (panelHUD != null) panelHUD.SetActive(false);
         if (panelMainMenu != null) panelMainMenu.SetActive(false);
         if (panelPausa != null) panelPausa.SetActive(false);
         if (panelOpciones != null) panelOpciones.SetActive(false);

@@ -117,7 +117,8 @@ public class CandadoController : MonoBehaviour
 
         // Restaurar tiempo por seguridad
         Time.timeScale = 1f;
-
+        CanvasController cc = FindAnyObjectByType<CanvasController>();
+        cc.panelUIActivo();
         Debug.Log("[CandadoController] Puzzle desactivado: jugador y cámara restaurados.");
     }
 

@@ -67,10 +67,12 @@ public class CandadoInteractuable : MonoBehaviour, IInteractuable
     {
         if (panelPuzzle != null)
         {
+            CanvasController cc = FindAnyObjectByType<CanvasController>();
             panelPuzzle.SetActive(false);
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
             Time.timeScale = 1f;
+            cc.panelUIActivo();
             Debug.Log("[CandadoInteractuable] Panel del puzzle cerrado (directo).");
         }
     }

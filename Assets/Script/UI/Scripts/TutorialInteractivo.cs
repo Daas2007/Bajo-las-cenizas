@@ -43,10 +43,11 @@ public class TutorialInteractivo : MonoBehaviour
     [Header("Mensajes")]
     [SerializeField] private float duracionMensajeTemporal = 2f;
 
-    void Start()
+    public void Start()
     {
         if (panelTutorial != null) panelTutorial.SetActive(true);
         if (camaraPrincipal == null) camaraPrincipal = Camera.main;
+        pasoActual = 0;
         MostrarPaso();
         if (textoTemporal != null) textoTemporal.text = "";
     }
@@ -215,12 +216,11 @@ public class TutorialInteractivo : MonoBehaviour
         }
     }
 
-    private void MostrarPaso()
+    public void MostrarPaso()
     {
         if (textoTutorial != null && pasoActual < pasos.Length)
             textoTutorial.text = pasos[pasoActual];
     }
-
     public void SiguientePaso()
     {
         pasoActual++;
@@ -233,11 +233,11 @@ public class TutorialInteractivo : MonoBehaviour
             MostrarPaso();
         }
     }
-
     private void CompletarTutorial()
     {
         tutorialActivo = false;
         if (panelTutorial != null) panelTutorial.SetActive(false);
+        pasoActual = 0;
         Debug.Log("✅ Tutorial completado y panel apagado.");
     }
 

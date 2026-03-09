@@ -187,4 +187,10 @@ public class GameManager : MonoBehaviour
                 ventana.ResetVentana();
         }
     }
+    public void RecogerCrital()
+    {
+        MuroBloqueo muro = FindAnyObjectByType<MuroBloqueo>();
+        muro.QuitarMuro();
+
+    } 
 }

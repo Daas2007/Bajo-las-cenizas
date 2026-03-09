@@ -15,7 +15,7 @@ public class PlayerMuertes : MonoBehaviour
         }
         else
         {
-            Debug.Log("No chocaste con el enemigo");
+            Debug.Log("Tranqui, no es el enemigo");
         }
     }
 }

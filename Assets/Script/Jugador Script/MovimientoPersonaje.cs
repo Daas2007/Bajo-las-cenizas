@@ -27,7 +27,6 @@ public class MovimientoPersonaje : MonoBehaviour
     [SerializeField] float RecargarStamina = 10f;
 
     private Coroutine recarga;
-
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -35,13 +34,11 @@ public class MovimientoPersonaje : MonoBehaviour
         if (camara == null && Camera.main != null) camara = Camera.main.transform;
         canvas_StaminaBar.SetActive(false);
     }
-
     void Start()
     {
         Stamina = StaminaMaxima;
         VelocidadBase = VelocidadMove;
     }
-
     void Update()
     {
         if (Time.timeScale == 1f)
@@ -54,13 +51,11 @@ public class MovimientoPersonaje : MonoBehaviour
             canvas_StaminaBar.SetActive(false);
         }
     }
-
     void FixedUpdate()
     {
         if (Time.timeScale == 1f)
             JugadorCaminandoRB();
     }
-
     void JugadorCaminandoRB()
     {
         float h = UsarGetAxisRaw ? Input.GetAxisRaw("Horizontal") : Input.GetAxis("Horizontal");
@@ -88,7 +83,6 @@ public class MovimientoPersonaje : MonoBehaviour
             camaraScript.SetEstado(velocidadActual);
         }
     }
-
     void JugadorCorrer()
     {
         bool moviendo = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) ||
@@ -107,7 +101,6 @@ public class MovimientoPersonaje : MonoBehaviour
             if (recarga == null) recarga = StartCoroutine(RecargaStamina());
         }
     }
-
     void ActualizarBarraStamina()
     {
         BarraStamina.fillAmount = Stamina / StaminaMaxima;
@@ -124,7 +117,6 @@ public class MovimientoPersonaje : MonoBehaviour
             canvas_StaminaBar.SetActive(false);
         }
     }
-
     IEnumerator RecargaStamina()
     {
         yield return new WaitForSeconds(1f);
@@ -138,16 +130,13 @@ public class MovimientoPersonaje : MonoBehaviour
         canvas_StaminaBar.SetActive(false);
         recarga = null;
     }
-
     public void GuardarPartida()
     {
         SistemaGuardar.Guardar(this, GameManager.Instancia);
     }
-
     public void CargarPartida()
     {
         SistemaGuardar.Cargar(this, GameManager.Instancia);
     }
-
 }
 
