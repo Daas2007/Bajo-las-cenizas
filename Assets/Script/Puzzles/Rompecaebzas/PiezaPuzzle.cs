@@ -11,13 +11,17 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
     private bool puedeRotarX = false;
     private Transform manoIzquierda;
 
-    // ✅ Guardamos la escala original
     private Vector3 escalaOriginal;
+    private Rigidbody rb;
 
     void Awake()
     {
         this.enabled = true;
-        escalaOriginal = transform.localScale; // guardamos la escala inicial
+        escalaOriginal = transform.localScale;
+        rb = GetComponent<Rigidbody>();
+        if (rb == null) rb = gameObject.AddComponent<Rigidbody>(); // asegura que tenga Rigidbody
+        rb.useGravity = true;
+        rb.isKinematic = false; // por defecto con física activa
     }
 
     void Start()
@@ -37,6 +41,10 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
         {
             if (Input.GetKeyDown(KeyCode.R))
                 transform.Rotate(0, 0, -90);
+
+            // 🔹 Soltar con Q
+            if (Input.GetKeyDown(KeyCode.Q))
+                Soltar();
         }
 
         if (colocada && puedeRotarX && Input.GetKeyDown(KeyCode.X))
@@ -58,9 +66,11 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
                 transform.SetParent(manoIzquierda);
                 transform.localPosition = Vector3.zero;
                 transform.localRotation = Quaternion.identity;
-
-                // ✅ Restaurar la escala original al agarrar
                 transform.localScale = escalaOriginal;
+
+                // 🔹 Desactivar física mientras está en la mano
+                rb.isKinematic = true;
+                rb.useGravity = false;
             }
         }
         else
@@ -73,6 +83,10 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
     {
         colocada = estado;
         enMano = false;
+
+        // 🔹 Al colocar en un slot, desactivar física siempre
+        rb.isKinematic = true;
+        rb.useGravity = false;
     }
 
     public void PermitirRotacionX(bool estado)
@@ -85,11 +99,19 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
         colocada = false;
         enMano = false;
         puedeRotarX = false;
+
+        // 🔹 Al resetear, volver a activar física
+        rb.isKinematic = false;
+        rb.useGravity = true;
     }
 
     public void Soltar()
     {
         enMano = false;
         transform.SetParent(null);
+
+        // 🔹 Reactivar física para que caiga al piso
+        rb.isKinematic = false;
+        rb.useGravity = true;
     }
 }

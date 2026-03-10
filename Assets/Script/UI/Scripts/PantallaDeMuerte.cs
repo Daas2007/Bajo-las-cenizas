@@ -16,12 +16,12 @@ public class PantallaDeMuerte : MonoBehaviour
 
     [Header("Pantalla de carga")]
     [SerializeField] private GameObject panelLoading;
-    [SerializeField] private float fadeDuration = 1f;   // 🔹 ahora dura 1 segundo
-    [SerializeField] private float holdDuration = 2f;   // 🔹 permanece opaco 2 segundos (más ágil)
+    [SerializeField] private float fadeDuration = 0.5f;   // 🔹 transición rápida: 0.5 segundos
+    [SerializeField] private float holdDuration = 5f;     // 🔹 permanece opaco 5 segundos
 
     [Header("Configuración")]
-    [SerializeField] float tiempoRojo = 1f;    // más rápido: 1 segundo
-    [SerializeField] float tiempoNegro = 1f;   // más rápido: 1 segundo
+    [SerializeField] float tiempoRojo = 1f;
+    [SerializeField] float tiempoNegro = 1f;
 
     private Image fondo;
     private Image loadingImage;
@@ -101,7 +101,7 @@ public class PantallaDeMuerte : MonoBehaviour
         {
             panelLoading.SetActive(true);
             yield return StartCoroutine(FadeIn());
-            yield return new WaitForSecondsRealtime(holdDuration);
+            yield return new WaitForSecondsRealtime(holdDuration); // 🔹 espera 5 segundos opaco
 
             SceneManager.LoadScene(nombreEscena);
         }
@@ -111,7 +111,7 @@ public class PantallaDeMuerte : MonoBehaviour
     {
         float t = 0f;
         Color c = loadingImage.color;
-        while (t < fadeDuration)
+        while (t < fadeDuration) // 🔹 dura 0.5 segundos
         {
             t += Time.unscaledDeltaTime;
             float alpha = Mathf.Lerp(0f, 1f, t / fadeDuration);
@@ -125,7 +125,7 @@ public class PantallaDeMuerte : MonoBehaviour
     {
         float t = 0f;
         Color c = loadingImage.color;
-        while (t < fadeDuration)
+        while (t < fadeDuration) // 🔹 dura 0.5 segundos
         {
             t += Time.unscaledDeltaTime;
             float alpha = Mathf.Lerp(1f, 0f, t / fadeDuration);
@@ -136,3 +136,4 @@ public class PantallaDeMuerte : MonoBehaviour
         panelLoading.SetActive(false);
     }
 }
+

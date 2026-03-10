@@ -49,32 +49,21 @@ public class ZoneTrigger : MonoBehaviour
         switch (tipo)
         {
             case TipoTrigger.ActivarMuro:
-                // Si el jugador ya tiene el cristal, aseguramos que el muro esté desactivado
+                // Si el jugador tiene cristal → desactivar muro
                 if (PlayerPrefs.GetInt("TieneCristal", 0) == 1)
                 {
-                    if (muroActivado)
-                    {
-                        LevelGateManager.Instancia?.DesactivarMuroRetorno(idHabitacion);
-                        muroActivado = false;
-                        Debug.Log($"[ZoneTrigger] OnTriggerEnter: jugador tiene cristal -> desactivar muro {idHabitacion}");
-                    }
-                    else
-                    {
-                        Debug.Log($"[ZoneTrigger] OnTriggerEnter: jugador tiene cristal -> muro ya desactivado {idHabitacion}");
-                    }
+                    LevelGateManager.Instancia?.DesactivarMuroRetorno(idHabitacion);
+                    muroActivado = false;
+                    Debug.Log($"[ZoneTrigger] Jugador tiene cristal -> muro desactivado en {idHabitacion}");
                 }
                 else
                 {
-                    // Si no tiene cristal, activar el muro (si no está ya activado)
+                    // Si no tiene cristal → activar muro
                     if (!muroActivado)
                     {
                         LevelGateManager.Instancia?.ActivarMuroRetorno(idHabitacion);
                         muroActivado = true;
-                        Debug.Log($"[ZoneTrigger] OnTriggerEnter: jugador NO tiene cristal -> activar muro {idHabitacion}");
-                    }
-                    else
-                    {
-                        Debug.Log($"[ZoneTrigger] OnTriggerEnter: muro ya activado para {idHabitacion}");
+                        Debug.Log($"[ZoneTrigger] Jugador NO tiene cristal -> muro activado en {idHabitacion}");
                     }
                 }
                 break;
@@ -83,7 +72,6 @@ public class ZoneTrigger : MonoBehaviour
                 LevelGateManager.Instancia?.CerrarPuertaLobby(idHabitacion);
                 LevelGateManager.Instancia?.EntrarHabitacion(idHabitacion);
 
-                // Si el jugador tiene cristal, cerrar rápido la puerta
                 PuertaInteractuable puerta = Object.FindFirstObjectByType<PuertaInteractuable>();
                 if (puerta != null)
                 {
@@ -92,6 +80,7 @@ public class ZoneTrigger : MonoBehaviour
                 break;
         }
     }
+
 
     private void OnTriggerExit(Collider other)
     {

@@ -10,6 +10,7 @@ public class CheckpointInicial : MonoBehaviour
         if (jugador != null && gm != null)
         {
             gm.spawnInicial = this.transform; // usar el transform del objeto spawn
+            jugador.transform.position = this.transform.position;
             Debug.Log($"[CheckpointInicial] Spawn inicial registrado en {transform.position}");
         }
         else

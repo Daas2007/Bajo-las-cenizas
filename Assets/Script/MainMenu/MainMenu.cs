@@ -8,8 +8,8 @@ public class MainMenu : MonoBehaviour
     [SerializeField] GameObject mainPanel;       // Panel principal del menú
     [SerializeField] GameObject opcionesPanel;   // Panel de opciones
     [SerializeField] GameObject panelLoading;    // Panel de carga con Image
-    [SerializeField] float fadeDuration = 1f;    // 🔹 Duración del fade in/out ahora 1 segundo (más rápido)
-    [SerializeField] float holdDuration = 2f;    // 🔹 Tiempo que permanece opaco reducido a 2 segundos
+    [SerializeField] float fadeDuration = 0.5f;  // 🔹 Duración del fade in/out: 0.5 segundos
+    [SerializeField] float holdDuration = 5f;    // 🔹 Tiempo que permanece opaco antes de cambiar de escena: 5 segundos
 
     private Image loadingImage;
 
@@ -21,7 +21,10 @@ public class MainMenu : MonoBehaviour
         if (panelLoading != null)
         {
             loadingImage = panelLoading.GetComponent<Image>();
-            panelLoading.SetActive(false);
+            // 🔹 Arranca opaco para que se aclare al entrar
+            panelLoading.SetActive(true);
+            loadingImage.color = new Color(loadingImage.color.r, loadingImage.color.g, loadingImage.color.b, 1f);
+            StartCoroutine(FadeOut()); // 🔹 aclarar al inicio de la escena
         }
 
         Time.timeScale = 1f;
@@ -43,42 +46,39 @@ public class MainMenu : MonoBehaviour
 
             // Cargar escena mientras sigue opaco
             SceneManager.LoadScene(nombreEscena);
-
-            // 🔹 Al entrar en la nueva escena, puedes llamar a FadeOut desde un script de inicio
         }
     }
 
-    // 🔹 Fade In (pantalla se opaca en 0.3 segundos)
+    // 🔹 Fade In (pantalla se opaca en 0.5 segundos)
     private IEnumerator FadeIn()
     {
         float t = 0f;
         Color c = loadingImage.color;
-        while (t < 0.4f) // ahora dura 0.3 segundos
+        while (t < fadeDuration)
         {
             t += Time.unscaledDeltaTime;
-            float alpha = Mathf.Lerp(0f, 1f, t / 0.4f);
+            float alpha = Mathf.Lerp(0f, 1f, t / fadeDuration);
             loadingImage.color = new Color(c.r, c.g, c.b, alpha);
             yield return null;
         }
         loadingImage.color = new Color(c.r, c.g, c.b, 1f);
     }
 
-    // 🔹 Fade Out (pantalla se aclara en 0.3 segundos)
+    // 🔹 Fade Out (pantalla se aclara en 0.5 segundos)
     public IEnumerator FadeOut()
     {
         float t = 0f;
         Color c = loadingImage.color;
-        while (t < 0.4f) // también dura 0.3 segundos
+        while (t < fadeDuration)
         {
             t += Time.unscaledDeltaTime;
-            float alpha = Mathf.Lerp(1f, 0f, t / 0.4f);
+            float alpha = Mathf.Lerp(1f, 0f, t / fadeDuration);
             loadingImage.color = new Color(c.r, c.g, c.b, alpha);
             yield return null;
         }
         loadingImage.color = new Color(c.r, c.g, c.b, 0f);
         panelLoading.SetActive(false);
     }
-
 
     public void CargarPartida()
     {
@@ -115,7 +115,20 @@ public class MainMenu : MonoBehaviour
 
     public void SalirJuego()
     {
+        StartCoroutine(SalirJuegoConFade());
+    }
+
+    private IEnumerator SalirJuegoConFade()
+    {
+        if (panelLoading != null)
+        {
+            panelLoading.SetActive(true);
+            yield return StartCoroutine(FadeIn()); // 🔹 oscurece la pantalla primero
+            yield return new WaitForSecondsRealtime(1f); // opcional: espera un instante opaco
+        }
+
         Application.Quit();
-        Debug.Log("Juego cerrado desde el menú principal.");
+        Debug.Log("Juego cerrado desde el menú principal con fade.");
     }
 }
+

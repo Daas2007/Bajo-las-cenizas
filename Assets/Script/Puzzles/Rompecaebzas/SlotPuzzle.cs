@@ -44,4 +44,28 @@ public class SlotPuzzle : MonoBehaviour, IInteractuable
     {
         piezaActual = null;
     }
+
+    // 🔹 Nuevo: método para asignar pieza y desactivar su física
+    public void ColocarPieza(PiezaPuzzle pieza)
+    {
+        piezaActual = pieza;
+        pieza.transform.SetParent(transform);
+        pieza.transform.position = transform.position;
+        pieza.transform.rotation = transform.rotation;
+        pieza.transform.localScale = Vector3.one;
+
+        // ✅ Marcar como colocada (desactiva gravedad y física)
+        pieza.MarcarColocada();
+
+        // Si es correcta, permitir rotación extra
+        if (pieza.piezaID == slotID)
+        {
+            pieza.PermitirRotacionX(true);
+        }
+        else
+        {
+            pieza.PermitirRotacionX(false);
+        }
+    }
 }
+

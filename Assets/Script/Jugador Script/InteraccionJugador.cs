@@ -23,6 +23,7 @@ public class InteraccionJugador : MonoBehaviour
     {
         DetectarObjeto();
 
+        // Si hay objeto interactuable enfrente
         if (objetoActual != null && Time.timeScale == 1f && (dialogoCanvas == null || !dialogoCanvas.activeSelf))
         {
             if (!panelInteraccion.activeSelf) panelInteraccion.SetActive(true);
@@ -50,8 +51,23 @@ public class InteraccionJugador : MonoBehaviour
         {
             if (panelInteraccion.activeSelf) panelInteraccion.SetActive(false);
         }
-    }
 
+        // 🔹 Mostrar opción de soltar con Q si hay algo en la mano
+        if (manoIzquierda.childCount > 0)
+        {
+            if (!panelInteraccion.activeSelf) panelInteraccion.SetActive(true);
+            textoInteraccion.text = "Presiona [Q] para soltar";
+
+            if (Input.GetKeyDown(KeyCode.Q))
+            {
+                PiezaPuzzle pieza = manoIzquierda.GetChild(0).GetComponent<PiezaPuzzle>();
+                if (pieza != null)
+                {
+                    pieza.Soltar();
+                }
+            }
+        }
+    }
     void DetectarObjeto()
     {
         Ray rayo = new Ray(camara.transform.position, camara.transform.forward);
@@ -110,4 +126,5 @@ public class InteraccionJugador : MonoBehaviour
             }
         }
     }
+
 }

@@ -146,6 +146,19 @@ public class MovimientoPersonaje : MonoBehaviour
     public void CristalObtenido()
     {
         Cristal = true;
+
+        // Guardar en PlayerPrefs para persistencia
+        PlayerPrefs.SetInt("TieneCristal", 1);
+        PlayerPrefs.Save();
+
+        // Notificar a todos los triggers que el cristal fue recogido
+        foreach (ZoneTrigger trigger in FindObjectsOfType<ZoneTrigger>())
+        {
+            trigger.NotificarCristalRecogido();
+        }
+
+        Debug.Log("[MovimientoPersonaje] Cristal recogido y notificado.");
     }
+
 }
 

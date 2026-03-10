@@ -33,20 +33,26 @@ public class CanvasController : MonoBehaviour
 
     private GameObject panelActivo;
     private GameObject panelAnterior;
-
     void Start()
     {
         DesactivarTodos();
         BloquearMouse();
         if (panelHUD != null) panelHUD.SetActive(true);
+
         if (panelLoading != null)
         {
             loadingImage = panelLoading.GetComponent<Image>();
-            panelLoading.SetActive(false);
+
+            // 🔹 Arranca opaco (pantalla negra)
+            panelLoading.SetActive(true);
+            loadingImage.color = new Color(0f, 0f, 0f, 1f); // negro con alfa 1
+
+            // 🔹 Ejecutar fade inverso al inicio (de negro a transparente)
+            StartCoroutine(FadeOut());
         }
+
         Time.timeScale = 1f;
     }
-
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -153,7 +159,6 @@ public class CanvasController : MonoBehaviour
     {
         StartCoroutine(SalirMenuCoroutine("MainMenu"));
     }
-
     private IEnumerator FadeIn()
     {
         float t = 0f;
@@ -167,7 +172,6 @@ public class CanvasController : MonoBehaviour
         }
         loadingImage.color = new Color(c.r, c.g, c.b, 1f);
     }
-
     private IEnumerator SalirMenuCoroutine(string nombreEscena)
     {
         if (panelLoading != null)
@@ -180,7 +184,6 @@ public class CanvasController : MonoBehaviour
             // Al entrar en la nueva escena, puedes llamar a FadeOut()
         }
     }
-
     private IEnumerator FadeOut()
     {
         float t = 0f;
@@ -195,8 +198,6 @@ public class CanvasController : MonoBehaviour
         loadingImage.color = new Color(c.r, c.g, c.b, 0f);
         panelLoading.SetActive(false);
     }
-
-
     //---------------Opciones---------------
     public void MostrarOpciones()
     {
@@ -369,5 +370,55 @@ public class CanvasController : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+    }
+    //---------------Guardar y Cargar---------------
+    public void GuardarPartida()
+    {
+        MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
+        GameManager gm = GameManager.Instancia;
+
+        if (jugador != null && gm != null)
+        {
+            SistemaGuardar.Guardar(jugador, gm);
+            Debug.Log("💾 Partida guardada desde CanvasController.");
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ No se pudo guardar: faltan referencias de jugador o GameManager.");
+        }
+    }
+    public void CargarPartida()
+    {
+        MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
+        GameManager gm = GameManager.Instancia;
+
+        if (jugador != null && gm != null)
+        {
+            bool cargado = SistemaGuardar.Cargar(jugador, gm);
+            if (cargado)
+            {
+                Debug.Log("📂 Partida cargada correctamente desde CanvasController.");
+            }
+            else
+            {
+                Debug.Log("📂 No había archivo de guardado, se mantiene estado actual.");
+            }
+
+            // Restaurar controles y UI
+            jugador.enabled = true;
+            Camera cam = jugador.GetComponentInChildren<Camera>();
+            if (cam != null) cam.enabled = true;
+
+            if (panelHUD != null) panelHUD.SetActive(true);
+            if (panelPausa != null) panelPausa.SetActive(false);
+            Reanudar();
+            Time.timeScale = 1f;
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ No se pudo cargar: faltan referencias de jugador o GameManager.");
+        }
     }
 }

@@ -169,8 +169,6 @@ public class GameManager : MonoBehaviour
 
         Debug.Log($"[GameManager] Jugador teletransportado a spawnInicial {spawnInicial.position}");
     }
-
-
     // ------------------- CARGAR PARTIDA -------------------
     public void CargarPartida()
     {
