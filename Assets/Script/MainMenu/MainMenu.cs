@@ -48,36 +48,37 @@ public class MainMenu : MonoBehaviour
         }
     }
 
-    // 🔹 Fade In (pantalla se opaca en 1 segundo)
+    // 🔹 Fade In (pantalla se opaca en 0.3 segundos)
     private IEnumerator FadeIn()
     {
         float t = 0f;
         Color c = loadingImage.color;
-        while (t < fadeDuration)
+        while (t < 0.4f) // ahora dura 0.3 segundos
         {
             t += Time.unscaledDeltaTime;
-            float alpha = Mathf.Lerp(0f, 1f, t / fadeDuration);
+            float alpha = Mathf.Lerp(0f, 1f, t / 0.4f);
             loadingImage.color = new Color(c.r, c.g, c.b, alpha);
             yield return null;
         }
         loadingImage.color = new Color(c.r, c.g, c.b, 1f);
     }
 
-    // 🔹 Fade Out (pantalla se aclara en 1 segundo)
+    // 🔹 Fade Out (pantalla se aclara en 0.3 segundos)
     public IEnumerator FadeOut()
     {
         float t = 0f;
         Color c = loadingImage.color;
-        while (t < fadeDuration)
+        while (t < 0.4f) // también dura 0.3 segundos
         {
             t += Time.unscaledDeltaTime;
-            float alpha = Mathf.Lerp(1f, 0f, t / fadeDuration);
+            float alpha = Mathf.Lerp(1f, 0f, t / 0.4f);
             loadingImage.color = new Color(c.r, c.g, c.b, alpha);
             yield return null;
         }
         loadingImage.color = new Color(c.r, c.g, c.b, 0f);
         panelLoading.SetActive(false);
     }
+
 
     public void CargarPartida()
     {

@@ -86,7 +86,6 @@ public class TutorialInteractivo : MonoBehaviour
                     SiguientePaso();
                 }
                 break;
-
             case 1:
                 // Requiere SHIFT mientras se mueve (acepta secuencia: moverse y luego SHIFT, o SHIFT y luego moverse)
                 if (!corrio)
@@ -113,16 +112,13 @@ public class TutorialInteractivo : MonoBehaviour
                     }
                 }
                 break;
-
             case 2:
-                // Interactuar con E: comportamiento especial para linterna vs otros objetos
+                // Interactuar con E con cualquier objeto en la layer Interaccion
                 if (Input.GetKeyDown(KeyCode.E))
                 {
-                    // Intentamos raycast y analizamos el objeto golpeado
                     if (camaraPrincipal == null)
                     {
-                        Debug.LogWarning("[TutorialInteractivo] Cámara principal no asignada para raycast.");
-                        MostrarMensajeTemporal("No hay cámara asignada para interactuar.", duracionMensajeTemporal);
+                        Debug.LogWarning("[TutorialInteractivo] Cámara principal no asignada.");
                         break;
                     }
 
@@ -130,76 +126,27 @@ public class TutorialInteractivo : MonoBehaviour
                     if (Physics.Raycast(ray, out RaycastHit hit, distanciaInteraccion))
                     {
                         int layerIndex = LayerMask.NameToLayer(layerInteraccionName);
-                        if (layerIndex == -1)
+                        if (layerIndex != -1 && hit.collider.gameObject.layer == layerIndex)
                         {
-                            Debug.LogWarning($"[TutorialInteractivo] Layer '{layerInteraccionName}' no existe.");
-                            MostrarMensajeTemporal("Layer de interacción no configurada.", duracionMensajeTemporal);
-                            break;
-                        }
+                            // Ejecutar interacción si existe
+                            var interactuable = hit.collider.GetComponent<IInteractuable>();
+                            if (interactuable != null) interactuable.Interactuar();
 
-                        if (hit.collider != null && hit.collider.gameObject.layer == layerIndex)
-                        {
-                            GameObject hitObj = hit.collider.gameObject;
-
-                            // ¿Es la linterna? (por tag o por componente LinternaPickup)
-                            bool esLinterna = false;
-                            if (!string.IsNullOrEmpty(Pickup) && hitObj.CompareTag(Pickup))
-                                esLinterna = true;
-                            else if (hitObj.GetComponent("LinternaPickup") != null) // chequeo por componente por nombre
-                                esLinterna = true;
-
-                            // Ejecutar la interacción del objeto si implementa IInteractuable
-                            var interactuable = hitObj.GetComponent<IInteractuable>();
-                            if (interactuable != null)
-                                interactuable.Interactuar();
-
-                            if (esLinterna)
+                            // Si el objeto es la linterna, marcar que la tiene
+                            if (hit.collider.CompareTag(Pickup) || hit.collider.GetComponent("LinternaPickup") != null)
                             {
-                                // Si es la linterna, marcarla como recogida y avanzar al paso de encender
                                 tieneLinterna = true;
-                                requiereIrPorLinterna = false;
-                                MostrarMensajeTemporal("Has recogido la linterna.", duracionMensajeTemporal);
-                                // Avanzar al siguiente paso (usar F)
-                                SiguientePaso();
+                                MostrarMensajeTemporal("Has recogido la linterna. Ahora presiona F para encenderla.", duracionMensajeTemporal);
                             }
-                            else
-                            {
-                                // Interactuó con otro objeto: no avanzamos, pedimos que vaya por la linterna
-                                requiereIrPorLinterna = true;
-                                MostrarMensajeTemporal("Ahora ve y recoge la linterna.", duracionMensajeTemporal);
-                                // No llamar a SiguientePaso() aquí; esperamos que recoja la linterna
-                            }
-                        }
-                        else
-                        {
-                            // Raycast no golpeó un objeto en la layer de interacción
-                            if (!tieneLinterna)
-                            {
-                                MostrarMensajeTemporal("No tienes alguna linterna, ve y búscala.", duracionMensajeTemporal);
-                            }
-                            else
-                            {
-                                MostrarMensajeTemporal("No hay nada con qué interactuar aquí.", duracionMensajeTemporal);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // No golpeó nada
-                        if (!tieneLinterna)
-                        {
-                            MostrarMensajeTemporal("No tienes alguna linterna, ve y búscala.", duracionMensajeTemporal);
-                        }
-                        else
-                        {
-                            MostrarMensajeTemporal("No hay nada con qué interactuar aquí.", duracionMensajeTemporal);
+
+                            // Avanzar al siguiente paso (mostrar texto de F)
+                            SiguientePaso();
                         }
                     }
                 }
                 break;
-
             case 3:
-                // Encender linterna con F (solo si tiene linterna)
+                // Encender linterna con F (solo si la tiene)
                 if (Input.GetKeyDown(KeyCode.F))
                 {
                     if (tieneLinterna)
@@ -209,7 +156,7 @@ public class TutorialInteractivo : MonoBehaviour
                     }
                     else
                     {
-                        MostrarMensajeTemporal("No tienes alguna linterna, ve y búscala.", duracionMensajeTemporal);
+                        MostrarMensajeTemporal("No tienes linterna, ve y búscala.", duracionMensajeTemporal);
                     }
                 }
                 break;
