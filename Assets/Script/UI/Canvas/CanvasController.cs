@@ -158,10 +158,10 @@ public class CanvasController : MonoBehaviour
     {
         float t = 0f;
         Color c = loadingImage.color;
-        while (t < fadeDuration) // 🔹 usa la variable
+        while (t < 0.5f) // 🔹 ahora dura 0.5 segundos
         {
             t += Time.unscaledDeltaTime;
-            float alpha = Mathf.Lerp(0f, 1f, t / fadeDuration);
+            float alpha = Mathf.Lerp(0f, 1f, t / 0.5f);
             loadingImage.color = new Color(c.r, c.g, c.b, alpha);
             yield return null;
         }
@@ -174,7 +174,7 @@ public class CanvasController : MonoBehaviour
         {
             panelLoading.SetActive(true);
             yield return StartCoroutine(FadeIn());
-            yield return new WaitForSecondsRealtime(holdDuration); // 🔹 ajusta este valor
+            yield return new WaitForSecondsRealtime(5f); // 🔹 permanece opaco 5 segundos
 
             SceneManager.LoadScene(nombreEscena);
             // Al entrar en la nueva escena, puedes llamar a FadeOut()
@@ -185,16 +185,17 @@ public class CanvasController : MonoBehaviour
     {
         float t = 0f;
         Color c = loadingImage.color;
-        while (t < fadeDuration) // 🔹 usa la variable
+        while (t < 0.5f) // 🔹 también dura 0.5 segundos
         {
             t += Time.unscaledDeltaTime;
-            float alpha = Mathf.Lerp(1f, 0f, t / fadeDuration);
+            float alpha = Mathf.Lerp(1f, 0f, t / 0.5f);
             loadingImage.color = new Color(c.r, c.g, c.b, alpha);
             yield return null;
         }
         loadingImage.color = new Color(c.r, c.g, c.b, 0f);
         panelLoading.SetActive(false);
     }
+
 
     //---------------Opciones---------------
     public void MostrarOpciones()

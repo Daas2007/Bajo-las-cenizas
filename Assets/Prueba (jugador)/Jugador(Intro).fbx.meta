@@ -3,12 +3,7 @@ guid: 72d7c54ce1718f442871575b19d79f96
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects:
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Piel
-    second: {fileID: 2100000, guid: 1cdb93f3c2c16ed4383ef30fdec89f00, type: 2}
+  externalObjects: {}
   materials:
     materialImportMode: 2
     materialName: 0
