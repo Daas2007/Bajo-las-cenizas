@@ -1,69 +1,82 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class MainMenu : MonoBehaviour
 {
     [SerializeField] GameObject mainPanel;       // Panel principal del menú
     [SerializeField] GameObject opcionesPanel;   // Panel de opciones
-    [SerializeField] GameObject pausaPanel;      // Panel de pausa
+    [SerializeField] GameObject panelLoading;    // Panel de carga con Image
+    [SerializeField] float fadeDuration = 1f;    // 🔹 Duración del fade in/out ahora 1 segundo (más rápido)
+    [SerializeField] float holdDuration = 2f;    // 🔹 Tiempo que permanece opaco reducido a 2 segundos
+
+    private Image loadingImage;
 
     private void Awake()
     {
-        // Al iniciar, solo mostrar el menú principal
         if (mainPanel != null) mainPanel.SetActive(true);
         if (opcionesPanel != null) opcionesPanel.SetActive(false);
-        if (pausaPanel != null) pausaPanel.SetActive(false);
 
-        // Cursor desbloqueado para poder usar botones
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
-
-        // Pausar el juego hasta que se presione Jugar
-        Time.timeScale = 0f;
-    }
-    public void Jugar()
-    {
-        if (mainPanel != null) mainPanel.SetActive(false);
-        if (opcionesPanel != null) opcionesPanel.SetActive(false);
-
-        // Reanudar el juego
-        Time.timeScale = 1f;
-
-        // Bloquear cursor para gameplay
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-
-        // Colocar al jugador en el checkpoint inicial y reiniciar estado
-        MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
-        GameManager gm = GameManager.Instancia;
-
-        if (jugador != null && gm != null && gm.spawnInicial != null)
+        if (panelLoading != null)
         {
-            jugador.transform.position = gm.spawnInicial.position;
-
-            // Reiniciar valores del GameManager
-            gm.muertes = 0;
-            gm.piezasRecogidas = 0;
-            gm.osoCompleto = false;
-            gm.puzzle1Completado = false;
-            gm.puzzle2Completado = false;
-            gm.cristalMetaActivo = false;
-            gm.tieneLinterna = false;
-
-            // Reiniciar linterna y objetos
-            if (gm.linternaEnMano != null) gm.linternaEnMano.SetActive(false);
-            if (gm.linternaPickup != null) gm.linternaPickup.SetActive(true);
-
-            // Reiniciar todas las puertas bloqueadas
-            if (gm.puertasBloqueadas != null)
-            {
-                foreach (GameObject puerta in gm.puertasBloqueadas)
-                {
-                    if (puerta != null) puerta.SetActive(true);
-                }
-            }
-
-            Debug.Log("✅ Juego iniciado en el checkpoint inicial con valores y objetos reiniciados.");
+            loadingImage = panelLoading.GetComponent<Image>();
+            panelLoading.SetActive(false);
         }
+
+        Time.timeScale = 1f;
+    }
+
+    // 🔹 Jugar con transición de pantalla de carga
+    public void JugarConLoading(string nombreEscena)
+    {
+        StartCoroutine(LoadingTransitionCoroutine(nombreEscena));
+    }
+
+    private IEnumerator LoadingTransitionCoroutine(string nombreEscena)
+    {
+        if (panelLoading != null)
+        {
+            panelLoading.SetActive(true);
+            yield return StartCoroutine(FadeIn());
+            yield return new WaitForSecondsRealtime(holdDuration);
+
+            // Cargar escena mientras sigue opaco
+            SceneManager.LoadScene(nombreEscena);
+
+            // 🔹 Al entrar en la nueva escena, puedes llamar a FadeOut desde un script de inicio
+        }
+    }
+
+    // 🔹 Fade In (pantalla se opaca en 1 segundo)
+    private IEnumerator FadeIn()
+    {
+        float t = 0f;
+        Color c = loadingImage.color;
+        while (t < fadeDuration)
+        {
+            t += Time.unscaledDeltaTime;
+            float alpha = Mathf.Lerp(0f, 1f, t / fadeDuration);
+            loadingImage.color = new Color(c.r, c.g, c.b, alpha);
+            yield return null;
+        }
+        loadingImage.color = new Color(c.r, c.g, c.b, 1f);
+    }
+
+    // 🔹 Fade Out (pantalla se aclara en 1 segundo)
+    public IEnumerator FadeOut()
+    {
+        float t = 0f;
+        Color c = loadingImage.color;
+        while (t < fadeDuration)
+        {
+            t += Time.unscaledDeltaTime;
+            float alpha = Mathf.Lerp(1f, 0f, t / fadeDuration);
+            loadingImage.color = new Color(c.r, c.g, c.b, alpha);
+            yield return null;
+        }
+        loadingImage.color = new Color(c.r, c.g, c.b, 0f);
+        panelLoading.SetActive(false);
     }
 
     public void CargarPartida()
@@ -71,14 +84,10 @@ public class MainMenu : MonoBehaviour
         if (mainPanel != null) mainPanel.SetActive(false);
         if (opcionesPanel != null) opcionesPanel.SetActive(false);
 
-        // Reanudar el juego
         Time.timeScale = 1f;
-
-        // Bloquear cursor para gameplay
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
-        // Cargar partida desde SistemaGuardar
         MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
         GameManager gm = GameManager.Instancia;
 
@@ -88,23 +97,21 @@ public class MainMenu : MonoBehaviour
             Debug.Log("✅ Partida cargada desde archivo de guardado.");
         }
     }
+
     public void AbrirOpciones()
     {
         if (opcionesPanel != null) opcionesPanel.SetActive(true);
-
-        // Cursor visible para interactuar con opciones
+        if (mainPanel != null) mainPanel.SetActive(false);
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
+
     public void CerrarOpciones()
     {
         if (opcionesPanel != null) opcionesPanel.SetActive(false);
         if (mainPanel != null) mainPanel.SetActive(true);
-
-        // Cursor visible porque seguimos en menú
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
     }
+
     public void SalirJuego()
     {
         Application.Quit();

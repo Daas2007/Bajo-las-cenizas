@@ -20,10 +20,6 @@ public class MuroBloqueo : MonoBehaviour
     public void QuitarMuro()
     {
         MovimientoPersonaje MP = FindAnyObjectByType<MovimientoPersonaje>();
-        if (MP.CristalObtenido())
-        {
-            
-        }
 
     }
 }

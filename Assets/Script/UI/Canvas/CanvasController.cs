@@ -1,4 +1,7 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
+using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class CanvasController : MonoBehaviour
 {
@@ -14,12 +17,19 @@ public class CanvasController : MonoBehaviour
     [Header("HUD siempre visible")]
     [SerializeField] GameObject panelHUD;
 
-    //---------------Panel del candado (nuevo)---------------
+    //---------------Panel del candado---------------
     [Header("Panel específico del candado")]
     [Tooltip("Panel UI del puzzle del candado")]
     [SerializeField] private GameObject panelCandado;
     [Tooltip("Referencia opcional al CandadoController para restaurar controles al cerrar")]
     [SerializeField] private CandadoController candadoControllerRef;
+
+    [Header("Pantalla de carga")]
+    [SerializeField] private GameObject panelLoading; // Panel de carga con Image
+    [SerializeField] private float fadeDuration = 2f; // Duración del fade in/out
+    [SerializeField] private float holdDuration = 3f; // Tiempo que permanece opaco
+
+    private Image loadingImage;
 
     private GameObject panelActivo;
     private GameObject panelAnterior;
@@ -27,16 +37,20 @@ public class CanvasController : MonoBehaviour
     void Start()
     {
         DesactivarTodos();
+        BloquearMouse();
         if (panelHUD != null) panelHUD.SetActive(true);
-        MostrarMainMenu(); // arranca en menú principal
+        if (panelLoading != null)
+        {
+            loadingImage = panelLoading.GetComponent<Image>();
+            panelLoading.SetActive(false);
+        }
+        Time.timeScale = 1f;
     }
 
     void Update()
     {
-        //---------------Control ESC---------------
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            // Si está abierto el panel del candado, cerrarlo y abrir pausa
             if (panelActivo == panelCandado)
             {
                 CerrarPanelCandado();
@@ -44,19 +58,16 @@ public class CanvasController : MonoBehaviour
                 return;
             }
 
-            // Si estamos en juego (sin panel activo y tiempo corriendo)
             if (panelActivo == null && Time.timeScale == 1f)
             {
                 MostrarPausa();
                 return;
             }
-            // Si estamos en pausa y no en opciones
             else if (panelActivo == panelPausa)
             {
                 Reanudar();
                 return;
             }
-            // Si estamos en opciones, cerrarlas y volver al panel anterior
             else if (panelActivo == panelOpciones)
             {
                 CerrarOpciones();
@@ -66,82 +77,69 @@ public class CanvasController : MonoBehaviour
     }
 
     //---------------MainMenu---------------
-    public void MostrarMainMenu()
-    {
-        ActivarPanel(panelMainMenu, true);
-    }
+    //public void MostrarMainMenu()
+    //{
+    //    ActivarPanel(panelMainMenu, true);
+    //}
 
-    // Jugar: siempre inicia desde spawnInicial con estado inicial
-    public void Jugar()
-    {
-        if (panelHUD !=null) panelHUD.SetActive(true);
-        GameManager gm = GameManager.Instancia;
-        if (gm != null)
-        {
-            gm.NuevaPartida();
+    //public void Jugar()
+    //{
+    //    if (panelHUD != null) panelHUD.SetActive(true);
+    //    GameManager gm = GameManager.Instancia;
+    //    if (gm != null) gm.NuevaPartida();
 
-        }
-        // Cerrar cualquier panel y reanudar juego
-        CerrarPanelActivo();
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-        Time.timeScale = 1f;
-        panelUIActivo();
-        Debug.Log("▶️ Jugar: inicio limpio desde spawn inicial.");
-        Debug.Log("tiempo de juego" + Time.timeScale);
-    }
+    //    CerrarPanelActivo();
+    //    Cursor.lockState = CursorLockMode.Locked;
+    //    Cursor.visible = false;
+    //    Time.timeScale = 1f;
+    //    panelUIActivo();
+    //    Debug.Log("▶️ Jugar: inicio limpio desde spawn inicial.");
+    //}
 
-    // Cargar desde menú principal: si hay guardado, cargar; si no, respawnear en spawnInicial
-    public void CargarPartidaDesdeMenu()
-    {
-        MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
-        GameManager gm = GameManager.Instancia;
+    //public void CargarPartidaDesdeMenu()
+    //{
+    //    MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
+    //    GameManager gm = GameManager.Instancia;
 
-        if (jugador != null && gm != null)
-        {
-            // Intentar cargar; SistemaGuardar.Cargar devuelve true si cargó desde archivo
-            bool cargado = SistemaGuardar.Cargar(jugador, gm);
-            if (!cargado)
-            {
-                // No hay guardado: dejar estado inicial y colocar en spawn inicial
-                gm.ReiniciarEstado();
-                if (gm.spawnInicial != null)
-                {
-                    jugador.transform.position = gm.spawnInicial.position;
-                    jugador.transform.rotation = gm.spawnInicial.rotation;
-                }
+    //    if (jugador != null && gm != null)
+    //    {
+    //        bool cargado = SistemaGuardar.Cargar(jugador, gm);
+    //        if (!cargado)
+    //        {
+    //            gm.ReiniciarEstado();
+    //            if (gm.spawnInicial != null)
+    //            {
+    //                jugador.transform.position = gm.spawnInicial.position;
+    //                jugador.transform.rotation = gm.spawnInicial.rotation;
+    //            }
+    //            if (gm.linternaPickup != null) gm.linternaPickup.SetActive(true);
+    //            if (gm.linternaEnMano != null) gm.linternaEnMano.SetActive(false);
+    //            gm.tieneLinterna = false;
+    //            Debug.Log("📂 No había guardado: respawneado en spawn inicial.");
+    //        }
+    //        else
+    //        {
+    //            Debug.Log("📂 Guardado cargado desde menú.");
+    //        }
 
-                if (gm.linternaPickup != null) gm.linternaPickup.SetActive(true);
-                if (gm.linternaEnMano != null) gm.linternaEnMano.SetActive(false);
-                gm.tieneLinterna = false;
+    //        jugador.enabled = true;
+    //        Camera cam = jugador.GetComponentInChildren<Camera>();
+    //        if (cam != null) cam.enabled = true;
+    //    }
 
-                Debug.Log("📂 No había guardado: respawneado en spawn inicial.");
-            }
-            else
-            {
-                Debug.Log("📂 Guardado cargado desde menú.");
-            }
+    //    CerrarPanelActivo();
+    //    Time.timeScale = 1f;
+    //    Cursor.lockState = CursorLockMode.Locked;
+    //    Cursor.visible = false;
+    //}
 
-            jugador.enabled = true;
-            Camera cam = jugador.GetComponentInChildren<Camera>();
-            if (cam != null) cam.enabled = true;
-        }
-
-        CerrarPanelActivo();
-
-        Time.timeScale = 1f;
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-    }
-
-    public void SalirJuego() => Application.Quit();
+    //public void SalirJuego() => Application.Quit();
 
     //---------------Pausa---------------
     public void MostrarPausa()
     {
         ActivarPanel(panelPausa, true);
     }
-
     public void Reanudar()
     {
         if (panelPausa != null) panelPausa.SetActive(false);
@@ -151,42 +149,62 @@ public class CanvasController : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
-
-    // Salir al menú desde pausa: reiniciar estado y mostrar menú principal (no conservar guardado activo al volver a jugar)
     public void SalirAlMenuDesdePausa()
     {
-        if (panelPausa != null) panelPausa.SetActive(false);
-        panelActivo = null;
+        StartCoroutine(SalirMenuCoroutine("MainMenu"));
+    }
 
-        if (panelMainMenu != null) panelMainMenu.SetActive(true);
-        panelActivo = panelMainMenu;
-
-        // Reiniciar estado del juego para asegurar que al volver a Jugar se inicie limpio
-        GameManager gm = GameManager.Instancia;
-        if (gm != null)
+    private IEnumerator FadeIn()
+    {
+        float t = 0f;
+        Color c = loadingImage.color;
+        while (t < fadeDuration) // 🔹 usa la variable
         {
-            gm.NuevaPartida(); // borra guardado y deja todo en estado inicial
+            t += Time.unscaledDeltaTime;
+            float alpha = Mathf.Lerp(0f, 1f, t / fadeDuration);
+            loadingImage.color = new Color(c.r, c.g, c.b, alpha);
+            yield return null;
         }
+        loadingImage.color = new Color(c.r, c.g, c.b, 1f);
+    }
 
-        Time.timeScale = 0f;
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
+    private IEnumerator SalirMenuCoroutine(string nombreEscena)
+    {
+        if (panelLoading != null)
+        {
+            panelLoading.SetActive(true);
+            yield return StartCoroutine(FadeIn());
+            yield return new WaitForSecondsRealtime(holdDuration); // 🔹 ajusta este valor
 
-        Debug.Log("✅ Volviendo al menú principal desde pausa (estado inicial aplicado).");
+            SceneManager.LoadScene(nombreEscena);
+            // Al entrar en la nueva escena, puedes llamar a FadeOut()
+        }
+    }
+
+    private IEnumerator FadeOut()
+    {
+        float t = 0f;
+        Color c = loadingImage.color;
+        while (t < fadeDuration) // 🔹 usa la variable
+        {
+            t += Time.unscaledDeltaTime;
+            float alpha = Mathf.Lerp(1f, 0f, t / fadeDuration);
+            loadingImage.color = new Color(c.r, c.g, c.b, alpha);
+            yield return null;
+        }
+        loadingImage.color = new Color(c.r, c.g, c.b, 0f);
+        panelLoading.SetActive(false);
     }
 
     //---------------Opciones---------------
     public void MostrarOpciones()
     {
         panelAnterior = panelActivo;
-
         if (panelOpciones != null) panelOpciones.SetActive(true);
         panelActivo = panelOpciones;
-
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
-
     public void CerrarOpciones()
     {
         if (panelActivo == panelOpciones)
@@ -209,50 +227,6 @@ public class CanvasController : MonoBehaviour
             }
         }
     }
-
-    //---------------Opciones: Guardar/Cargar---------------
-    public void GuardarPartida()
-    {
-        MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
-        GameManager gm = GameManager.Instancia;
-
-        if (jugador != null && gm != null)
-        {
-            SistemaGuardar.Guardar(jugador, gm);
-            Debug.Log("💾 Partida guardada desde menú de opciones.");
-        }
-    }
-
-    // Cargar desde opciones: intenta cargar, si no existe guardado respawnea en spawn inicial
-    public void CargarPartida()
-    {
-        MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
-        GameManager gm = GameManager.Instancia;
-
-        if (jugador != null && gm != null)
-        {
-            bool cargado = SistemaGuardar.Cargar(jugador, gm);
-            if (!cargado)
-            {
-                gm.ReiniciarEstado();
-                if (gm.spawnInicial != null)
-                {
-                    jugador.transform.position = gm.spawnInicial.position;
-                    jugador.transform.rotation = gm.spawnInicial.rotation;
-                }
-                if (gm.linternaPickup != null) gm.linternaPickup.SetActive(true);
-                if (gm.linternaEnMano != null) gm.linternaEnMano.SetActive(false);
-                gm.tieneLinterna = false;
-
-                Debug.Log("📂 No había guardado: respawneado en spawn inicial desde opciones.");
-            }
-            else
-            {
-                Debug.Log("📂 Guardado cargado desde opciones.");
-            }
-        }
-    }
-
     //---------------Pantalla de Muerte---------------
     public void MostrarPantallaMuerte()
     {
@@ -265,13 +239,10 @@ public class CanvasController : MonoBehaviour
 
         Debug.Log("☠️ Pantalla de muerte activada.");
     }
-
-    // Reintentar desde muerte: cargar último guardado si existe; si no, respawnear en spawn inicial
     public void ReintentarDesdeMuerte()
     {
         if (panelMuerte != null) panelMuerte.SetActive(false);
         panelActivo = null;
-
         if (panelHUD != null) panelHUD.SetActive(true);
 
         GameManager gm = GameManager.Instancia;
@@ -281,7 +252,6 @@ public class CanvasController : MonoBehaviour
             bool cargado = SistemaGuardar.Cargar(jugador, gm);
             if (!cargado)
             {
-                // No hay guardado: respawnear en spawn inicial con estado inicial
                 gm.ReiniciarEstado();
                 if (gm.spawnInicial != null)
                 {
@@ -291,7 +261,6 @@ public class CanvasController : MonoBehaviour
                 if (gm.linternaPickup != null) gm.linternaPickup.SetActive(true);
                 if (gm.linternaEnMano != null) gm.linternaEnMano.SetActive(false);
                 gm.tieneLinterna = false;
-
                 Debug.Log("🔄 Reintentar: no había guardado, respawneado en spawn inicial.");
             }
             else
@@ -308,19 +277,15 @@ public class CanvasController : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
-
-    // Salir al menú desde muerte: reiniciar estado y mostrar menú principal
     public void SalirAlMenuDesdeMuerte()
-    {
+    {       
+        SceneManager.LoadScene("MainMenu");
         if (panelMuerte != null) panelMuerte.SetActive(false);
-        MostrarMainMenu();
-        //if (panelMainMenu != null) panelMainMenu.SetActive(true);
 
         GameManager gm = GameManager.Instancia;
-        if (gm != null)
-        {
-            gm.NuevaPartida(); // reinicia desde inicio y borra guardado
-        }
+        if (gm != null) gm.NuevaPartida();
+
+ // nombre exacto de tu escena de menú
 
         Time.timeScale = 0f;
         Cursor.lockState = CursorLockMode.None;
@@ -328,29 +293,19 @@ public class CanvasController : MonoBehaviour
 
         Debug.Log("✅ Volviendo al menú principal desde pantalla de muerte (estado inicial).");
     }
-
     //---------------Dialogo---------------
     public void MostrarDialogo() => ActivarPanel(panelDialogo, true);
-
-    //---------------Panel Candado (nuevo)---------------
+    //---------------Panel Candado---------------
     public void MostrarPanelCandado()
     {
         ActivarPanel(panelCandado, true);
-
-        // Si el controller no está asignado, intentamos buscar uno en escena (fallback)
         if (candadoControllerRef == null)
-        {
             candadoControllerRef = FindObjectOfType<CandadoController>();
-        }
     }
-
     public void CerrarPanelCandado()
     {
-        // Restaurar controles a través del controller si está asignado
         if (candadoControllerRef == null)
-        {
             candadoControllerRef = FindObjectOfType<CandadoController>();
-        }
 
         if (candadoControllerRef != null)
         {
@@ -358,7 +313,6 @@ public class CanvasController : MonoBehaviour
         }
         else
         {
-            // Fallback: ocultar panel y restaurar cursor y tiempo por seguridad
             if (panelCandado != null) panelCandado.SetActive(false);
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
@@ -368,7 +322,6 @@ public class CanvasController : MonoBehaviour
         panelActivo = null;
         Debug.Log("[CanvasController] Panel candado cerrado y controles restaurados.");
     }
-
     //---------------Control general---------------
     public void CerrarPanelActivo()
     {
@@ -378,11 +331,11 @@ public class CanvasController : MonoBehaviour
             panelActivo = null;
         }
     }
-
     private void ActivarPanel(GameObject panel, bool pausarJuego)
     {
         DesactivarTodos();
         if (panel != null)
+
         {
             panel.SetActive(true);
             panelActivo = panel;
@@ -410,5 +363,10 @@ public class CanvasController : MonoBehaviour
         if (panelDialogo != null) panelDialogo.SetActive(false);
         if (panelCandado != null) panelCandado.SetActive(false); // aseguramos que se apague al resetear paneles
         panelActivo = null;
+    }
+    public void BloquearMouse()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 }
