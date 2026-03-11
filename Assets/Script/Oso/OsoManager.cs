@@ -22,13 +22,14 @@ public class OsoManager : MonoBehaviour, IInteractuable
             if (pieza != null)
             {
                 ColocarPieza(pieza);
-                Destroy(pieza.gameObject); // destruir la pieza suelta
+                Destroy(pieza.gameObject); // destruir la pieza en la mano
             }
         }
     }
 
     public void ColocarPieza(OsoPieza pieza)
     {
+        // ✅ Activa la parte correspondiente del torso
         if (pieza.indiceTorso >= 0 && pieza.indiceTorso < piezasTorso.Length)
         {
             piezasTorso[pieza.indiceTorso].SetActive(true);
@@ -36,6 +37,7 @@ public class OsoManager : MonoBehaviour, IInteractuable
 
         piezasColocadas++;
 
+        // ✅ Si todas las piezas están colocadas, activar oso completo y cristal
         if (piezasColocadas >= piezasTorso.Length)
         {
             if (osoCompleto != null) osoCompleto.SetActive(true);

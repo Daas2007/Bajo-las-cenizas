@@ -72,10 +72,19 @@ public class InteraccionJugador : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.Q))
             {
-                PiezaPuzzle pieza = manoIzquierda.GetChild(0).GetComponent<PiezaPuzzle>();
-                if (pieza != null)
+                // ✅ Soporte para ambos tipos de piezas
+                PiezaPuzzle piezaPuzzle = manoIzquierda.GetChild(0).GetComponent<PiezaPuzzle>();
+                if (piezaPuzzle != null)
                 {
-                    pieza.Soltar();
+                    piezaPuzzle.Soltar();
+                }
+                else
+                {
+                    OsoPieza piezaOso = manoIzquierda.GetChild(0).GetComponent<OsoPieza>();
+                    if (piezaOso != null)
+                    {
+                        piezaOso.Soltar();
+                    }
                 }
             }
         }
@@ -113,12 +122,9 @@ public class InteraccionJugador : MonoBehaviour
             PiezaPuzzle pieza = manoIzquierda.GetChild(0).GetComponent<PiezaPuzzle>();
             if (pieza != null)
             {
-                // ✅ La pieza deja de ser hija de la mano y se vuelve hija del slot
                 pieza.transform.SetParent(slot.transform);
                 pieza.transform.position = slot.transform.position;
                 pieza.transform.rotation = slot.transform.rotation;
-
-                // ✅ Forzar escala a 1,1,1 en el slot
                 pieza.transform.localScale = Vector3.one;
 
                 slot.piezaActual = pieza;
@@ -136,5 +142,4 @@ public class InteraccionJugador : MonoBehaviour
             }
         }
     }
-
 }

@@ -13,15 +13,22 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
 
     private Vector3 escalaOriginal;
     private Rigidbody rb;
+    private Collider col;
 
     void Awake()
     {
         this.enabled = true;
         escalaOriginal = transform.localScale;
+
         rb = GetComponent<Rigidbody>();
-        if (rb == null) rb = gameObject.AddComponent<Rigidbody>(); // asegura que tenga Rigidbody
+        if (rb == null) rb = gameObject.AddComponent<Rigidbody>();
+
+        col = GetComponent<Collider>();
+        if (col == null) col = gameObject.AddComponent<BoxCollider>();
+
         rb.useGravity = true;
         rb.isKinematic = false; // por defecto con física activa
+        if (col != null) col.enabled = true; // collider activo por defecto
     }
 
     void Start()
@@ -68,9 +75,10 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
                 transform.localRotation = Quaternion.identity;
                 transform.localScale = escalaOriginal;
 
-                // 🔹 Desactivar física mientras está en la mano
+                // 🔹 Desactivar física y collider mientras está en la mano
                 rb.isKinematic = true;
                 rb.useGravity = false;
+                if (col != null) col.enabled = false;
             }
         }
         else
@@ -84,9 +92,10 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
         colocada = estado;
         enMano = false;
 
-        // 🔹 Al colocar en un slot, desactivar física siempre
+        // 🔹 Al colocar en un slot, desactivar física pero volver a activar collider
         rb.isKinematic = true;
         rb.useGravity = false;
+        if (col != null) col.enabled = true;
     }
 
     public void PermitirRotacionX(bool estado)
@@ -100,9 +109,10 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
         enMano = false;
         puedeRotarX = false;
 
-        // 🔹 Al resetear, volver a activar física
+        // 🔹 Al resetear, volver a activar física y collider
         rb.isKinematic = false;
         rb.useGravity = true;
+        if (col != null) col.enabled = true;
     }
 
     public void Soltar()
@@ -110,8 +120,9 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
         enMano = false;
         transform.SetParent(null);
 
-        // 🔹 Reactivar física para que caiga al piso
+        // 🔹 Reactivar física y collider para que caiga al piso
         rb.isKinematic = false;
         rb.useGravity = true;
+        if (col != null) col.enabled = true;
     }
 }

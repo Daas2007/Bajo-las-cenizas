@@ -1,12 +1,12 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class GestorPuzzleFisico : MonoBehaviour
 {
     [Header("Slots del puzzle")]
     public SlotPuzzle[] slots;
 
-    [Header("Puertas que se desbloquean")]
-    public GameObject[] puertasBloqueadas; // aqu� arrastras las 2 puertas del armario
+    [Header("Pieza del oso que se activa")]
+    public GameObject piezaOso; // arrastra aquí la pieza del oso (déjala desactivada en el Inspector)
 
     private bool puzzleCompletado = false;
 
@@ -15,13 +15,14 @@ public class GestorPuzzleFisico : MonoBehaviour
         if (!puzzleCompletado && ComprobarPuzzle())
         {
             puzzleCompletado = true;
-            DesbloquearPuertas();
+            ActivarPiezaOso();
             BloquearPuzzle();
         }
     }
 
     private bool ComprobarPuzzle()
     {
+        // ✅ Solo devuelve true si TODOS los slots tienen la pieza correcta
         foreach (var slot in slots)
         {
             if (!slot.EstaCorrecta()) return false;
@@ -29,12 +30,12 @@ public class GestorPuzzleFisico : MonoBehaviour
         return true;
     }
 
-    private void DesbloquearPuertas()
+    private void ActivarPiezaOso()
     {
-        foreach (var puerta in puertasBloqueadas)
+        if (piezaOso != null && !piezaOso.activeSelf)
         {
-            // Cambia el layer a "Interaccion" para que ahora puedan abrirse
-            puerta.layer = LayerMask.NameToLayer("Interaccion");
+            piezaOso.SetActive(true); // ✅ activa la pieza del oso
+            Debug.Log("✅ Puzzle completado, pieza del oso activada.");
         }
     }
 

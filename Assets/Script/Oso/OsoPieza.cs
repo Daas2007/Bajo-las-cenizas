@@ -3,13 +3,22 @@
 public class OsoPieza : MonoBehaviour, IInteractuable
 {
     [Header("Configuración de la pieza")]
-    [SerializeField] public int indiceTorso; // índice que corresponde a la parte del torso
+    [SerializeField] public int indiceTorso;
 
     private bool enMano = false;
+    private Rigidbody rb;
+    private Collider col;
+    private int capaOriginal;
+
+    private void Awake()
+    {
+        rb = GetComponent<Rigidbody>();
+        col = GetComponent<Collider>();
+        capaOriginal = gameObject.layer;
+    }
 
     public void Interactuar()
     {
-        // ✅ Se agarra como cualquier pieza normal
         if (!enMano)
         {
             Transform manoIzquierda = GameObject.FindWithTag("Player")
@@ -22,7 +31,19 @@ public class OsoPieza : MonoBehaviour, IInteractuable
                 transform.SetParent(manoIzquierda);
                 transform.localPosition = Vector3.zero;
                 transform.localRotation = Quaternion.identity;
-                transform.localScale = Vector3.one;
+
+                // ✅ Desactivar físicas y colisiones mientras está en la mano
+                if (rb != null)
+                {
+                    rb.isKinematic = true;
+                    rb.useGravity = false;
+                }
+                if (col != null)
+                {
+                    col.enabled = false;
+                }
+
+                gameObject.layer = LayerMask.NameToLayer("EnMano");
             }
         }
     }
@@ -31,5 +52,18 @@ public class OsoPieza : MonoBehaviour, IInteractuable
     {
         enMano = false;
         transform.SetParent(null);
+
+        // ✅ Reactivar físicas y colisiones al soltar
+        if (rb != null)
+        {
+            rb.isKinematic = false;
+            rb.useGravity = true;
+        }
+        if (col != null)
+        {
+            col.enabled = true;
+        }
+
+        gameObject.layer = capaOriginal;
     }
 }

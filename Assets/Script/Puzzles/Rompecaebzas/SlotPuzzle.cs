@@ -45,7 +45,7 @@ public class SlotPuzzle : MonoBehaviour, IInteractuable
         piezaActual = null;
     }
 
-    // 🔹 Nuevo: método para asignar pieza y desactivar su física
+    // 🔹 Método para asignar pieza y manejar física/collider
     public void ColocarPieza(PiezaPuzzle pieza)
     {
         piezaActual = pieza;
@@ -57,15 +57,21 @@ public class SlotPuzzle : MonoBehaviour, IInteractuable
         // ✅ Marcar como colocada (desactiva gravedad y física)
         pieza.MarcarColocada();
 
-        // Si es correcta, permitir rotación extra
+        // Si es correcta, permitir rotación extra y desactivar collider
         if (pieza.piezaID == slotID)
         {
             pieza.PermitirRotacionX(true);
+
+            Collider piezaCol = pieza.GetComponent<Collider>();
+            if (piezaCol != null) piezaCol.enabled = false;
         }
         else
         {
             pieza.PermitirRotacionX(false);
+
+            // ❌ Si no es correcta, mantener collider activo
+            Collider piezaCol = pieza.GetComponent<Collider>();
+            if (piezaCol != null) piezaCol.enabled = true;
         }
     }
 }
-
