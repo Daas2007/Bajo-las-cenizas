@@ -10,8 +10,8 @@ public class Dialogo : MonoBehaviour, IInteractuable
 
     [Header("Audio")]
     [SerializeField] private AudioSource audioSource;
-    [SerializeField] private AudioClip sonidoLetra;     // sonido tipo Undertale por letra
-    [SerializeField] private AudioClip sonidoInicio;    // sonido al empezar diálogo
+    [SerializeField] private AudioClip sonidoLetra;
+    [SerializeField] private AudioClip sonidoInicio;
 
     [Header("Líneas de diálogo")]
     [TextArea(2, 5)]
@@ -111,43 +111,34 @@ public class Dialogo : MonoBehaviour, IInteractuable
         MostrarLinea();
         BloquearJugador(true);
 
-        // 🔊 reproducir sonido de inicio
         if (audioSource != null && sonidoInicio != null)
             audioSource.PlayOneShot(sonidoInicio);
     }
 
-    // 🔹 Método que tu PuertaConCondicion necesita
-    public void IniciarDialogoConLineas(string[] nuevasLineas, bool marcarComoHablado = false)
+    // 🔹 Método nuevo para mensajes temporales (no marca HaHablado)
+    public void MostrarMensajeTemporal(string texto)
     {
-        if (nuevasLineas == null || nuevasLineas.Length == 0)
+        if (dialogoCanvas == null || dialogoTexto == null)
+        {
+            Debug.LogWarning("[Dialogo] UI no asignada.");
             return;
+        }
 
-        if (lineasOriginales == null && lineas != null)
-            lineasOriginales = (string[])lineas.Clone();
-
-        lineas = (string[])nuevasLineas.Clone();
-        indiceLinea = 0;
+        dialogoCanvas.SetActive(true);
         mostrandoDialogo = true;
 
-        if (dialogoCanvas != null) dialogoCanvas.SetActive(true);
-        MostrarLinea();
+        if (rutinaTexto != null) StopCoroutine(rutinaTexto);
+        rutinaTexto = StartCoroutine(EscribirLinea(texto));
 
-        StartCoroutine(RestaurarLineasAlTerminar(marcarComoHablado));
+        // Cerrar automáticamente después de unos segundos
+        StartCoroutine(CerrarMensajeTemporal());
     }
 
-    private IEnumerator RestaurarLineasAlTerminar(bool marcarComoHablado)
+    private IEnumerator CerrarMensajeTemporal()
     {
-        while (mostrandoDialogo)
-            yield return null;
-
-        if (lineasOriginales != null)
-            lineas = (string[])lineasOriginales.Clone();
-
-        if (marcarComoHablado)
-        {
-            HaHablado = true;
-            OnDialogoCompleto?.Invoke();
-        }
+        yield return new WaitForSeconds(tiempoAutoAvance);
+        dialogoCanvas.SetActive(false);
+        mostrandoDialogo = false;
     }
 
     public void MostrarLinea()
@@ -165,7 +156,6 @@ public class Dialogo : MonoBehaviour, IInteractuable
         {
             dialogoTexto.text += letra;
 
-            // 🔊 reproducir sonido por cada letra
             if (audioSource != null && sonidoLetra != null)
                 audioSource.PlayOneShot(sonidoLetra);
 
@@ -202,6 +192,7 @@ public class Dialogo : MonoBehaviour, IInteractuable
         mostrandoDialogo = false;
         BloquearJugador(false);
 
+        // ✅ Al terminar el diálogo completo, marcar como hablado
         if (!HaHablado)
         {
             HaHablado = true;

@@ -3,22 +3,33 @@
 public class OsoPieza : MonoBehaviour, IInteractuable
 {
     [Header("Configuración de la pieza")]
-    [SerializeField] private OsoManager osoManager;
-    [SerializeField] public int indiceTorso; // índice que corresponde a la pieza en el torso
+    [SerializeField] public int indiceTorso; // índice que corresponde a la parte del torso
+
+    private bool enMano = false;
 
     public void Interactuar()
     {
-        // ✅ Al interactuar, colocar en el torso
-        if (osoManager != null)
+        // ✅ Se agarra como cualquier pieza normal
+        if (!enMano)
         {
-            osoManager.ColocarPieza(this);
+            Transform manoIzquierda = GameObject.FindWithTag("Player")
+                .GetComponent<InteraccionJugador>()
+                .GetManoIzquierda();
+
+            if (manoIzquierda.childCount == 0)
+            {
+                enMano = true;
+                transform.SetParent(manoIzquierda);
+                transform.localPosition = Vector3.zero;
+                transform.localRotation = Quaternion.identity;
+                transform.localScale = Vector3.one;
+            }
         }
+    }
 
-        // ✅ Destruir la pieza que estaba en la mano
-        Destroy(gameObject);
-
-        Debug.Log("🧩 Pieza del oso colocada en el torso.");
+    public void Soltar()
+    {
+        enMano = false;
+        transform.SetParent(null);
     }
 }
-
-

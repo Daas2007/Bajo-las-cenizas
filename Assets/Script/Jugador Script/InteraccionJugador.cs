@@ -28,13 +28,25 @@ public class InteraccionJugador : MonoBehaviour
         {
             if (!panelInteraccion.activeSelf) panelInteraccion.SetActive(true);
 
+            // 🔹 Ajuste de mensajes según el tag
             if (objetoTransform.CompareTag("Pickup") || objetoTransform.CompareTag("Agarrar"))
+            {
                 textoInteraccion.text = "Presiona [E] para agarrar";
+            }
             else if (objetoTransform.CompareTag("Slot") || objetoTransform.CompareTag("Colocar"))
+            {
                 textoInteraccion.text = "Presiona [E] para colocar";
+            }
+            else if (objetoTransform.CompareTag("OsoTorso"))
+            {
+                textoInteraccion.text = "Presiona [E] para colocar pieza del oso";
+            }
             else
+            {
                 textoInteraccion.text = "Presiona [E] para interactuar";
+            }
 
+            // 🔹 Interacción con E
             if (Input.GetKeyDown(KeyCode.E))
             {
                 if (objetoTransform.CompareTag("Colocar"))
@@ -90,12 +102,10 @@ public class InteraccionJugador : MonoBehaviour
         objetoActual = null;
         objetoTransform = null;
     }
-
     public Transform GetManoIzquierda()
     {
         return manoIzquierda;
     }
-
     private void IntentarColocar(SlotPuzzle slot)
     {
         if (manoIzquierda.childCount > 0 && slot != null)

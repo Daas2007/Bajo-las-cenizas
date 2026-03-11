@@ -35,6 +35,9 @@ public class TutorialInteractivo : MonoBehaviour
     [Header("Mensajes")]
     [SerializeField] private float duracionMensajeTemporal = 2f;
 
+    [Header("Objetos del tutorial")]
+    [SerializeField] private GameObject linternaObjeto; // 🔹 referencia a la linterna en la escena
+
     void Start()
     {
         if (panelTutorial != null) panelTutorial.SetActive(true);
@@ -42,7 +45,11 @@ public class TutorialInteractivo : MonoBehaviour
         pasoActual = 0;
         MostrarPaso();
         if (textoTemporal != null) textoTemporal.text = "";
+
+        // 🔹 Linterna desactivada al inicio
+        if (linternaObjeto != null) linternaObjeto.SetActive(false);
     }
+
     void Update()
     {
         if (!tutorialActivo) return;
@@ -90,6 +97,10 @@ public class TutorialInteractivo : MonoBehaviour
                 break;
 
             case 2:
+                // 🔹 Activar linterna al llegar a este paso
+                if (linternaObjeto != null && !linternaObjeto.activeSelf)
+                    linternaObjeto.SetActive(true);
+
                 if (Input.GetKeyDown(KeyCode.E))
                 {
                     if (camaraPrincipal == null)
@@ -101,7 +112,6 @@ public class TutorialInteractivo : MonoBehaviour
                     Ray ray = new Ray(camaraPrincipal.transform.position, camaraPrincipal.transform.forward);
                     if (Physics.Raycast(ray, out RaycastHit hit, distanciaInteraccion))
                     {
-                        // 🔹 Solo avanzar si el objeto tiene uno de los scripts válidos
                         if (hit.collider.GetComponent<LinternaPickup>() != null)
                         {
                             tieneLinterna = true;
@@ -120,11 +130,6 @@ public class TutorialInteractivo : MonoBehaviour
                         {
                             Debug.Log("[TutorialInteractivo] Objeto interactuado no válido para el tutorial.");
                         }
-                    }
-                    else
-                    {
-                        // No golpeó nada → ignorar
-                        Debug.Log("[TutorialInteractivo] No hay objeto con el que interactuar.");
                     }
                 }
                 break;
@@ -145,11 +150,13 @@ public class TutorialInteractivo : MonoBehaviour
                 break;
         }
     }
+
     public void MostrarPaso()
     {
         if (textoTutorial != null && pasoActual < pasos.Length)
             textoTutorial.text = pasos[pasoActual];
     }
+
     public void SiguientePaso()
     {
         pasoActual++;
@@ -162,6 +169,7 @@ public class TutorialInteractivo : MonoBehaviour
             MostrarPaso();
         }
     }
+
     private void CompletarTutorial()
     {
         tutorialActivo = false;
@@ -169,6 +177,7 @@ public class TutorialInteractivo : MonoBehaviour
         pasoActual = 0;
         Debug.Log("✅ Tutorial completado y panel apagado.");
     }
+
     public void NotificarLinternaRecogida()
     {
         tieneLinterna = true;
@@ -179,6 +188,7 @@ public class TutorialInteractivo : MonoBehaviour
             SiguientePaso();
         }
     }
+
     private Coroutine mensajeCoroutine;
     private void MostrarMensajeTemporal(string mensaje, float duracion)
     {
@@ -186,6 +196,7 @@ public class TutorialInteractivo : MonoBehaviour
         if (mensajeCoroutine != null) StopCoroutine(mensajeCoroutine);
         mensajeCoroutine = StartCoroutine(MostrarMensajeCoroutine(mensaje, duracion));
     }
+
     private IEnumerator MostrarMensajeCoroutine(string mensaje, float duracion)
     {
         textoTemporal.text = mensaje;
@@ -195,6 +206,7 @@ public class TutorialInteractivo : MonoBehaviour
         textoTemporal.gameObject.SetActive(false);
         mensajeCoroutine = null;
     }
+
     public bool EstaActivo() => tutorialActivo;
     public int ObtenerPasoActual() => pasoActual;
     public bool TieneLinterna() => tieneLinterna;

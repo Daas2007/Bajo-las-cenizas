@@ -88,6 +88,7 @@ public class PantallaDeMuerte : MonoBehaviour
     {
         CanvasController cc = FindObjectOfType<CanvasController>();
         if (cc != null) cc.ReintentarDesdeMuerte();
+        cc.panelUIActivo();
     }
 
     public void SalirAlMenu()
