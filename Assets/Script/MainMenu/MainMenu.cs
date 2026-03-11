@@ -8,8 +8,8 @@ public class MainMenu : MonoBehaviour
     [SerializeField] GameObject mainPanel;       // Panel principal del menú
     [SerializeField] GameObject opcionesPanel;   // Panel de opciones
     [SerializeField] GameObject panelLoading;    // Panel de carga con Image
-    [SerializeField] float fadeDuration = 0.5f;  // 🔹 Duración del fade in/out: 0.5 segundos
-    [SerializeField] float holdDuration = 5f;    // 🔹 Tiempo que permanece opaco antes de cambiar de escena: 5 segundos
+    [SerializeField] float fadeDuration = 0.5f;  // Duración del fade in/out
+    [SerializeField] float holdDuration = 5f;    // Tiempo opaco antes de cambiar de escena
 
     private Image loadingImage;
 
@@ -21,13 +21,20 @@ public class MainMenu : MonoBehaviour
         if (panelLoading != null)
         {
             loadingImage = panelLoading.GetComponent<Image>();
-            // 🔹 Arranca opaco para que se aclare al entrar
-            panelLoading.SetActive(true);
-            loadingImage.color = new Color(loadingImage.color.r, loadingImage.color.g, loadingImage.color.b, 1f);
-            StartCoroutine(FadeOut()); // 🔹 aclarar al inicio de la escena
         }
 
         Time.timeScale = 1f;
+    }
+
+    private void OnEnable()
+    {
+        // 🔹 Cada vez que el menú se habilita (inicio o regreso desde otra escena)
+        if (panelLoading != null && loadingImage != null)
+        {
+            panelLoading.SetActive(true);
+            loadingImage.color = new Color(loadingImage.color.r, loadingImage.color.g, loadingImage.color.b, 1f);
+            StartCoroutine(FadeOut()); // aclarar al entrar al menú
+        }
     }
 
     // 🔹 Jugar con transición de pantalla de carga
@@ -44,12 +51,11 @@ public class MainMenu : MonoBehaviour
             yield return StartCoroutine(FadeIn());
             yield return new WaitForSecondsRealtime(holdDuration);
 
-            // Cargar escena mientras sigue opaco
             SceneManager.LoadScene(nombreEscena);
         }
     }
 
-    // 🔹 Fade In (pantalla se opaca en 0.5 segundos)
+    // 🔹 Fade In (oscurece en fadeDuration)
     private IEnumerator FadeIn()
     {
         float t = 0f;
@@ -64,7 +70,7 @@ public class MainMenu : MonoBehaviour
         loadingImage.color = new Color(c.r, c.g, c.b, 1f);
     }
 
-    // 🔹 Fade Out (pantalla se aclara en 0.5 segundos)
+    // 🔹 Fade Out (aclara en fadeDuration)
     public IEnumerator FadeOut()
     {
         float t = 0f;
@@ -123,12 +129,11 @@ public class MainMenu : MonoBehaviour
         if (panelLoading != null)
         {
             panelLoading.SetActive(true);
-            yield return StartCoroutine(FadeIn()); // 🔹 oscurece la pantalla primero
-            yield return new WaitForSecondsRealtime(1f); // opcional: espera un instante opaco
+            yield return StartCoroutine(FadeIn()); // oscurece la pantalla primero
+            yield return new WaitForSecondsRealtime(1f);
         }
 
         Application.Quit();
         Debug.Log("Juego cerrado desde el menú principal con fade.");
     }
 }
-

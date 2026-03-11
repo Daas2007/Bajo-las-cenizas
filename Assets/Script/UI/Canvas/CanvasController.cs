@@ -33,25 +33,26 @@ public class CanvasController : MonoBehaviour
 
     private GameObject panelActivo;
     private GameObject panelAnterior;
-    void Start()
+    void Awake()
+    {
+        if (panelLoading != null)
+            loadingImage = panelLoading.GetComponent<Image>();
+
+        Time.timeScale = 1f;
+    }
+    private void OnEnable()
     {
         DesactivarTodos();
         BloquearMouse();
         if (panelHUD != null) panelHUD.SetActive(true);
 
-        if (panelLoading != null)
+        // 🔹 Arranca opaco y aclara al entrar
+        if (panelLoading != null && loadingImage != null)
         {
-            loadingImage = panelLoading.GetComponent<Image>();
-
-            // 🔹 Arranca opaco (pantalla negra)
             panelLoading.SetActive(true);
             loadingImage.color = new Color(0f, 0f, 0f, 1f); // negro con alfa 1
-
-            // 🔹 Ejecutar fade inverso al inicio (de negro a transparente)
             StartCoroutine(FadeOut());
         }
-
-        Time.timeScale = 1f;
     }
     void Update()
     {
@@ -81,66 +82,6 @@ public class CanvasController : MonoBehaviour
             }
         }
     }
-
-    //---------------MainMenu---------------
-    //public void MostrarMainMenu()
-    //{
-    //    ActivarPanel(panelMainMenu, true);
-    //}
-
-    //public void Jugar()
-    //{
-    //    if (panelHUD != null) panelHUD.SetActive(true);
-    //    GameManager gm = GameManager.Instancia;
-    //    if (gm != null) gm.NuevaPartida();
-
-    //    CerrarPanelActivo();
-    //    Cursor.lockState = CursorLockMode.Locked;
-    //    Cursor.visible = false;
-    //    Time.timeScale = 1f;
-    //    panelUIActivo();
-    //    Debug.Log("▶️ Jugar: inicio limpio desde spawn inicial.");
-    //}
-
-    //public void CargarPartidaDesdeMenu()
-    //{
-    //    MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
-    //    GameManager gm = GameManager.Instancia;
-
-    //    if (jugador != null && gm != null)
-    //    {
-    //        bool cargado = SistemaGuardar.Cargar(jugador, gm);
-    //        if (!cargado)
-    //        {
-    //            gm.ReiniciarEstado();
-    //            if (gm.spawnInicial != null)
-    //            {
-    //                jugador.transform.position = gm.spawnInicial.position;
-    //                jugador.transform.rotation = gm.spawnInicial.rotation;
-    //            }
-    //            if (gm.linternaPickup != null) gm.linternaPickup.SetActive(true);
-    //            if (gm.linternaEnMano != null) gm.linternaEnMano.SetActive(false);
-    //            gm.tieneLinterna = false;
-    //            Debug.Log("📂 No había guardado: respawneado en spawn inicial.");
-    //        }
-    //        else
-    //        {
-    //            Debug.Log("📂 Guardado cargado desde menú.");
-    //        }
-
-    //        jugador.enabled = true;
-    //        Camera cam = jugador.GetComponentInChildren<Camera>();
-    //        if (cam != null) cam.enabled = true;
-    //    }
-
-    //    CerrarPanelActivo();
-    //    Time.timeScale = 1f;
-    //    Cursor.lockState = CursorLockMode.Locked;
-    //    Cursor.visible = false;
-    //}
-
-    //public void SalirJuego() => Application.Quit();
-
     //---------------Pausa---------------
     public void MostrarPausa()
     {
@@ -163,10 +104,10 @@ public class CanvasController : MonoBehaviour
     {
         float t = 0f;
         Color c = loadingImage.color;
-        while (t < 0.5f) // 🔹 ahora dura 0.5 segundos
+        while (t < fadeDuration)
         {
             t += Time.unscaledDeltaTime;
-            float alpha = Mathf.Lerp(0f, 1f, t / 0.5f);
+            float alpha = Mathf.Lerp(0f, 1f, t / fadeDuration);
             loadingImage.color = new Color(c.r, c.g, c.b, alpha);
             yield return null;
         }
@@ -188,10 +129,10 @@ public class CanvasController : MonoBehaviour
     {
         float t = 0f;
         Color c = loadingImage.color;
-        while (t < 0.5f) // 🔹 también dura 0.5 segundos
+        while (t < fadeDuration)
         {
             t += Time.unscaledDeltaTime;
-            float alpha = Mathf.Lerp(1f, 0f, t / 0.5f);
+            float alpha = Mathf.Lerp(1f, 0f, t / fadeDuration);
             loadingImage.color = new Color(c.r, c.g, c.b, alpha);
             yield return null;
         }
