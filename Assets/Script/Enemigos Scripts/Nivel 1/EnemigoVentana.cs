@@ -53,12 +53,31 @@ public class EnemigoVentana : MonoBehaviour
 
     float tiempoUltimoAudio = -999f;
 
+    [Header("Advertencia volumétrica (efecto cámara)")]
+    [Tooltip("Referencia al componente VolumetricOjoEffect en la cámara")]
+    [SerializeField] private VolumetricOjoEffect volumetricOjo;
+    [Tooltip("Cuando queden <= este valor (segundos) se mostrará el pulso volumétrico")]
+    [SerializeField] private float tiempoAvisoAntesDeEntrar = 3f;
+    private bool avisoActivo = false;
+
+    [Header("Opcional: centrar efecto en posición del enemigo")]
+    [Tooltip("Si true, el centro del efecto seguirá la posición world del spawnParent/enemigo")]
+    [SerializeField] private bool seguirPosicionEnemigo = true;
+
     void Start()
     {
         ActualizarColorVentana();
 
         if (enemigoEnEscena != null)
             enemigoEnEscena.SetActive(false);
+
+        // Asegurarse de que el efecto volumétrico arranque en su intensidad base
+        if (volumetricOjo != null)
+        {
+            volumetricOjo.HidePulse();
+            // opcional: inicializar centro si no se va a seguir al enemigo
+            // volumetricOjo.center = new Vector2(0.5f, 0.5f);
+        }
     }
 
     void Update()
@@ -90,6 +109,13 @@ public class EnemigoVentana : MonoBehaviour
             {
                 cuentaRegresivaActiva = false;
                 tiempoRestanteParaEntrar = 0f;
+
+                // ocultar efecto volumétrico si estaba activo
+                if (volumetricOjo != null && avisoActivo)
+                {
+                    volumetricOjo.HidePulse();
+                    avisoActivo = false;
+                }
             }
         }
         else
@@ -102,6 +128,7 @@ public class EnemigoVentana : MonoBehaviour
             }
         }
 
+        // Lógica de cuenta regresiva para entrar cuando está en estado 3
         if (estadoActual == 3 && !recibiendoLuz)
         {
             if (!cuentaRegresivaActiva)
@@ -114,8 +141,58 @@ public class EnemigoVentana : MonoBehaviour
             {
                 tiempoRestanteParaEntrar -= deltaT;
 
+                // actualizar centro del efecto para que siga al enemigo (opcional)
+                if (seguirPosicionEnemigo && volumetricOjo != null)
+                {
+                    Vector3 worldPos = Vector3.zero;
+                    if (spawnParent != null) worldPos = spawnParent.position;
+                    else if (enemigoEnEscena != null) worldPos = enemigoEnEscena.transform.position;
+
+                    Camera cam = Camera.main;
+                    if (cam != null)
+                    {
+                        Vector3 vp = cam.WorldToViewportPoint(worldPos);
+                        // solo actualizar si está delante de la cámara
+                        if (vp.z > 0f)
+                            volumetricOjo.center = new Vector2(Mathf.Clamp01(vp.x), Mathf.Clamp01(vp.y));
+                    }
+                }
+
+                // Mostrar advertencia volumétrica cuando quede poco tiempo
+                if (volumetricOjo != null)
+                {
+                    if (tiempoRestanteParaEntrar <= tiempoAvisoAntesDeEntrar && tiempoRestanteParaEntrar > 0f)
+                    {
+                        if (!avisoActivo)
+                        {
+                            volumetricOjo.ShowPulse(tiempoRestanteParaEntrar);
+                            avisoActivo = true;
+                        }
+                        else
+                        {
+                            // opcional: actualizar duración reiniciando el pulso
+                            // volumetricOjo.ShowPulse(tiempoRestanteParaEntrar);
+                        }
+                    }
+                    else if (tiempoRestanteParaEntrar > tiempoAvisoAntesDeEntrar)
+                    {
+                        if (avisoActivo)
+                        {
+                            volumetricOjo.HidePulse();
+                            avisoActivo = false;
+                        }
+                    }
+                }
+
                 if (tiempoRestanteParaEntrar <= 0f && !enemigoSpawned)
                 {
+                    // ocultar efecto antes de entrar
+                    if (volumetricOjo != null && avisoActivo)
+                    {
+                        volumetricOjo.HidePulse();
+                        avisoActivo = false;
+                    }
+
                     EntrarAHabitacion();
                 }
             }
@@ -142,6 +219,13 @@ public class EnemigoVentana : MonoBehaviour
             tiempoRestanteParaEntrar = 0f;
         }
 
+        // Si había una alerta activa, ocultarla
+        if (volumetricOjo != null && avisoActivo)
+        {
+            volumetricOjo.HidePulse();
+            avisoActivo = false;
+        }
+
         ActualizarColorVentana();
         ReproducirAudio(clipRetroceder);
     }
@@ -160,34 +244,25 @@ public class EnemigoVentana : MonoBehaviour
             return;
         }
 
-        // Si hay spawnParent configurado, parentar al enemigo a ese transform y usar localPosition = Vector3.zero
         if (spawnParent != null)
         {
-            // 1) Parentar (sin mantener posición mundial)
             enemigoEnEscena.transform.SetParent(spawnParent, worldPositionStays: false);
-
-            // 2) Asegurar localPosition/localRotation en cero
             enemigoEnEscena.transform.localPosition = Vector3.zero;
             enemigoEnEscena.transform.localRotation = Quaternion.identity;
         }
         else
         {
-            // Si no hay spawnParent, por compatibilidad colocamos en world 0,0,0
             enemigoEnEscena.transform.SetParent(null, worldPositionStays: true);
             enemigoEnEscena.transform.position = Vector3.zero;
             enemigoEnEscena.transform.rotation = Quaternion.identity;
         }
 
-        // Resetear física y estado del perseguidor de forma segura
         EnemigoPerseguidor script = enemigoEnEscena.GetComponent<EnemigoPerseguidor>();
         if (script != null)
         {
             script.ResetEnemigo();
-
-            // Activar después de reposicionar y resetear
             enemigoEnEscena.SetActive(true);
 
-            // Asignar objetivo si existe
             GameObject jugador = GameObject.FindGameObjectWithTag("Player");
             if (jugador != null)
             {
@@ -234,6 +309,12 @@ public class EnemigoVentana : MonoBehaviour
         cuentaRegresivaActiva = false;
         tiempoRestanteParaEntrar = 0f;
         enemigoSpawned = false;
+
+        if (volumetricOjo != null && avisoActivo)
+        {
+            volumetricOjo.HidePulse();
+            avisoActivo = false;
+        }
 
         if (enemigoEnEscena != null)
         {

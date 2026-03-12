@@ -187,6 +187,7 @@ public class CanvasController : MonoBehaviour
         if (panelMuerte != null) panelMuerte.SetActive(false);
         panelActivo = null;
         if (panelHUD != null) panelHUD.SetActive(true);
+        Time.timeScale = 1f;
 
         GameManager gm = GameManager.Instancia;
         MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
