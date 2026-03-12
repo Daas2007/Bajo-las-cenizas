@@ -36,9 +36,12 @@ public class SlotPuzzle : MonoBehaviour, IInteractuable
 
     public bool EstaCorrecta()
     {
+        // ✅ Si no hay pieza en el slot, no está correcto
         if (piezaActual == null) return false;
+
         return piezaActual.piezaID == slotID;
     }
+
 
     public void ResetSlot()
     {

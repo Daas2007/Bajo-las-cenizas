@@ -6,9 +6,16 @@ public class GestorPuzzleFisico : MonoBehaviour
     public SlotPuzzle[] slots;
 
     [Header("Pieza del oso que se activa")]
-    public GameObject piezaOso; // arrastra aquí la pieza del oso (déjala desactivada en el Inspector)
+    public GameObject piezaOso; // arrastra aquí la pieza del oso
 
     private bool puzzleCompletado = false;
+
+    private void Start()
+    {
+        // ✅ Garantiza que arranque desactivada
+        if (piezaOso != null)
+            piezaOso.SetActive(false);
+    }
 
     void Update()
     {
@@ -22,7 +29,6 @@ public class GestorPuzzleFisico : MonoBehaviour
 
     private bool ComprobarPuzzle()
     {
-        // ✅ Solo devuelve true si TODOS los slots tienen la pieza correcta
         foreach (var slot in slots)
         {
             if (!slot.EstaCorrecta()) return false;
@@ -34,7 +40,7 @@ public class GestorPuzzleFisico : MonoBehaviour
     {
         if (piezaOso != null && !piezaOso.activeSelf)
         {
-            piezaOso.SetActive(true); // ✅ activa la pieza del oso
+            piezaOso.SetActive(true);
             Debug.Log("✅ Puzzle completado, pieza del oso activada.");
         }
     }
@@ -45,8 +51,25 @@ public class GestorPuzzleFisico : MonoBehaviour
         {
             if (slot.piezaActual != null)
             {
-                // Desactiva el script de la pieza para que ya no se pueda mover
                 slot.piezaActual.enabled = false;
+            }
+        }
+    }
+
+    // 🔹 Reset opcional
+    public void ResetPuzzle()
+    {
+        puzzleCompletado = false;
+        if (piezaOso != null)
+            piezaOso.SetActive(false);
+
+        foreach (var slot in slots)
+        {
+            if (slot.piezaActual != null)
+            {
+                slot.piezaActual.ResetColocada();
+                slot.piezaActual.enabled = true;
+                slot.ResetSlot();
             }
         }
     }
