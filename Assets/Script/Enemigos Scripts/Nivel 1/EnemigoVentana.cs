@@ -53,15 +53,10 @@ public class EnemigoVentana : MonoBehaviour
 
     float tiempoUltimoAudio = -999f;
 
-    [Header("Advertencia volumétrica (efecto cámara)")]
-    [Tooltip("Referencia al componente VolumetricOjoEffect en la cámara")]
-    [SerializeField] private VolumetricOjoEffect volumetricOjo;
-    [Tooltip("Cuando queden <= este valor (segundos) se mostrará el pulso volumétrico")]
+    [Header("Ajustes internos")]
     [SerializeField] private float tiempoAvisoAntesDeEntrar = 3f;
-    private bool avisoActivo = false;
 
-    [Header("Opcional: centrar efecto en posición del enemigo")]
-    [Tooltip("Si true, el centro del efecto seguirá la posición world del spawnParent/enemigo")]
+    [Header("Opcional: centrar efecto en posición del enemigo (no usado)")]
     [SerializeField] private bool seguirPosicionEnemigo = true;
 
     void Start()
@@ -70,14 +65,6 @@ public class EnemigoVentana : MonoBehaviour
 
         if (enemigoEnEscena != null)
             enemigoEnEscena.SetActive(false);
-
-        // Asegurarse de que el efecto volumétrico arranque en su intensidad base
-        if (volumetricOjo != null)
-        {
-            volumetricOjo.HidePulse();
-            // opcional: inicializar centro si no se va a seguir al enemigo
-            // volumetricOjo.center = new Vector2(0.5f, 0.5f);
-        }
     }
 
     void Update()
@@ -86,12 +73,14 @@ public class EnemigoVentana : MonoBehaviour
         tiempoTotalJuego += deltaT;
         tiempoEnEstado += deltaT;
 
+        // Escala dificultad con el tiempo
         if (tiempoTotalJuego >= nivelAgresividad * tiempoPorNivel)
         {
             nivelAgresividad++;
             tiempoParaAvanzar = Mathf.Max(tiempoMinimoAvance, tiempoParaAvanzar - reduccionPorNivel);
         }
 
+        // Si recibe luz, retrocede o resetea cuenta
         if (recibiendoLuz)
         {
             contadorLuz += deltaT;
@@ -109,13 +98,6 @@ public class EnemigoVentana : MonoBehaviour
             {
                 cuentaRegresivaActiva = false;
                 tiempoRestanteParaEntrar = 0f;
-
-                // ocultar efecto volumétrico si estaba activo
-                if (volumetricOjo != null && avisoActivo)
-                {
-                    volumetricOjo.HidePulse();
-                    avisoActivo = false;
-                }
             }
         }
         else
@@ -128,73 +110,17 @@ public class EnemigoVentana : MonoBehaviour
             }
         }
 
-        // Lógica de cuenta regresiva para entrar cuando está en estado 3
-        if (estadoActual == 3 && !recibiendoLuz)
+        // --- Lógica de cuenta regresiva para entrar ---
+        // Ahora la cuenta corre si cuentaRegresivaActiva == true (no se exige estadoActual == 3)
+        if (cuentaRegresivaActiva && !recibiendoLuz && !enemigoSpawned)
         {
-            if (!cuentaRegresivaActiva)
+            tiempoRestanteParaEntrar -= deltaT;
+
+            // (Opcional) aquí podrías actualizar efectos visuales o UI según tiempoRestanteParaEntrar
+            // Si llega a cero, spawnear enemigo
+            if (tiempoRestanteParaEntrar <= 0f && !enemigoSpawned)
             {
-                cuentaRegresivaActiva = true;
-                tiempoRestanteParaEntrar = tiempoAntesDeEntrar;
-            }
-
-            if (cuentaRegresivaActiva)
-            {
-                tiempoRestanteParaEntrar -= deltaT;
-
-                // actualizar centro del efecto para que siga al enemigo (opcional)
-                if (seguirPosicionEnemigo && volumetricOjo != null)
-                {
-                    Vector3 worldPos = Vector3.zero;
-                    if (spawnParent != null) worldPos = spawnParent.position;
-                    else if (enemigoEnEscena != null) worldPos = enemigoEnEscena.transform.position;
-
-                    Camera cam = Camera.main;
-                    if (cam != null)
-                    {
-                        Vector3 vp = cam.WorldToViewportPoint(worldPos);
-                        // solo actualizar si está delante de la cámara
-                        if (vp.z > 0f)
-                            volumetricOjo.center = new Vector2(Mathf.Clamp01(vp.x), Mathf.Clamp01(vp.y));
-                    }
-                }
-
-                // Mostrar advertencia volumétrica cuando quede poco tiempo
-                if (volumetricOjo != null)
-                {
-                    if (tiempoRestanteParaEntrar <= tiempoAvisoAntesDeEntrar && tiempoRestanteParaEntrar > 0f)
-                    {
-                        if (!avisoActivo)
-                        {
-                            volumetricOjo.ShowPulse(tiempoRestanteParaEntrar);
-                            avisoActivo = true;
-                        }
-                        else
-                        {
-                            // opcional: actualizar duración reiniciando el pulso
-                            // volumetricOjo.ShowPulse(tiempoRestanteParaEntrar);
-                        }
-                    }
-                    else if (tiempoRestanteParaEntrar > tiempoAvisoAntesDeEntrar)
-                    {
-                        if (avisoActivo)
-                        {
-                            volumetricOjo.HidePulse();
-                            avisoActivo = false;
-                        }
-                    }
-                }
-
-                if (tiempoRestanteParaEntrar <= 0f && !enemigoSpawned)
-                {
-                    // ocultar efecto antes de entrar
-                    if (volumetricOjo != null && avisoActivo)
-                    {
-                        volumetricOjo.HidePulse();
-                        avisoActivo = false;
-                    }
-
-                    EntrarAHabitacion();
-                }
+                EntrarAHabitacion();
             }
         }
     }
@@ -217,13 +143,6 @@ public class EnemigoVentana : MonoBehaviour
             estadoActual = 1;
             cuentaRegresivaActiva = false;
             tiempoRestanteParaEntrar = 0f;
-        }
-
-        // Si había una alerta activa, ocultarla
-        if (volumetricOjo != null && avisoActivo)
-        {
-            volumetricOjo.HidePulse();
-            avisoActivo = false;
         }
 
         ActualizarColorVentana();
@@ -277,6 +196,33 @@ public class EnemigoVentana : MonoBehaviour
         }
     }
 
+    // Métodos públicos para que EnemyActivator los llame
+    /// <summary>
+    /// Llamar cuando el jugador entra al trigger: arranca la cuenta regresiva sin forzar estado.
+    /// </summary>
+    public void StartTriggerSequence()
+    {
+        // NO forzamos estadoActual = 3 aquí.
+        // Solo arrancamos la cuenta regresiva si aún no está spawneado.
+        if (enemigoSpawned) return;
+
+        cuentaRegresivaActiva = true;
+        tiempoRestanteParaEntrar = tiempoAntesDeEntrar;
+
+        // Reset timers para evitar saltos
+        tiempoEnEstado = 0f;
+        contadorLuz = 0f;
+    }
+
+    /// <summary>
+    /// Llamar cuando el jugador sale del trigger o se cancela la secuencia.
+    /// </summary>
+    public void StopTriggerSequence()
+    {
+        cuentaRegresivaActiva = false;
+        tiempoRestanteParaEntrar = 0f;
+    }
+
     public void SetIluminado(bool valor)
     {
         recibiendoLuz = valor;
@@ -309,12 +255,6 @@ public class EnemigoVentana : MonoBehaviour
         cuentaRegresivaActiva = false;
         tiempoRestanteParaEntrar = 0f;
         enemigoSpawned = false;
-
-        if (volumetricOjo != null && avisoActivo)
-        {
-            volumetricOjo.HidePulse();
-            avisoActivo = false;
-        }
 
         if (enemigoEnEscena != null)
         {
