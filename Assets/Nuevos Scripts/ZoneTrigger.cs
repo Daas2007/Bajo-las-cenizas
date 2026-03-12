@@ -5,15 +5,24 @@ public class ZoneTrigger : MonoBehaviour
 {
     public enum TipoTrigger
     {
-        ActivarMuro,   // Trigger colocado ANTES de entrar al cuarto
-        CerrarPuerta   // Trigger colocado DENTRO del cuarto
+        IntercambiarHabitacion,
+        CerrarPuerta
     }
 
     [SerializeField] private string idHabitacion = "Habitacion1";
-    [SerializeField] private TipoTrigger tipo = TipoTrigger.ActivarMuro;
+    [SerializeField] private TipoTrigger tipo = TipoTrigger.IntercambiarHabitacion;
 
-    // Estado local para evitar llamadas repetidas
-    private bool muroActivado = false;
+    [Header("Habitaciones (asignar en Inspector)")]
+    [Tooltip("Habitación 'lobby' que debe estar activa al inicio de la escena")]
+    [SerializeField] private GameObject lobbyRoom;
+    [Tooltip("Habitación alternativa que se activa cuando NO hay cristal y se atraviesa el trigger")]
+    [SerializeField] private GameObject alternateRoom;
+
+    // Indica si ya se aplicó el intercambio (alternate activo)
+    private bool hasSwapped = false;
+
+    // Estado interno para saber si GameManager tiene cristal (se actualiza con el evento)
+    private bool estadoHasCrystal = false;
 
     private void Reset()
     {
@@ -23,96 +32,114 @@ public class ZoneTrigger : MonoBehaviour
 
     private void Start()
     {
-        // Comprobación inicial: si el jugador ya tiene el cristal, aseguramos que el muro esté desactivado
-        if (tipo == TipoTrigger.ActivarMuro && !string.IsNullOrEmpty(idHabitacion))
-        {
-            if (PlayerPrefs.GetInt("TieneCristal", 0) == 1)
-            {
-                LevelGateManager.Instancia?.DesactivarMuroRetorno(idHabitacion);
-                muroActivado = false;
-                Debug.Log($"[ZoneTrigger] Start: jugador ya tiene cristal -> muro desactivado para {idHabitacion}");
-            }
-            else
-            {
-                // opcional: no forzar activación en Start para no sorprender al jugador,
-                // pero dejamos el estado en false para que OnTriggerEnter lo active si corresponde.
-                muroActivado = false;
-            }
-        }
+        // Forzar estado visual inicial: lobby ON, alternate OFF
+        if (lobbyRoom != null) lobbyRoom.SetActive(true);
+        if (alternateRoom != null) alternateRoom.SetActive(false);
+
+        // Inicializar estadoHasCrystal según GameManager (si existe)
+        estadoHasCrystal = GameManager.Instancia != null && GameManager.Instancia.HasCrystal;
+
+        // Suscribirse al evento para actualizar solo el estado interno si se recoge el cristal
+        if (GameManager.Instancia != null)
+            GameManager.Instancia.OnCrystalCollected += OnCrystalCollected;
+
+        Debug.Log($"[ZoneTrigger Start] {name} inicializado. estadoHasCrystal={estadoHasCrystal}, hasSwapped={hasSwapped}");
+    }
+
+    private void OnDestroy()
+    {
+        if (GameManager.Instancia != null)
+            GameManager.Instancia.OnCrystalCollected -= OnCrystalCollected;
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!other.CompareTag("Player")) return;
-        if (string.IsNullOrEmpty(idHabitacion)) return;
+        Debug.Log($"[ZoneTrigger] OnTriggerEnter en {name} por {other.name} (tag={other.tag})");
+
+        if (!other.CompareTag("Player"))
+        {
+            Debug.Log($"[ZoneTrigger] Ignorado: collider no es Player ({other.tag})");
+            return;
+        }
 
         switch (tipo)
         {
-            case TipoTrigger.ActivarMuro:
-                // Si el jugador tiene cristal → desactivar muro
-                if (PlayerPrefs.GetInt("TieneCristal", 0) == 1)
-                {
-                    LevelGateManager.Instancia?.DesactivarMuroRetorno(idHabitacion);
-                    muroActivado = false;
-                    Debug.Log($"[ZoneTrigger] Jugador tiene cristal -> muro desactivado en {idHabitacion}");
-                }
-                else
-                {
-                    // Si no tiene cristal → activar muro
-                    if (!muroActivado)
-                    {
-                        LevelGateManager.Instancia?.ActivarMuroRetorno(idHabitacion);
-                        muroActivado = true;
-                        Debug.Log($"[ZoneTrigger] Jugador NO tiene cristal -> muro activado en {idHabitacion}");
-                    }
-                }
+            case TipoTrigger.IntercambiarHabitacion:
+                HandleIntercambio();
                 break;
 
             case TipoTrigger.CerrarPuerta:
                 LevelGateManager.Instancia?.CerrarPuertaLobby(idHabitacion);
                 LevelGateManager.Instancia?.EntrarHabitacion(idHabitacion);
 
-                PuertaInteractuable puerta = Object.FindFirstObjectByType<PuertaInteractuable>();
-                if (puerta != null)
-                {
-                    puerta.CerrarSiCristal();
-                }
+                var puerta = Object.FindFirstObjectByType<PuertaInteractuable>();
+                if (puerta != null) puerta.CerrarSiCristal();
                 break;
         }
     }
 
-
-    private void OnTriggerExit(Collider other)
+    private void HandleIntercambio()
     {
-        if (!other.CompareTag("Player")) return;
-
-        // Al salir del trigger con cristal → activar enemigo más rápido
-        if (tipo == TipoTrigger.ActivarMuro && PlayerPrefs.GetInt("TieneCristal", 0) == 1)
+        if (GameManager.Instancia == null)
         {
-            EnemigoPerseguidor enemigo = Object.FindFirstObjectByType<EnemigoPerseguidor>();
-            if (enemigo != null)
-            {
-                enemigo.SetVelocidadExtra();
-            }
+            Debug.LogWarning($"[ZoneTrigger] GameManager.Instancia es null en {name}. No se puede determinar estado del cristal.");
+            return;
         }
+
+        bool hasCrystalNow = GameManager.Instancia.HasCrystal;
+        Debug.Log($"[ZoneTrigger] HandleIntercambio en {name}: hasCrystalNow={hasCrystalNow}, hasSwapped={hasSwapped}");
+
+        // Caso 1: no tiene cristal y aún no hemos hecho swap -> activar alternate
+        if (!hasCrystalNow && !hasSwapped)
+        {
+            if (lobbyRoom == null || alternateRoom == null)
+            {
+                Debug.LogWarning($"[ZoneTrigger] lobbyRoom o alternateRoom NO asignadas en {name}.");
+                return;
+            }
+
+            lobbyRoom.SetActive(false);
+            alternateRoom.SetActive(true);
+            hasSwapped = true;
+            estadoHasCrystal = false;
+            Debug.Log($"[ZoneTrigger] Swap aplicado: jugador SIN cristal -> lobby OFF, alternate ON ({name})");
+            return;
+        }
+
+        // Caso 2: tiene cristal y previamente hicimos swap -> volver a lobby
+        if (hasCrystalNow && hasSwapped)
+        {
+            if (lobbyRoom == null || alternateRoom == null)
+            {
+                Debug.LogWarning($"[ZoneTrigger] lobbyRoom o alternateRoom NO asignadas en {name}.");
+                return;
+            }
+
+            lobbyRoom.SetActive(true);
+            alternateRoom.SetActive(false);
+            hasSwapped = false;
+            estadoHasCrystal = true;
+            Debug.Log($"[ZoneTrigger] Swap revertido: jugador CON cristal -> lobby ON, alternate OFF ({name})");
+            return;
+        }
+
+        // Si llegamos aquí, no hay cambio necesario
+        Debug.Log($"[ZoneTrigger] No se requiere cambio en {name} (hasCrystalNow={hasCrystalNow}, hasSwapped={hasSwapped}).");
     }
 
-    // -----------------------
-    // Método público para notificar que el jugador recogió el cristal.
-    // Llamar desde el script que maneja la recolección del cristal (o desde GameManager).
-    // -----------------------
-    public void NotificarCristalRecogido()
+    // Método público para forzar actualización desde otros scripts (opcional)
+    public void ForzarActualizarEstado()
     {
-        // Guardar en PlayerPrefs por compatibilidad con el resto del sistema
-        PlayerPrefs.SetInt("TieneCristal", 1);
-        PlayerPrefs.Save();
+        if (tipo != TipoTrigger.IntercambiarHabitacion) return;
+        // No aplicamos visualmente aquí; ForzarActualizarEstado puede usarse para forzar la lógica
+        HandleIntercambio();
+    }
 
-        // Si este trigger controla el muro de la habitación, desactivarlo
-        if (tipo == TipoTrigger.ActivarMuro && !string.IsNullOrEmpty(idHabitacion))
-        {
-            LevelGateManager.Instancia?.DesactivarMuroRetorno(idHabitacion);
-            muroActivado = false;
-            Debug.Log($"[ZoneTrigger] NotificarCristalRecogido: cristal recogido -> desactivar muro {idHabitacion}");
-        }
+    // Callback cuando GameManager notifica recolección del cristal.
+    // Actualiza el estado interno para que la próxima vez que atravieses el trigger se aplique la reversión.
+    private void OnCrystalCollected()
+    {
+        estadoHasCrystal = true;
+        Debug.Log($"[ZoneTrigger] OnCrystalCollected: estado interno actualizado a true ({name}). El swap se aplicará/revertirá al atravesar el trigger.");
     }
 }

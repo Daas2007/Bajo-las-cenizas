@@ -8,8 +8,14 @@ public class CristalMeta : MonoBehaviour
     {
         if (!other.CompareTag("Player")) return;
 
-        LevelGateManager.Instancia.CompletarHabitacion(idHabitacion);
-        Destroy(gameObject); // eliminar cristal
+        LevelGateManager.Instancia?.CompletarHabitacion(idHabitacion);
+
+        if (GameManager.Instancia != null)
+        {
+            GameManager.Instancia.NotifyCrystalCollected();
+            GameManager.Instancia.RecogerCristal(); // opcional: lógica global al recoger
+        }
+
+        Destroy(gameObject);
     }
 }
-

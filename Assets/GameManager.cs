@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections.Generic;
-using System.IO;
 
 public class GameManager : MonoBehaviour
 {
@@ -10,7 +10,7 @@ public class GameManager : MonoBehaviour
     public int piezasRecogidas = 0;
     public int piezasNecesarias = 5;
     public bool osoCompleto = false;
-    public System.Action OnOsoCompleto;
+    public Action OnOsoCompleto;
 
     [Header("Objetos de la escena")]
     public GameObject linternaEnMano;
@@ -32,6 +32,15 @@ public class GameManager : MonoBehaviour
     [Header("Referencias")]
     public GameObject enemigo;
     public bool tieneLinterna = false;
+
+    // -----------------------
+    // Estado de sesión: si el jugador tiene el cristal en la partida actual.
+    // NO se persiste en PlayerPrefs ni en disco.
+    // -----------------------
+    public bool HasCrystal { get; private set; } = false;
+
+    // Evento para notificar a otros sistemas que se recogió el cristal
+    public event Action OnCrystalCollected;
 
     void Awake()
     {
@@ -96,35 +105,41 @@ public class GameManager : MonoBehaviour
         foreach (EnemigoVentana ventana in FindObjectsOfType<EnemigoVentana>())
             ventana.ResetVentana();
 
-        // Reset muro
-        MuroBloqueo muro = FindObjectOfType<MuroBloqueo>();
-        if (muro != null) muro.ResetMuro();
+        // Reset muros
+        foreach (MuroBloqueo muro in FindObjectsOfType<MuroBloqueo>())
+            muro.ResetMuro();
 
         // Reset puzzles
         ResetearPuzzleOso();
         puzzle1Completado = false;
         puzzle2Completado = false;
         cristalMetaActivo = false;
+
+        // Reset cristal de sesión (no persistente)
+        HasCrystal = false;
     }
 
     // ------------------- NUEVA PARTIDA -------------------
     public void NuevaPartida()
     {
-        ReiniciarEstado(); 
+        ReiniciarEstado();
         // Borrar archivo de guardado para asegurar inicio limpio
-        SistemaGuardar.BorrarArchivo(); 
-        // Teleport seguro al spawn inicial (maneja Rigidbody/CharacterController y el script de movimiento)
-        TeleportarASpawnInicial(); 
+        SistemaGuardar.BorrarArchivo();
+        // Teleport seguro al spawn inicial
+        TeleportarASpawnInicial();
         // Linterna inicial
-         if (linternaEnMano != null) linternaEnMano.SetActive(false); if (linternaPickup != null) linternaPickup.SetActive(true); tieneLinterna = false; 
+        if (linternaEnMano != null) linternaEnMano.SetActive(false);
+        if (linternaPickup != null) linternaPickup.SetActive(true);
+        tieneLinterna = false;
         // Reactivar UI
         GameObject gameplayUI = GameObject.Find("GameplayUI");
         if (gameplayUI != null) gameplayUI.SetActive(true);
         muertes = 0;
         muertesPorHabitacion.Clear();
-        Debug.Log("[GameManager] NuevaPartida: inicio limpio aplicado."); }
+        Debug.Log("[GameManager] NuevaPartida: inicio limpio aplicado.");
+    }
+
     //-------------------- SPAWN INICIAL---------------------
-    // GameManager.cs (añadir dentro de la clase)
     public void TeleportarASpawnInicial()
     {
         MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
@@ -139,15 +154,12 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // Desactivar temporalmente el script de movimiento para evitar que sobrescriba la posición
         var movimientoScript = jugador.GetComponent<MovimientoPersonaje>();
         if (movimientoScript != null) movimientoScript.enabled = false;
 
-        // Si tiene CharacterController, desactivarlo temporalmente
         var cc = jugador.GetComponent<CharacterController>();
         if (cc != null) cc.enabled = false;
 
-        // Si tiene Rigidbody, ponerlo en kinematic y limpiar velocidades
         var rb = jugador.GetComponent<Rigidbody>();
         bool rbWasKinematic = false;
         if (rb != null)
@@ -158,17 +170,16 @@ public class GameManager : MonoBehaviour
             rb.angularVelocity = Vector3.zero;
         }
 
-        // Teleportar
         jugador.transform.position = spawnInicial.position;
         jugador.transform.rotation = spawnInicial.rotation;
 
-        // Restaurar Rigidbody/CharacterController y script
         if (rb != null) rb.isKinematic = rbWasKinematic;
         if (cc != null) cc.enabled = true;
         if (movimientoScript != null) movimientoScript.enabled = true;
 
         Debug.Log($"[GameManager] Jugador teletransportado a spawnInicial {spawnInicial.position}");
     }
+
     // ------------------- CARGAR PARTIDA -------------------
     public void CargarPartida()
     {
@@ -177,7 +188,6 @@ public class GameManager : MonoBehaviour
         {
             SistemaGuardar.Cargar(jugador, this);
 
-            // 🔧 Reset enemigos y ventanas al cargar
             foreach (EnemigoPerseguidor enemigo in FindObjectsOfType<EnemigoPerseguidor>())
                 enemigo.ResetEnemigo();
 
@@ -185,10 +195,34 @@ public class GameManager : MonoBehaviour
                 ventana.ResetVentana();
         }
     }
-    public void RecogerCrital()
-    {
-        MuroBloqueo muro = FindAnyObjectByType<MuroBloqueo>();
-        muro.QuitarMuro();
 
-    } 
+    // ------------------- CRISTAL (estado en memoria, no PlayerPrefs) -------------------
+    /// <summary>
+    /// Notificar que el jugador ha recogido el cristal en esta partida.
+    /// Actualiza el estado en memoria y notifica a listeners.
+    /// </summary>
+    public void NotifyCrystalCollected()
+    {
+        if (HasCrystal) return;
+        HasCrystal = true;
+        OnCrystalCollected?.Invoke();
+        Debug.Log("[GameManager] NotifyCrystalCollected: cristal recogido (estado en memoria).");
+    }
+
+    /// <summary>
+    /// Método que puede ser llamado para quitar muros o realizar acciones globales al recoger cristal.
+    /// </summary>
+    public void RecogerCristal()
+    {
+        NotifyCrystalCollected();
+
+        MuroBloqueo[] muros = FindObjectsOfType<MuroBloqueo>();
+        foreach (var muro in muros)
+        {
+            if (muro != null)
+                muro.QuitarMuro();
+        }
+
+        Debug.Log("[GameManager] RecogerCristal: muros quitados en la escena.");
+    }
 }

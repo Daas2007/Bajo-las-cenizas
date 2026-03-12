@@ -12,7 +12,7 @@ public class MovimientoPersonaje : MonoBehaviour
     [SerializeField] Transform camara;
     [SerializeField] Rigidbody rb;
     [SerializeField] Camara camaraScript;
-    [SerializeField] Animator animator; // 🔑 referencia al Animator
+    [SerializeField] Animator animator;
 
     [Header("Configuración de velocidad Player")]
     [SerializeField] bool UsarGetAxisRaw = true;
@@ -28,18 +28,21 @@ public class MovimientoPersonaje : MonoBehaviour
     [SerializeField] float RecargarStamina = 10f;
 
     private Coroutine recarga;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
         if (camara == null && Camera.main != null) camara = Camera.main.transform;
-        canvas_StaminaBar.SetActive(false);
+        if (canvas_StaminaBar != null) canvas_StaminaBar.SetActive(false);
     }
+
     void Start()
     {
         Stamina = StaminaMaxima;
         VelocidadBase = VelocidadMove;
     }
+
     void Update()
     {
         if (Time.timeScale == 1f)
@@ -49,14 +52,16 @@ public class MovimientoPersonaje : MonoBehaviour
         }
         else
         {
-            canvas_StaminaBar.SetActive(false);
+            if (canvas_StaminaBar != null) canvas_StaminaBar.SetActive(false);
         }
     }
+
     void FixedUpdate()
     {
         if (Time.timeScale == 1f)
             JugadorCaminandoRB();
     }
+
     void JugadorCaminandoRB()
     {
         float h = UsarGetAxisRaw ? Input.GetAxisRaw("Horizontal") : Input.GetAxis("Horizontal");
@@ -72,7 +77,6 @@ public class MovimientoPersonaje : MonoBehaviour
 
         float velocidadActual = movimiento.magnitude / Time.fixedDeltaTime;
 
-        // 🔑 Actualizar Animator
         if (animator != null)
         {
             animator.SetFloat("Velocidad", velocidadActual);
@@ -84,6 +88,7 @@ public class MovimientoPersonaje : MonoBehaviour
             camaraScript.SetEstado(velocidadActual);
         }
     }
+
     void JugadorCorrer()
     {
         bool moviendo = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) ||
@@ -102,22 +107,24 @@ public class MovimientoPersonaje : MonoBehaviour
             if (recarga == null) recarga = StartCoroutine(RecargaStamina());
         }
     }
+
     void ActualizarBarraStamina()
     {
-        BarraStamina.fillAmount = Stamina / StaminaMaxima;
+        if (BarraStamina != null)
+            BarraStamina.fillAmount = Stamina / StaminaMaxima;
 
         bool moviendo = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) ||
                         Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D);
 
-        if ((Input.GetKey(KeyCode.LeftShift) && moviendo && Stamina > 0f) || Stamina < StaminaMaxima)
+        if (canvas_StaminaBar != null)
         {
-            canvas_StaminaBar.SetActive(true);
-        }
-        else
-        {
-            canvas_StaminaBar.SetActive(false);
+            if ((Input.GetKey(KeyCode.LeftShift) && moviendo && Stamina > 0f) || Stamina < StaminaMaxima)
+                canvas_StaminaBar.SetActive(true);
+            else
+                canvas_StaminaBar.SetActive(false);
         }
     }
+
     IEnumerator RecargaStamina()
     {
         yield return new WaitForSeconds(1f);
@@ -125,40 +132,58 @@ public class MovimientoPersonaje : MonoBehaviour
         {
             Stamina += RecargarStamina * Time.deltaTime;
             if (Stamina > StaminaMaxima) Stamina = StaminaMaxima;
-            BarraStamina.fillAmount = Stamina / StaminaMaxima;
+            if (BarraStamina != null) BarraStamina.fillAmount = Stamina / StaminaMaxima;
             yield return null;
         }
-        canvas_StaminaBar.SetActive(false);
+        if (canvas_StaminaBar != null) canvas_StaminaBar.SetActive(false);
         recarga = null;
     }
+
     public void GuardarPartida()
     {
         SistemaGuardar.Guardar(this, GameManager.Instancia);
     }
+
     public void CargarPartida()
     {
         SistemaGuardar.Cargar(this, GameManager.Instancia);
     }
-    private void OnTriggerEnter(Collider cristal)
+
+    private void OnTriggerEnter(Collider other)
     {
-        if (cristal.CompareTag("Cristal")) CristalObtenido();
+        if (other.CompareTag("Cristal"))
+        {
+            CristalObtenido(other.gameObject);
+        }
     }
-    public void CristalObtenido()
+
+    // Versión actualizada: notifica al GameManager y actualiza ZoneTriggers sin usar PlayerPrefs
+    public void CristalObtenido(GameObject cristalObject = null)
     {
+        if (Cristal) return;
+
         Cristal = true;
 
-        // Guardar en PlayerPrefs para persistencia
-        PlayerPrefs.SetInt("TieneCristal", 1);
-        PlayerPrefs.Save();
-
-        // Notificar a todos los triggers que el cristal fue recogido
-        foreach (ZoneTrigger trigger in FindObjectsOfType<ZoneTrigger>())
+        if (GameManager.Instancia != null)
         {
-            trigger.NotificarCristalRecogido();
+            GameManager.Instancia.NotifyCrystalCollected();
+        }
+        else
+        {
+            Debug.LogWarning("[MovimientoPersonaje] GameManager.Instancia es null al recoger cristal.");
         }
 
-        Debug.Log("[MovimientoPersonaje] Cristal recogido y notificado.");
+        // Forzar actualización inmediata en triggers (opcional, los triggers también están suscritos al evento)
+        ZoneTrigger[] triggers = FindObjectsOfType<ZoneTrigger>();
+        foreach (var t in triggers)
+        {
+            if (t != null)
+                t.ForzarActualizarEstado();
+        }
+
+        if (cristalObject != null)
+            Destroy(cristalObject);
+
+        Debug.Log("[MovimientoPersonaje] Cristal recogido: notificado a GameManager y actualizados ZoneTriggers.");
     }
-
 }
-
