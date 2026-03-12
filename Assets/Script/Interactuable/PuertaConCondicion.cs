@@ -22,15 +22,41 @@ public class PuertaConCondicion : MonoBehaviour, IInteractuable
     [Header("Texto si no ha hablado")]
     [SerializeField] private string mensajeSiNoHaHablado = "Hey tú, ven al fondo";
 
-    // Coroutine para controlar el tiempo del mensaje y reactivar movimiento
-    private Coroutine mensajeCoroutine;
+    [Header("Escritura tipo Undertale")]
+    [SerializeField] private float tiempoEntreLetras = 0.03f;
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip sonidoLetra;
+    [SerializeField] private AudioClip sonidoInicio;
+
+    // Estado
+    private Coroutine hideCoroutine;
+    private Coroutine writeCoroutine;
+    private bool escribiendo = false;
+    private string currentFullText = "";
+
+    void Start()
+    {
+        if (panelMensaje != null)
+            panelMensaje.SetActive(false);
+    }
 
     void Update()
     {
-        // Si el panel está activo y el jugador presiona Space, cerrar inmediatamente y reactivar movimiento
-        if (panelMensaje != null && panelMensaje.activeSelf && Input.GetKeyDown(KeyCode.Space))
+        // Si hay un diálogo global activo, ignorar entradas para evitar interferencias
+        if (Dialogo.AnyDialogActive) return;
+
+        if (panelMensaje != null && panelMensaje.activeSelf)
         {
-            CancelarMensajeTemporal();
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                if (escribiendo)
+                    TerminarEscrituraInstantanea();
+                else
+                    CancelarMensajeTemporal();
+            }
+
+            if (Input.GetKeyDown(KeyCode.Escape))
+                CancelarMensajeTemporal();
         }
     }
 
@@ -44,71 +70,110 @@ public class PuertaConCondicion : MonoBehaviour, IInteractuable
 
         if (npcDialogo == null)
         {
-            Debug.LogWarning("[PuertaConCondicion] npcDialogo no asignado.");
             MostrarMensajeTemporal(mensajeSiNoHaHablado);
             return;
         }
 
-        // Si ya habló con el NPC, abrir la puerta
         if (npcDialogo.HaHablado)
-        {
             puertaBase.Interactuar();
-        }
         else
-        {
             MostrarMensajeTemporal(mensajeSiNoHaHablado);
-        }
     }
 
     private void MostrarMensajeTemporal(string texto)
     {
         if (panelMensaje == null || textoMensaje == null) return;
 
-        // Si ya hay un mensaje en curso, reiniciamos el temporizador y el texto
-        if (mensajeCoroutine != null)
-        {
-            StopCoroutine(mensajeCoroutine);
-            mensajeCoroutine = null;
-        }
+        // Detener coroutines previas
+        if (hideCoroutine != null) { StopCoroutine(hideCoroutine); hideCoroutine = null; }
+        if (writeCoroutine != null) { StopCoroutine(writeCoroutine); writeCoroutine = null; }
 
         panelMensaje.SetActive(true);
-        textoMensaje.text = texto;
+        textoMensaje.text = "";
+        currentFullText = texto;
 
-        // Bloquear movimiento del jugador si se asignó el componente
-        if (Personaje != null)
-            Personaje.enabled = false;
+        // Bloquear movimiento
+        if (Personaje != null) Personaje.enabled = false;
 
-        mensajeCoroutine = StartCoroutine(DesactivarPanelCoroutine(duracionMensaje));
+        // Sonido de inicio (opcional)
+        if (audioSource != null && sonidoInicio != null) audioSource.PlayOneShot(sonidoInicio);
+
+        // Iniciar escritura
+        writeCoroutine = StartCoroutine(WriteRoutine(currentFullText));
+
+        // Programar ocultado
+        if (duracionMensaje > 0f)
+            hideCoroutine = StartCoroutine(HideRoutine(duracionMensaje));
     }
 
-    private IEnumerator DesactivarPanelCoroutine(float duracion)
+    private IEnumerator WriteRoutine(string texto)
     {
-        // Usar tiempo real para que no dependa de Time.timeScale
-        yield return new WaitForSecondsRealtime(duracion);
+        escribiendo = true;
+        textoMensaje.text = "";
 
-        if (panelMensaje != null)
-            panelMensaje.SetActive(false);
-
-        // Reactivar movimiento del jugador si corresponde
-        if (Personaje != null)
-            Personaje.enabled = true;
-
-        mensajeCoroutine = null;
-    }
-
-    // Por si necesitas cancelar manualmente el mensaje y reactivar movimiento
-    public void CancelarMensajeTemporal()
-    {
-        if (mensajeCoroutine != null)
+        for (int i = 0; i < texto.Length; i++)
         {
-            StopCoroutine(mensajeCoroutine);
-            mensajeCoroutine = null;
+            // Si escribiendo fue cancelado externamente, salir
+            if (!escribiendo) break;
+
+            textoMensaje.text += texto[i];
+
+            if (escribiendo && audioSource != null && sonidoLetra != null)
+                audioSource.PlayOneShot(sonidoLetra);
+
+            yield return new WaitForSecondsRealtime(tiempoEntreLetras);
         }
 
-        if (panelMensaje != null)
-            panelMensaje.SetActive(false);
+        // Si no fue cancelado, asegurar texto completo
+        if (escribiendo)
+            textoMensaje.text = texto;
 
-        if (Personaje != null)
-            Personaje.enabled = true;
+        escribiendo = false;
+        writeCoroutine = null;
+    }
+
+    private void TerminarEscrituraInstantanea()
+    {
+        if (writeCoroutine != null)
+        {
+            StopCoroutine(writeCoroutine);
+            writeCoroutine = null;
+        }
+
+        textoMensaje.text = currentFullText;
+        escribiendo = false;
+    }
+
+    private IEnumerator HideRoutine(float delay)
+    {
+        yield return new WaitForSecondsRealtime(delay);
+
+        // Si aún escribiendo, completar primero
+        if (escribiendo)
+        {
+            TerminarEscrituraInstantanea();
+            yield return new WaitForSecondsRealtime(0.15f);
+        }
+
+        // Ocultar y reactivar movimiento
+        if (panelMensaje != null) panelMensaje.SetActive(false);
+        if (Personaje != null) Personaje.enabled = true;
+
+        hideCoroutine = null;
+        currentFullText = "";
+    }
+
+    public void CancelarMensajeTemporal()
+    {
+        // Detener coroutines
+        if (hideCoroutine != null) { StopCoroutine(hideCoroutine); hideCoroutine = null; }
+        if (writeCoroutine != null) { StopCoroutine(writeCoroutine); writeCoroutine = null; }
+
+        // Ocultar y reactivar movimiento
+        if (panelMensaje != null) panelMensaje.SetActive(false);
+        if (Personaje != null) Personaje.enabled = true;
+
+        escribiendo = false;
+        currentFullText = "";
     }
 }

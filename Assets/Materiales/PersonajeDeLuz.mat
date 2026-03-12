@@ -179,7 +179,7 @@ Material:
     - _BaseColor: {r: 0.83396226, g: 0.8214089, b: 0.1557778, a: 1}
     - _Color: {r: 0.83396226, g: 0.8214089, b: 0.15577775, a: 1}
     - _EMISSION_COLOR: {r: 0, g: 0, b: 0, a: 0}
-    - _EmissionColor: {r: 23.96863, g: 22.705645, b: 0, a: 1}
+    - _EmissionColor: {r: 95.87452, g: 90.82258, b: 0, a: 1}
     - _HueVariation: {r: 1, g: 0.5, b: 0, a: 0.1}
     - _SPECULAR_COLOR: {r: 1, g: 1, b: 1, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
