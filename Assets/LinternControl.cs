@@ -77,3 +77,4 @@ public class LinternaControl : MonoBehaviour
     public float DistanciaAtenuacion => distanciaAtenuacion;
     public LayerMask CapasDetectables => capasDetectables;
 }
+ 

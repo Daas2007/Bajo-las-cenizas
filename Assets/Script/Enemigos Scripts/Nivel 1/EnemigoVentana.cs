@@ -104,9 +104,18 @@ public class EnemigoVentana : MonoBehaviour
         {
             contadorLuz = 0f;
 
+            // Avanza de estado si ha pasado el tiempo requerido
             if (tiempoEnEstado >= tiempoParaAvanzar)
             {
-                AvanzarEstado();
+                if (estadoActual < 3)
+                {
+                    AvanzarEstado();
+                }
+                else if (estadoActual == 3 && !enemigoSpawned)
+                {
+                    // ✅ Si ya está en estado 3 y se cumple el tiempo, entra a la habitación
+                    EntrarAHabitacion();
+                }
             }
         }
 
@@ -163,24 +172,22 @@ public class EnemigoVentana : MonoBehaviour
             return;
         }
 
+        // Colocar al enemigo en el spawn
         if (spawnParent != null)
         {
-            enemigoEnEscena.transform.SetParent(spawnParent, worldPositionStays: false);
+            enemigoEnEscena.transform.SetParent(spawnParent, false);
             enemigoEnEscena.transform.localPosition = Vector3.zero;
             enemigoEnEscena.transform.localRotation = Quaternion.identity;
         }
-        else
-        {
-            enemigoEnEscena.transform.SetParent(null, worldPositionStays: true);
-            enemigoEnEscena.transform.position = Vector3.zero;
-            enemigoEnEscena.transform.rotation = Quaternion.identity;
-        }
 
+        // ✅ Activar el GameObject
+        enemigoEnEscena.SetActive(true);
+
+        // ✅ Reiniciar y activar persecución
         EnemigoPerseguidor script = enemigoEnEscena.GetComponent<EnemigoPerseguidor>();
         if (script != null)
         {
             script.ResetEnemigo();
-            enemigoEnEscena.SetActive(true);
 
             GameObject jugador = GameObject.FindGameObjectWithTag("Player");
             if (jugador != null)
@@ -188,13 +195,10 @@ public class EnemigoVentana : MonoBehaviour
                 script.objetivo = jugador.transform;
             }
 
-            script.enabled = true;
-        }
-        else
-        {
-            enemigoEnEscena.SetActive(true);
+            script.ActivarPersecucion(); // 🔥 aquí se activa la persecución
         }
     }
+
 
     // Métodos públicos para que EnemyActivator los llame
     /// <summary>

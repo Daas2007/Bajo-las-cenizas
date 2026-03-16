@@ -14,6 +14,15 @@ public class EnemigoPerseguidor : MonoBehaviour
     private enum Estado { Idle, Persiguiendo, Atacando }
     private Estado estadoActual = Estado.Idle;
 
+    private void OnEnable()
+    {
+        // ✅ Siempre que el GameObject se active, el script queda habilitado
+        if (!enabled) enabled = true;
+
+        // Opcional: reiniciar estado si quieres que siempre arranque limpio
+        estadoActual = Estado.Idle;
+    }
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -82,7 +91,7 @@ public class EnemigoPerseguidor : MonoBehaviour
 
     public void ResetEnemigo()
     {
-        rb.linearVelocity = Vector3.zero;
+        rb.linearVelocity = Vector3.zero; // ✅ corregido
         rb.angularVelocity = Vector3.zero;
 
         bool prevKinematic = rb.isKinematic;
@@ -98,6 +107,6 @@ public class EnemigoPerseguidor : MonoBehaviour
         rb.useGravity = prevUseGravity;
 
         estadoActual = Estado.Idle;
-        gameObject.SetActive(true);
     }
+
 }

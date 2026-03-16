@@ -5,9 +5,6 @@ public class EnemyActivator : MonoBehaviour
     [Tooltip("Solo la ventana (GameObject que contiene el UI o el objeto ventana)")]
     [SerializeField] private GameObject ventanaRoot;
 
-    [Tooltip("Si true, al salir del trigger se desactiva la ventana y se cancela la secuencia")]
-    [SerializeField] private bool deactivateOnExit = false;
-
     // referencia al script EnemigoVentana dentro de ventanaRoot (si existe)
     private EnemigoVentana ventanaScript;
 
@@ -34,23 +31,10 @@ public class EnemyActivator : MonoBehaviour
             ventanaRoot.SetActive(true);
 
         if (ventanaScript != null)
-            ventanaScript.StartTriggerSequence();
-        else
-            Debug.LogWarning($"EnemyActivator [{name}] no encontró EnemigoVentana en ventanaRoot.");
-    }
+            Debug.Log($"EnemyActivator [{name}] activó la ventana.");
 
-    private void OnTriggerExit(Collider other)
-    {
-        if (!other.CompareTag("Player")) return;
-
-        if (deactivateOnExit)
-        {
-            if (ventanaRoot != null)
-                ventanaRoot.SetActive(false);
-        }
-
-        if (ventanaScript != null)
-            ventanaScript.StopTriggerSequence();
+        // ✅ destruir este objeto después de activar la ventana
+        Destroy(gameObject);
     }
 
     // Método público para activar/desactivar desde código si lo necesitas
