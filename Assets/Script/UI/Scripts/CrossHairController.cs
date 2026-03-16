@@ -6,51 +6,56 @@ public class CrosshairSwap : MonoBehaviour
     [Header("Referencias")]
     [SerializeField] private Image crosshairCirculo;
     [SerializeField] private Image crosshairMano;
+    [SerializeField] private Image crosshairCandado;
+    [SerializeField] private Image crosshairPuzzle;
 
     [Header("Raycast")]
     [SerializeField] private Camera camara;
     [SerializeField] private float distanciaRaycast = 3f;
     [SerializeField] private LayerMask capaInteractuable;
 
-    [Header("Menús")]
-    [SerializeField] private GameObject mainMenuCanvas;
-    [SerializeField] private GameObject pausaMenuCanvas;
-    [SerializeField] private GameObject opcionesMenuCanvas;
-
     void Update()
     {
-        // 🔑 Si algún menú está activo → ocultar crosshair
-        if ((mainMenuCanvas != null && mainMenuCanvas.activeSelf) ||
-            (pausaMenuCanvas != null && pausaMenuCanvas.activeSelf) ||
-            (opcionesMenuCanvas != null && opcionesMenuCanvas.activeSelf))
+        if (camara == null)
         {
-            crosshairCirculo.enabled = false;
-            crosshairMano.enabled = false;
+            Debug.LogError("❌ No se asignó la cámara en CrosshairSwap.");
             return;
         }
 
-        // Si no hay menús activos → usar raycast normal
         Ray ray = new Ray(camara.transform.position, camara.transform.forward);
         RaycastHit hit;
 
-        if (Physics.Raycast(ray, out hit, distanciaRaycast))
+        if (Physics.Raycast(ray, out hit, distanciaRaycast, capaInteractuable))
         {
-            // Verificamos que esté en la capa interactuable
-            if (((1 << hit.collider.gameObject.layer) & capaInteractuable) != 0)
+            IInteractuable interactuable = hit.collider.GetComponent<IInteractuable>();
+            if (interactuable != null)
             {
-                // Verificamos que tenga la interfaz IInteractuable
-                IInteractuable interactuable = hit.collider.GetComponent<IInteractuable>();
-                if (interactuable != null)
+                // 🔹 Cambiar crosshair según el tag
+                if (hit.collider.CompareTag("Candado"))
                 {
-                    crosshairCirculo.enabled = false;
-                    crosshairMano.enabled = true;
-                    return;
+                    SetCrosshair(false, false, true, false);
                 }
+                else if (hit.collider.CompareTag("Puzzle"))
+                {
+                    SetCrosshair(false, false, false, true);
+                }
+                else
+                {
+                    SetCrosshair(false, true, false, false); // mano
+                }
+                return;
             }
         }
 
         // Si no cumple condiciones → mostrar círculo
-        crosshairCirculo.enabled = true;
-        crosshairMano.enabled = false;
+        SetCrosshair(true, false, false, false);
+    }
+
+    private void SetCrosshair(bool circulo, bool mano, bool candado, bool puzzle)
+    {
+        if (crosshairCirculo != null) crosshairCirculo.enabled = circulo;
+        if (crosshairMano != null) crosshairMano.enabled = mano;
+        if (crosshairCandado != null) crosshairCandado.enabled = candado;
+        if (crosshairPuzzle != null) crosshairPuzzle.enabled = puzzle;
     }
 }

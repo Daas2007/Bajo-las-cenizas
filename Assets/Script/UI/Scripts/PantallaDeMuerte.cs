@@ -11,13 +11,12 @@ public class PantallaDeMuerte : MonoBehaviour
     [SerializeField] TMP_Text textoMoriste;
     [SerializeField] GameObject botonReintentar;
     [SerializeField] GameObject botonSalir;
-    [SerializeField] GameObject mainMenuPanel;
     [SerializeField] GameObject gameplayUI;
 
     [Header("Pantalla de carga")]
     [SerializeField] private GameObject panelLoading;
-    [SerializeField] private float fadeDuration = 0.5f;   // 🔹 transición rápida: 0.5 segundos
-    [SerializeField] private float holdDuration = 5f;     // 🔹 permanece opaco 5 segundos
+    [SerializeField] private float fadeDuration = 0.5f;   // transición rápida
+    [SerializeField] private float holdDuration = 5f;     // permanece opaco 5 segundos
 
     [Header("Configuración")]
     [SerializeField] float tiempoRojo = 1f;
@@ -102,8 +101,12 @@ public class PantallaDeMuerte : MonoBehaviour
         {
             panelLoading.SetActive(true);
             yield return StartCoroutine(FadeIn());
-            yield return new WaitForSecondsRealtime(holdDuration); // 🔹 espera 5 segundos opaco
+            yield return new WaitForSecondsRealtime(holdDuration);
 
+            SceneManager.LoadScene(nombreEscena); // ✅ carga directamente la escena MainMenu
+        }
+        else
+        {
             SceneManager.LoadScene(nombreEscena);
         }
     }
@@ -112,7 +115,7 @@ public class PantallaDeMuerte : MonoBehaviour
     {
         float t = 0f;
         Color c = loadingImage.color;
-        while (t < fadeDuration) // 🔹 dura 0.5 segundos
+        while (t < fadeDuration)
         {
             t += Time.unscaledDeltaTime;
             float alpha = Mathf.Lerp(0f, 1f, t / fadeDuration);
@@ -126,7 +129,7 @@ public class PantallaDeMuerte : MonoBehaviour
     {
         float t = 0f;
         Color c = loadingImage.color;
-        while (t < fadeDuration) // 🔹 dura 0.5 segundos
+        while (t < fadeDuration)
         {
             t += Time.unscaledDeltaTime;
             float alpha = Mathf.Lerp(1f, 0f, t / fadeDuration);
@@ -137,4 +140,3 @@ public class PantallaDeMuerte : MonoBehaviour
         panelLoading.SetActive(false);
     }
 }
-

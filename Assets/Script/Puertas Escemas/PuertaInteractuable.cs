@@ -5,12 +5,12 @@ public class PuertaInteractuable : MonoBehaviour, IInteractuable
 {
     [Header("Configuración de apertura")]
     [SerializeField] private Transform engranaje;
-    [SerializeField] private Vector3 rotacionInicialEuler; // editable en Inspector
-    [SerializeField] private Vector3 rotacionFinalEuler;   // editable en Inspector
+    [SerializeField] private Vector3 rotacionInicialEuler;
+    [SerializeField] private Vector3 rotacionFinalEuler;
     [SerializeField] private float duracion = 1f;
 
     [Header("Opciones especiales")]
-    [SerializeField] private bool cierreRapidoConCristal = false; // 👈 toggle en Inspector
+    [SerializeField] private bool cierreRapidoConCristal = false;
 
     private bool abierta = false;
     private bool enMovimiento = false;
@@ -21,7 +21,7 @@ public class PuertaInteractuable : MonoBehaviour, IInteractuable
     {
         if (engranaje == null)
         {
-            Debug.LogError("⚠️ No se asignó el engranaje/bisagra en el Inspector.");
+            Debug.LogError($"⚠️ [PuertaInteractuable] El objeto '{gameObject.name}' no tiene engranaje asignado.");
             return;
         }
 
@@ -31,14 +31,30 @@ public class PuertaInteractuable : MonoBehaviour, IInteractuable
 
     public void Interactuar()
     {
-        if (engranaje == null || enMovimiento) return;
+        if (engranaje == null)
+        {
+            Debug.LogError($"❌ [PuertaInteractuable] '{gameObject.name}' no puede interactuar: engranaje nulo.");
+            return;
+        }
+
+        if (enMovimiento)
+        {
+            Debug.Log($"⏳ [PuertaInteractuable] '{gameObject.name}' está en movimiento, ignorando interacción.");
+            return;
+        }
 
         StopAllCoroutines();
 
         if (!abierta)
+        {
+            Debug.Log($"🔓 [PuertaInteractuable] '{gameObject.name}' abriendo puerta.");
             StartCoroutine(RotarPuerta(rotacionFinal, true, duracion));
+        }
         else
+        {
+            Debug.Log($"🔒 [PuertaInteractuable] '{gameObject.name}' cerrando puerta.");
             StartCoroutine(RotarPuerta(rotacionInicial, false, duracion));
+        }
     }
 
     private IEnumerator RotarPuerta(Quaternion destino, bool abrir, float tiempoAnim)
@@ -60,17 +76,25 @@ public class PuertaInteractuable : MonoBehaviour, IInteractuable
         enMovimiento = false;
     }
 
-    // 👇 Método para cerrar rápido si la puerta tiene el bool activado
     public void CerrarSiCristal()
     {
-        if (cierreRapidoConCristal && PlayerPrefs.GetInt("TieneCristal", 0) == 1)
+        if (!cierreRapidoConCristal)
+        {
+            Debug.Log($"🛑 [PuertaInteractuable] '{gameObject.name}' no tiene cierre rápido activado.");
+            return;
+        }
+
+        if (PlayerPrefs.GetInt("TieneCristal", 0) == 1)
         {
             StopAllCoroutines();
-            StartCoroutine(RotarPuerta(rotacionInicial, false, 0.3f)); // cierre rápido
-            Debug.Log("🚪 Puerta cerrada rápido por condición de cristal.");
+            StartCoroutine(RotarPuerta(rotacionInicial, false, 0.3f));
+            Debug.Log($"🚪 [PuertaInteractuable] '{gameObject.name}' cerrada rápidamente por condición de cristal.");
+        }
+        else
+        {
+            Debug.Log($"🔍 [PuertaInteractuable] '{gameObject.name}' no se cierra: el jugador no tiene cristal.");
         }
     }
 
     public bool EstaAbierta() => abierta;
 }
-

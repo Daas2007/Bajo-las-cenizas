@@ -29,9 +29,13 @@ public class InteraccionJugador : MonoBehaviour
             if (!panelInteraccion.activeSelf) panelInteraccion.SetActive(true);
 
             // 🔹 Ajuste de mensajes según el tag
-            if (objetoTransform.CompareTag("Pickup") || objetoTransform.CompareTag("Agarrar"))
+            if (objetoTransform.CompareTag("Puzzle"))
             {
-                textoInteraccion.text = "Presiona [E] para agarrar";
+                textoInteraccion.text = "Presiona [E] para agarrar pieza de puzzle";
+            }
+            else if (objetoTransform.CompareTag("Agarrar"))
+            {
+                textoInteraccion.text = "Presiona [E] para agarrar objeto";
             }
             else if (objetoTransform.CompareTag("Slot") || objetoTransform.CompareTag("Colocar"))
             {
@@ -53,6 +57,11 @@ public class InteraccionJugador : MonoBehaviour
                 {
                     IntentarColocar(objetoTransform.GetComponent<SlotPuzzle>());
                 }
+                else if (objetoTransform.CompareTag("Puzzle") || objetoTransform.CompareTag("Agarrar"))
+                {
+                    // ✅ Solo estos dos tags pueden ser agarrados con la mano izquierda
+                    objetoActual.Interactuar();
+                }
                 else
                 {
                     objetoActual.Interactuar();
@@ -72,23 +81,31 @@ public class InteraccionJugador : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.Q))
             {
-                // ✅ Soporte para ambos tipos de piezas
-                PiezaPuzzle piezaPuzzle = manoIzquierda.GetChild(0).GetComponent<PiezaPuzzle>();
+                Transform objetoEnMano = manoIzquierda.GetChild(0);
+
+                // ✅ Soporte para piezas de puzzle y oso
+                PiezaPuzzle piezaPuzzle = objetoEnMano.GetComponent<PiezaPuzzle>();
                 if (piezaPuzzle != null)
                 {
                     piezaPuzzle.Soltar();
                 }
                 else
                 {
-                    OsoPieza piezaOso = manoIzquierda.GetChild(0).GetComponent<OsoPieza>();
+                    OsoPieza piezaOso = objetoEnMano.GetComponent<OsoPieza>();
                     if (piezaOso != null)
                     {
                         piezaOso.Soltar();
+                    }
+                    else if (objetoEnMano.CompareTag("Agarrar"))
+                    {
+                        // ✅ Soltar objeto normal
+                        objetoEnMano.SetParent(null);
                     }
                 }
             }
         }
     }
+
     void DetectarObjeto()
     {
         Ray rayo = new Ray(camara.transform.position, camara.transform.forward);
@@ -111,10 +128,12 @@ public class InteraccionJugador : MonoBehaviour
         objetoActual = null;
         objetoTransform = null;
     }
+
     public Transform GetManoIzquierda()
     {
         return manoIzquierda;
     }
+
     private void IntentarColocar(SlotPuzzle slot)
     {
         if (manoIzquierda.childCount > 0 && slot != null)

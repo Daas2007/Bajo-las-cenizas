@@ -30,7 +30,6 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
         rb.isKinematic = false; // por defecto con física activa
         if (col != null) col.enabled = true; // collider activo por defecto
     }
-
     void Start()
     {
         GameObject jugador = GameObject.FindWithTag("Player");
@@ -41,7 +40,6 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
                 manoIzquierda = interaccion.GetManoIzquierda();
         }
     }
-
     void Update()
     {
         if (enMano && !colocada)
@@ -59,7 +57,6 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
             transform.Rotate(90, 0, 0);
         }
     }
-
     public void Interactuar()
     {
         if (colocada) return;
@@ -79,6 +76,9 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
                 rb.isKinematic = true;
                 rb.useGravity = false;
                 if (col != null) col.enabled = false;
+
+                // ✅ Forzar el tag Puzzle al agarrar
+                gameObject.tag = "Puzzle";
             }
         }
         else
@@ -86,7 +86,6 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
             Soltar();
         }
     }
-
     public void MarcarColocada(bool estado = true)
     {
         colocada = estado;
@@ -97,12 +96,10 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
         rb.useGravity = false;
         if (col != null) col.enabled = true;
     }
-
     public void PermitirRotacionX(bool estado)
     {
         puedeRotarX = estado;
     }
-
     public void ResetColocada()
     {
         colocada = false;
@@ -114,7 +111,6 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
         rb.useGravity = true;
         if (col != null) col.enabled = true;
     }
-
     public void Soltar()
     {
         enMano = false;

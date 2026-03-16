@@ -5,34 +5,28 @@ using UnityEngine.SceneManagement;
 
 public class CanvasController : MonoBehaviour
 {
-    //---------------Paneles principales---------------
     [Header("Paneles principales")]
-    [SerializeField] GameObject panelMainMenu;
     [SerializeField] GameObject panelPausa;
     [SerializeField] GameObject panelOpciones;
     [SerializeField] GameObject panelMuerte;
     [SerializeField] GameObject panelDialogo;
 
-    //---------------HUD---------------
     [Header("HUD siempre visible")]
     [SerializeField] GameObject panelHUD;
 
-    //---------------Panel del candado---------------
     [Header("Panel específico del candado")]
-    [Tooltip("Panel UI del puzzle del candado")]
     [SerializeField] private GameObject panelCandado;
-    [Tooltip("Referencia opcional al CandadoController para restaurar controles al cerrar")]
     [SerializeField] private CandadoController candadoControllerRef;
 
     [Header("Pantalla de carga")]
-    [SerializeField] private GameObject panelLoading; // Panel de carga con Image
-    [SerializeField] private float fadeDuration = 2f; // Duración del fade in/out
-    [SerializeField] private float holdDuration = 3f; // Tiempo que permanece opaco
+    [SerializeField] private GameObject panelLoading;
+    [SerializeField] private float fadeDuration = 2f;
+    [SerializeField] private float holdDuration = 3f;
 
     private Image loadingImage;
-
     private GameObject panelActivo;
     private GameObject panelAnterior;
+
     void Awake()
     {
         if (panelLoading != null)
@@ -40,20 +34,21 @@ public class CanvasController : MonoBehaviour
 
         Time.timeScale = 1f;
     }
+
     private void OnEnable()
     {
         DesactivarTodos();
         BloquearMouse();
         if (panelHUD != null) panelHUD.SetActive(true);
 
-        // 🔹 Arranca opaco y aclara al entrar
         if (panelLoading != null && loadingImage != null)
         {
             panelLoading.SetActive(true);
-            loadingImage.color = new Color(0f, 0f, 0f, 1f); // negro con alfa 1
+            loadingImage.color = new Color(0f, 0f, 0f, 1f);
             StartCoroutine(FadeOut());
         }
     }
+
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -82,11 +77,13 @@ public class CanvasController : MonoBehaviour
             }
         }
     }
+
     //---------------Pausa---------------
     public void MostrarPausa()
     {
         ActivarPanel(panelPausa, true);
     }
+
     public void Reanudar()
     {
         if (panelPausa != null) panelPausa.SetActive(false);
@@ -96,10 +93,12 @@ public class CanvasController : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
+
     public void SalirAlMenuDesdePausa()
     {
         StartCoroutine(SalirMenuCoroutine("MainMenu"));
     }
+
     private IEnumerator FadeIn()
     {
         float t = 0f;
@@ -113,18 +112,23 @@ public class CanvasController : MonoBehaviour
         }
         loadingImage.color = new Color(c.r, c.g, c.b, 1f);
     }
+
     private IEnumerator SalirMenuCoroutine(string nombreEscena)
     {
         if (panelLoading != null)
         {
             panelLoading.SetActive(true);
             yield return StartCoroutine(FadeIn());
-            yield return new WaitForSecondsRealtime(5f); // 🔹 permanece opaco 5 segundos
+            yield return new WaitForSecondsRealtime(5f);
 
             SceneManager.LoadScene(nombreEscena);
-            // Al entrar en la nueva escena, puedes llamar a FadeOut()
+        }
+        else
+        {
+            SceneManager.LoadScene(nombreEscena);
         }
     }
+
     private IEnumerator FadeOut()
     {
         float t = 0f;
@@ -139,6 +143,7 @@ public class CanvasController : MonoBehaviour
         loadingImage.color = new Color(c.r, c.g, c.b, 0f);
         panelLoading.SetActive(false);
     }
+
     //---------------Opciones---------------
     public void MostrarOpciones()
     {
@@ -148,6 +153,7 @@ public class CanvasController : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
+
     public void CerrarOpciones()
     {
         if (panelActivo == panelOpciones)
@@ -161,7 +167,7 @@ public class CanvasController : MonoBehaviour
                 panelActivo = panelAnterior;
                 panelAnterior = null;
 
-                if (panelActivo == panelPausa || panelActivo == panelMainMenu)
+                if (panelActivo == panelPausa)
                 {
                     Time.timeScale = 0f;
                     Cursor.lockState = CursorLockMode.None;
@@ -170,6 +176,7 @@ public class CanvasController : MonoBehaviour
             }
         }
     }
+
     //---------------Pantalla de Muerte---------------
     public void MostrarPantallaMuerte()
     {
@@ -182,6 +189,7 @@ public class CanvasController : MonoBehaviour
 
         Debug.Log("☠️ Pantalla de muerte activada.");
     }
+
     public void ReintentarDesdeMuerte()
     {
         if (panelMuerte != null) panelMuerte.SetActive(false);
@@ -189,56 +197,26 @@ public class CanvasController : MonoBehaviour
         if (panelHUD != null) panelHUD.SetActive(true);
         Time.timeScale = 1f;
 
-        GameManager gm = GameManager.Instancia;
-        MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
-        if (gm != null && jugador != null)
-        {
-            bool cargado = SistemaGuardar.Cargar(jugador, gm);
-            if (!cargado)
-            {
-                gm.ReiniciarEstado();
-                if (gm.spawnInicial != null)
-                {
-                    jugador.transform.position = gm.spawnInicial.position;
-                    jugador.transform.rotation = gm.spawnInicial.rotation;
-                }
-                if (gm.linternaPickup != null) gm.linternaPickup.SetActive(true);
-                if (gm.linternaEnMano != null) gm.linternaEnMano.SetActive(false);
-                gm.tieneLinterna = false;
-                Debug.Log("🔄 Reintentar: no había guardado, respawneado en spawn inicial.");
-            }
-            else
-            {
-                Debug.Log("🔄 Reintentar: guardado cargado correctamente.");
-            }
-        }
-
-        if (jugador != null) jugador.enabled = true;
-        Camera cam = jugador.GetComponentInChildren<Camera>();
-        if (cam != null) cam.enabled = true;
-
-        Time.timeScale = 1f;
+        // lógica de respawn/cargar partida...
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
+
     public void SalirAlMenuDesdeMuerte()
-    {       
+    {
         SceneManager.LoadScene("MainMenu");
         if (panelMuerte != null) panelMuerte.SetActive(false);
-
-        GameManager gm = GameManager.Instancia;
-        if (gm != null) gm.NuevaPartida();
-
- // nombre exacto de tu escena de menú
 
         Time.timeScale = 0f;
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
-        Debug.Log("✅ Volviendo al menú principal desde pantalla de muerte (estado inicial).");
+        Debug.Log("✅ Volviendo al menú principal desde pantalla de muerte.");
     }
+
     //---------------Dialogo---------------
     public void MostrarDialogo() => ActivarPanel(panelDialogo, true);
+
     //---------------Panel Candado---------------
     public void MostrarPanelCandado()
     {
@@ -246,6 +224,7 @@ public class CanvasController : MonoBehaviour
         if (candadoControllerRef == null)
             candadoControllerRef = FindObjectOfType<CandadoController>();
     }
+
     public void CerrarPanelCandado()
     {
         if (candadoControllerRef == null)
@@ -266,6 +245,7 @@ public class CanvasController : MonoBehaviour
         panelActivo = null;
         Debug.Log("[CanvasController] Panel candado cerrado y controles restaurados.");
     }
+
     //---------------Control general---------------
     public void CerrarPanelActivo()
     {
@@ -275,11 +255,11 @@ public class CanvasController : MonoBehaviour
             panelActivo = null;
         }
     }
+
     private void ActivarPanel(GameObject panel, bool pausarJuego)
     {
         DesactivarTodos();
         if (panel != null)
-
         {
             panel.SetActive(true);
             panelActivo = panel;
@@ -292,75 +272,27 @@ public class CanvasController : MonoBehaviour
             }
         }
     }
+
     public void panelUIActivo()
     {
-        if (Time.timeScale !=0)
-        panelHUD.SetActive(true);
+        if (Time.timeScale != 0)
+            panelHUD.SetActive(true);
     }
+
     private void DesactivarTodos()
     {
         if (panelHUD != null) panelHUD.SetActive(false);
-        if (panelMainMenu != null) panelMainMenu.SetActive(false);
         if (panelPausa != null) panelPausa.SetActive(false);
         if (panelOpciones != null) panelOpciones.SetActive(false);
         if (panelMuerte != null) panelMuerte.SetActive(false);
         if (panelDialogo != null) panelDialogo.SetActive(false);
-        if (panelCandado != null) panelCandado.SetActive(false); // aseguramos que se apague al resetear paneles
+        if (panelCandado != null) panelCandado.SetActive(false);
         panelActivo = null;
     }
+
     public void BloquearMouse()
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-    }
-    //---------------Guardar y Cargar---------------
-    public void GuardarPartida()
-    {
-        MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
-        GameManager gm = GameManager.Instancia;
-
-        if (jugador != null && gm != null)
-        {
-            SistemaGuardar.Guardar(jugador, gm);
-            Debug.Log("💾 Partida guardada desde CanvasController.");
-        }
-        else
-        {
-            Debug.LogWarning("⚠️ No se pudo guardar: faltan referencias de jugador o GameManager.");
-        }
-    }
-    public void CargarPartida()
-    {
-        MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
-        GameManager gm = GameManager.Instancia;
-
-        if (jugador != null && gm != null)
-        {
-            bool cargado = SistemaGuardar.Cargar(jugador, gm);
-            if (cargado)
-            {
-                Debug.Log("📂 Partida cargada correctamente desde CanvasController.");
-            }
-            else
-            {
-                Debug.Log("📂 No había archivo de guardado, se mantiene estado actual.");
-            }
-
-            // Restaurar controles y UI
-            jugador.enabled = true;
-            Camera cam = jugador.GetComponentInChildren<Camera>();
-            if (cam != null) cam.enabled = true;
-
-            if (panelHUD != null) panelHUD.SetActive(true);
-            if (panelPausa != null) panelPausa.SetActive(false);
-            Reanudar();
-            Time.timeScale = 1f;
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-        }
-        else
-        {
-            Debug.LogWarning("⚠️ No se pudo cargar: faltan referencias de jugador o GameManager.");
-        }
     }
 }

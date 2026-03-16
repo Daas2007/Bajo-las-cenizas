@@ -12,7 +12,6 @@ public class SlotPuzzle : MonoBehaviour, IInteractuable
     {
         boxCollider = GetComponent<BoxCollider>();
     }
-
     void Update()
     {
         // ✅ Si no tiene hijo, tag = "Colocar" y collider activo
@@ -28,12 +27,10 @@ public class SlotPuzzle : MonoBehaviour, IInteractuable
             if (boxCollider != null) boxCollider.enabled = false;
         }
     }
-
     public void Interactuar()
     {
         // La lógica de colocar la maneja InteraccionJugador.IntentarColocar()
     }
-
     public bool EstaCorrecta()
     {
         // ✅ Si no hay pieza en el slot, no está correcto
@@ -41,16 +38,19 @@ public class SlotPuzzle : MonoBehaviour, IInteractuable
 
         return piezaActual.piezaID == slotID;
     }
-
-
     public void ResetSlot()
     {
         piezaActual = null;
     }
-
-    // 🔹 Método para asignar pieza y manejar física/collider
     public void ColocarPieza(PiezaPuzzle pieza)
     {
+        // ✅ Solo aceptar piezas con tag Puzzle
+        if (pieza == null || !pieza.CompareTag("Puzzle"))
+        {
+            Debug.LogWarning($"[SlotPuzzle] El objeto '{pieza?.gameObject.name}' no tiene el tag Puzzle, no se coloca en el slot {slotID}.");
+            return;
+        }
+
         piezaActual = pieza;
         pieza.transform.SetParent(transform);
         pieza.transform.position = transform.position;
