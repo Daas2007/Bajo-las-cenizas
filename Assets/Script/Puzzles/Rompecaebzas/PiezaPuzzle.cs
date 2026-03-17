@@ -27,9 +27,10 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
         if (col == null) col = gameObject.AddComponent<BoxCollider>();
 
         rb.useGravity = true;
-        rb.isKinematic = false; // por defecto con física activa
-        if (col != null) col.enabled = true; // collider activo por defecto
+        rb.isKinematic = false;
+        if (col != null) col.enabled = true;
     }
+
     void Start()
     {
         GameObject jugador = GameObject.FindWithTag("Player");
@@ -40,6 +41,7 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
                 manoIzquierda = interaccion.GetManoIzquierda();
         }
     }
+
     void Update()
     {
         if (enMano && !colocada)
@@ -47,7 +49,6 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
             if (Input.GetKeyDown(KeyCode.R))
                 transform.Rotate(0, 0, -90);
 
-            // 🔹 Soltar con Q
             if (Input.GetKeyDown(KeyCode.Q))
                 Soltar();
         }
@@ -57,13 +58,13 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
             transform.Rotate(90, 0, 0);
         }
     }
+
     public void Interactuar()
     {
         if (colocada) return;
 
         if (!enMano)
         {
-            // ✅ Solo agarrar si la mano está vacía
             if (manoIzquierda.childCount == 0)
             {
                 enMano = true;
@@ -72,12 +73,10 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
                 transform.localRotation = Quaternion.identity;
                 transform.localScale = escalaOriginal;
 
-                // 🔹 Desactivar física y collider mientras está en la mano
                 rb.isKinematic = true;
                 rb.useGravity = false;
                 if (col != null) col.enabled = false;
 
-                // ✅ Forzar el tag Puzzle al agarrar
                 gameObject.tag = "Puzzle";
             }
         }
@@ -86,43 +85,54 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
             Soltar();
         }
     }
-    public void MarcarColocada(bool estado = true)
+
+    // 🔹 Ajustado: neutraliza la pieza si está en el slot correcto
+    public void MarcarColocada(bool estado = true, int slotID = -1)
     {
         colocada = estado;
         enMano = false;
 
-        // 🔹 Al colocar en un slot, desactivar física pero volver a activar collider
         rb.isKinematic = true;
         rb.useGravity = false;
+
         if (col != null) col.enabled = true;
+
+        // ✅ Si la pieza está en el slot correcto → neutralizar
+        if (estado && slotID == piezaID)
+        {
+            if (col != null) col.enabled = false; // desactivar collider
+            gameObject.tag = "Untagged";          // quitar tag
+            gameObject.layer = LayerMask.NameToLayer("Default"); // layer default
+        }
     }
+
     public void PermitirRotacionX(bool estado)
     {
         puedeRotarX = estado;
     }
+
     public void ResetColocada()
     {
         colocada = false;
         enMano = false;
         puedeRotarX = false;
 
-        // 🔹 Al resetear, volver a activar física y collider
         rb.isKinematic = false;
         rb.useGravity = true;
         if (col != null) col.enabled = true;
+
+        gameObject.tag = "Puzzle";
     }
+
     public void Soltar()
     {
         enMano = false;
         transform.SetParent(null);
 
-        // 🔹 Reactivar física y collider para que caiga al piso
         rb.isKinematic = false;
         rb.useGravity = true;
         if (col != null) col.enabled = true;
 
-        // 🔹 Al soltar, siempre vuelve a ser Puzzle
         gameObject.tag = "Puzzle";
     }
-
 }
