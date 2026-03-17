@@ -8,6 +8,20 @@ public class PuertaConCondicion : MonoBehaviour, IInteractuable
     [Header("Condición: NPC con el que hay que hablar primero")]
     [SerializeField] private Dialogo npcDialogo;
 
+    private void Update()
+    {
+        // 🔹 Mientras no haya hablado con el NPC → Tag Candado
+        if (npcDialogo != null && !npcDialogo.HaHablado)
+        {
+            gameObject.tag = "Candado";
+        }
+        else
+        {
+            // 🔹 Cuando ya habló → Tag normal (puedes usar "Untagged" o "Interactuable")
+            gameObject.tag = "Untagged";
+        }
+    }
+
     public void Interactuar()
     {
         if (puertaBase == null)
@@ -23,7 +37,6 @@ public class PuertaConCondicion : MonoBehaviour, IInteractuable
         }
         else
         {
-            // No hace nada, simplemente no abre
             Debug.Log("[PuertaConCondicion] El jugador aún no ha hablado con el NPC, la puerta no se abre.");
         }
     }

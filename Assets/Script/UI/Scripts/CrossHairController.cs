@@ -8,6 +8,7 @@ public class CrosshairSwap : MonoBehaviour
     [SerializeField] private Image crosshairMano;
     [SerializeField] private Image crosshairCandado;
     [SerializeField] private Image crosshairPuzzle;
+    [SerializeField] private Image crosshairCharla; // 🔹 Nuevo handler para diálogos
 
     [Header("Raycast")]
     [SerializeField] private Camera camara;
@@ -33,29 +34,34 @@ public class CrosshairSwap : MonoBehaviour
                 // 🔹 Cambiar crosshair según el tag
                 if (hit.collider.CompareTag("Candado"))
                 {
-                    SetCrosshair(false, false, true, false);
+                    SetCrosshair(false, false, true, false, false);
                 }
                 else if (hit.collider.CompareTag("Puzzle"))
                 {
-                    SetCrosshair(false, false, false, true);
+                    SetCrosshair(false, false, false, true, false);
+                }
+                else if (hit.collider.CompareTag("Dialogo"))
+                {
+                    SetCrosshair(false, false, false, false, true); // charla
                 }
                 else
                 {
-                    SetCrosshair(false, true, false, false); // mano
+                    SetCrosshair(false, true, false, false, false); // mano
                 }
                 return;
             }
         }
 
         // Si no cumple condiciones → mostrar círculo
-        SetCrosshair(true, false, false, false);
+        SetCrosshair(true, false, false, false, false);
     }
 
-    private void SetCrosshair(bool circulo, bool mano, bool candado, bool puzzle)
+    private void SetCrosshair(bool circulo, bool mano, bool candado, bool puzzle, bool charla)
     {
         if (crosshairCirculo != null) crosshairCirculo.enabled = circulo;
         if (crosshairMano != null) crosshairMano.enabled = mano;
         if (crosshairCandado != null) crosshairCandado.enabled = candado;
         if (crosshairPuzzle != null) crosshairPuzzle.enabled = puzzle;
+        if (crosshairCharla != null) crosshairCharla.enabled = charla;
     }
 }

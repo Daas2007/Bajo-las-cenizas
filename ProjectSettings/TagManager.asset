@@ -17,6 +17,7 @@ TagManager:
   - OsoTorso
   - Puzzle
   - Candado
+  - Dialogo
   layers:
   - Default
   - TransparentFX
