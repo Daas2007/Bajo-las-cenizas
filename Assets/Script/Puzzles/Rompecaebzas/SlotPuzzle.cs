@@ -60,13 +60,17 @@ public class SlotPuzzle : MonoBehaviour, IInteractuable
         // ✅ Marcar como colocada (desactiva gravedad y física)
         pieza.MarcarColocada();
 
-        // Si es correcta, permitir rotación extra y desactivar collider
+        // Si es correcta → neutralizar
         if (pieza.piezaID == slotID)
         {
             pieza.PermitirRotacionX(true);
 
             Collider piezaCol = pieza.GetComponent<Collider>();
             if (piezaCol != null) piezaCol.enabled = false;
+
+            // 🔹 Neutralizar tag y layer
+            pieza.gameObject.tag = "Untagged";
+            pieza.gameObject.layer = LayerMask.NameToLayer("Default");
         }
         else
         {
@@ -75,6 +79,10 @@ public class SlotPuzzle : MonoBehaviour, IInteractuable
             // ❌ Si no es correcta, mantener collider activo
             Collider piezaCol = pieza.GetComponent<Collider>();
             if (piezaCol != null) piezaCol.enabled = true;
+
+            // 🔹 Mantener interactuable
+            pieza.gameObject.tag = "Puzzle";
         }
     }
+
 }

@@ -120,5 +120,9 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
         rb.isKinematic = false;
         rb.useGravity = true;
         if (col != null) col.enabled = true;
+
+        // 🔹 Al soltar, siempre vuelve a ser Puzzle
+        gameObject.tag = "Puzzle";
     }
+
 }
