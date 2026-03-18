@@ -47,9 +47,7 @@ public class GameManager : MonoBehaviour
         if (Instancia == null) Instancia = this;
         else Destroy(gameObject);
     }
-
     // ------------------- MÉTODOS DE JUEGO -------------------
-
     public void RecogerPieza()
     {
         piezasRecogidas++;
@@ -59,13 +57,11 @@ public class GameManager : MonoBehaviour
             OnOsoCompleto?.Invoke();
         }
     }
-
     public void ResetearPuzzleOso()
     {
         piezasRecogidas = 0;
         osoCompleto = false;
     }
-
     public void RegistrarMuerte(string habitacion = "global")
     {
         muertes++;
@@ -73,15 +69,12 @@ public class GameManager : MonoBehaviour
             muertesPorHabitacion[habitacion] = 0;
         muertesPorHabitacion[habitacion]++;
     }
-
     public int GetMuertes() => muertes;
-
     public bool CristalDañado(string habitacion = "global")
     {
         if (!muertesPorHabitacion.ContainsKey(habitacion)) return false;
         return muertesPorHabitacion[habitacion] > 2;
     }
-
     // ------------------- REINICIO -------------------
     public void ReiniciarEstado()
     {
@@ -118,7 +111,6 @@ public class GameManager : MonoBehaviour
         // Reset cristal de sesión (no persistente)
         HasCrystal = false;
     }
-
     // ------------------- NUEVA PARTIDA -------------------
     public void NuevaPartida()
     {
@@ -138,7 +130,6 @@ public class GameManager : MonoBehaviour
         muertesPorHabitacion.Clear();
         Debug.Log("[GameManager] NuevaPartida: inicio limpio aplicado.");
     }
-
     //-------------------- SPAWN INICIAL---------------------
     public void TeleportarASpawnInicial()
     {
@@ -179,28 +170,55 @@ public class GameManager : MonoBehaviour
 
         Debug.Log($"[GameManager] Jugador teletransportado a spawnInicial {spawnInicial.position}");
     }
-
-    // ------------------- CARGAR PARTIDA -------------------
-    public void CargarPartida()
+    // ------------------- GUARDAR PARTIDA -------------------
+    public void GuardarPartida()
     {
         MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
         if (jugador != null)
         {
-            SistemaGuardar.Cargar(jugador, this);
-
-            foreach (EnemigoPerseguidor enemigo in FindObjectsOfType<EnemigoPerseguidor>())
-                enemigo.ResetEnemigo();
-
-            foreach (EnemigoVentana ventana in FindObjectsOfType<EnemigoVentana>())
-                ventana.ResetVentana();
+            SistemaGuardar.Guardar(jugador, this);
+            CanvasController cv = FindAnyObjectByType<CanvasController>();
+            cv.Reanudar();
+            Debug.Log("💾 Partida guardada correctamente.");
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ No se pudo guardar: jugador no encontrado.");
         }
     }
+    // ------------------- REINTENTAR DESDE GUARDADO -------------------
+    public void ReintentarDesdeGuardado()
+    {
+        MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
+        if (jugador != null)
+        {
+            bool cargado = SistemaGuardar.Cargar(jugador, this);
+            if (!cargado)
+            {
+                // Si no hay guardado, respawn inicial
+                ReiniciarEstado();
+                TeleportarASpawnInicial();
+                Debug.Log("🔄 No había guardado, respawn en spawn inicial.");
+            }
+            else
+            {
+                Debug.Log("📂 Partida cargada correctamente desde guardado.");
+            }
 
-    // ------------------- CRISTAL (estado en memoria, no PlayerPrefs) -------------------
-    /// <summary>
-    /// Notificar que el jugador ha recogido el cristal en esta partida.
-    /// Actualiza el estado en memoria y notifica a listeners.
-    /// </summary>
+            // Reactivar jugador y cámara
+            jugador.enabled = true;
+            Camera cam = jugador.GetComponentInChildren<Camera>();
+            if (cam != null) cam.enabled = true;
+
+            // Restaurar tiempo y controles
+            CanvasController cv = FindAnyObjectByType<CanvasController>(); 
+            cv.Reanudar();
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ No se pudo reintentar: jugador no encontrado.");
+        }
+    }
     public void NotifyCrystalCollected()
     {
         if (HasCrystal) return;
@@ -208,10 +226,6 @@ public class GameManager : MonoBehaviour
         OnCrystalCollected?.Invoke();
         Debug.Log("[GameManager] NotifyCrystalCollected: cristal recogido (estado en memoria).");
     }
-
-    /// <summary>
-    /// Método que puede ser llamado para quitar muros o realizar acciones globales al recoger cristal.
-    /// </summary>
     public void RecogerCristal()
     {
         NotifyCrystalCollected();

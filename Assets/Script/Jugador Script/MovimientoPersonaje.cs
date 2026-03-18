@@ -13,6 +13,8 @@ public class MovimientoPersonaje : MonoBehaviour
     [SerializeField] Rigidbody rb;
     [SerializeField] Camara camaraScript;
     [SerializeField] Animator animator;
+    [SerializeField] AudioSource audioSource;
+    [SerializeField] AudioClip jadeoClip; // Sonido de jadeo
 
     [Header("Configuración de velocidad Player")]
     [SerializeField] bool UsarGetAxisRaw = true;
@@ -28,6 +30,7 @@ public class MovimientoPersonaje : MonoBehaviour
     [SerializeField] float RecargarStamina = 10f;
 
     private Coroutine recarga;
+    private bool estabaCorriendo = false;
 
     void Awake()
     {
@@ -71,11 +74,9 @@ public class MovimientoPersonaje : MonoBehaviour
         Vector3 derechaCamara = camara.right; derechaCamara.y = 0f; derechaCamara.Normalize();
 
         Vector3 direccionPlano = (derechaCamara * h + adelanteCamara * v).normalized;
-        Vector3 movimiento = direccionPlano * VelocidadMove * Time.fixedDeltaTime;
-
         rb.linearVelocity = direccionPlano * VelocidadMove;
 
-        float velocidadActual = movimiento.magnitude / Time.fixedDeltaTime;
+        float velocidadActual = rb.linearVelocity.magnitude;
 
         if (animator != null)
         {
@@ -94,7 +95,9 @@ public class MovimientoPersonaje : MonoBehaviour
         bool moviendo = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) ||
                         Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D);
 
-        if (Input.GetKey(KeyCode.LeftShift) && moviendo && Stamina > 0f)
+        bool corriendoAhora = Input.GetKey(KeyCode.LeftShift) && moviendo && Stamina > 0f;
+
+        if (corriendoAhora)
         {
             VelocidadMove = VelocidadBase * 1.5f;
             Stamina -= CostoCorrer * Time.deltaTime;
@@ -104,8 +107,18 @@ public class MovimientoPersonaje : MonoBehaviour
         else
         {
             VelocidadMove = VelocidadBase;
+
+            // Si estaba corriendo y ahora no, verificar jadeo
+            if (estabaCorriendo && !corriendoAhora && Stamina <= StaminaMaxima * 0.35f)
+            {
+                if (audioSource != null && jadeoClip != null)
+                    audioSource.PlayOneShot(jadeoClip);
+            }
+
             if (recarga == null) recarga = StartCoroutine(RecargaStamina());
         }
+
+        estabaCorriendo = corriendoAhora;
     }
 
     void ActualizarBarraStamina()
@@ -127,7 +140,10 @@ public class MovimientoPersonaje : MonoBehaviour
 
     IEnumerator RecargaStamina()
     {
-        yield return new WaitForSeconds(1f);
+        // Si la estamina llegó a 0, esperar más tiempo antes de recargar
+        float delay = (Stamina <= 0f) ? 3f : 1f;
+        yield return new WaitForSeconds(delay);
+
         while (Stamina < StaminaMaxima)
         {
             Stamina += RecargarStamina * Time.deltaTime;

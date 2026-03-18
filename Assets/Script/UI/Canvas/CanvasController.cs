@@ -83,7 +83,6 @@ public class CanvasController : MonoBehaviour
     {
         ActivarPanel(panelPausa, true);
     }
-
     public void Reanudar()
     {
         if (panelPausa != null) panelPausa.SetActive(false);
@@ -93,12 +92,10 @@ public class CanvasController : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
-
     public void SalirAlMenuDesdePausa()
     {
         StartCoroutine(SalirMenuCoroutine("MainMenu"));
     }
-
     private IEnumerator FadeIn()
     {
         float t = 0f;
@@ -112,7 +109,6 @@ public class CanvasController : MonoBehaviour
         }
         loadingImage.color = new Color(c.r, c.g, c.b, 1f);
     }
-
     private IEnumerator SalirMenuCoroutine(string nombreEscena)
     {
         if (panelLoading != null)
@@ -128,7 +124,6 @@ public class CanvasController : MonoBehaviour
             SceneManager.LoadScene(nombreEscena);
         }
     }
-
     private IEnumerator FadeOut()
     {
         float t = 0f;
@@ -143,7 +138,6 @@ public class CanvasController : MonoBehaviour
         loadingImage.color = new Color(c.r, c.g, c.b, 0f);
         panelLoading.SetActive(false);
     }
-
     //---------------Opciones---------------
     public void MostrarOpciones()
     {
@@ -153,7 +147,6 @@ public class CanvasController : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
-
     public void CerrarOpciones()
     {
         if (panelActivo == panelOpciones)
@@ -176,7 +169,6 @@ public class CanvasController : MonoBehaviour
             }
         }
     }
-
     //---------------Pantalla de Muerte---------------
     public void MostrarPantallaMuerte()
     {
@@ -189,19 +181,60 @@ public class CanvasController : MonoBehaviour
 
         Debug.Log("☠️ Pantalla de muerte activada.");
     }
-
     public void ReintentarDesdeMuerte()
     {
+        StartCoroutine(ReintentarConFade());
+    }
+    private IEnumerator ReintentarConFade()
+    {
+        // ✅ Mostrar panel de carga y hacer fade in
+        if (panelLoading != null && loadingImage != null)
+        {
+            panelLoading.SetActive(true);
+            yield return StartCoroutine(FadeIn());
+            yield return new WaitForSecondsRealtime(2f); // tiempo opaco antes de reaparecer
+        }
+
+        // ✅ Cerrar panel de muerte y restaurar HUD
         if (panelMuerte != null) panelMuerte.SetActive(false);
         panelActivo = null;
         if (panelHUD != null) panelHUD.SetActive(true);
-        Time.timeScale = 1f;
 
-        // lógica de respawn/cargar partida...
+        // ✅ Restaurar estado del juego
+        GameManager gm = GameManager.Instancia;
+        MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
+
+        if (gm != null && jugador != null)
+        {
+            bool cargado = SistemaGuardar.Cargar(jugador, gm);
+            if (!cargado)
+            {
+                gm.ReiniciarEstado();
+                gm.TeleportarASpawnInicial();
+                Debug.Log("🔄 Reintentar: no había guardado, respawneado en spawn inicial.");
+            }
+            else
+            {
+                Debug.Log("🔄 Reintentar: guardado cargado correctamente.");
+            }
+        }
+
+        // ✅ Reactivar jugador y cámara
+        if (jugador != null) jugador.enabled = true;
+        Camera cam = jugador.GetComponentInChildren<Camera>();
+        if (cam != null) cam.enabled = true;
+
+        // ✅ Restaurar tiempo y controles
+        Time.timeScale = 1f;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-    }
 
+        // ✅ Fade out para volver al juego
+        if (panelLoading != null && loadingImage != null)
+        {
+            yield return StartCoroutine(FadeOut());
+        }
+    }
     public void SalirAlMenuDesdeMuerte()
     {
         SceneManager.LoadScene("MainMenu");
@@ -213,10 +246,8 @@ public class CanvasController : MonoBehaviour
 
         Debug.Log("✅ Volviendo al menú principal desde pantalla de muerte.");
     }
-
     //---------------Dialogo---------------
     public void MostrarDialogo() => ActivarPanel(panelDialogo, true);
-
     //---------------Panel Candado---------------
     public void MostrarPanelCandado()
     {
@@ -224,7 +255,6 @@ public class CanvasController : MonoBehaviour
         if (candadoControllerRef == null)
             candadoControllerRef = FindObjectOfType<CandadoController>();
     }
-
     public void CerrarPanelCandado()
     {
         if (candadoControllerRef == null)
@@ -245,7 +275,6 @@ public class CanvasController : MonoBehaviour
         panelActivo = null;
         Debug.Log("[CanvasController] Panel candado cerrado y controles restaurados.");
     }
-
     //---------------Control general---------------
     public void CerrarPanelActivo()
     {
@@ -255,7 +284,6 @@ public class CanvasController : MonoBehaviour
             panelActivo = null;
         }
     }
-
     private void ActivarPanel(GameObject panel, bool pausarJuego)
     {
         DesactivarTodos();
@@ -272,13 +300,11 @@ public class CanvasController : MonoBehaviour
             }
         }
     }
-
     public void panelUIActivo()
     {
         if (Time.timeScale != 0)
             panelHUD.SetActive(true);
     }
-
     private void DesactivarTodos()
     {
         if (panelHUD != null) panelHUD.SetActive(false);
@@ -289,7 +315,6 @@ public class CanvasController : MonoBehaviour
         if (panelCandado != null) panelCandado.SetActive(false);
         panelActivo = null;
     }
-
     public void BloquearMouse()
     {
         Cursor.lockState = CursorLockMode.Locked;

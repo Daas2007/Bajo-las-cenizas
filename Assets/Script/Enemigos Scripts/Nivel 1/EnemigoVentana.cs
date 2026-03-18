@@ -40,6 +40,10 @@ public class EnemigoVentana : MonoBehaviour
     [SerializeField] Material naranjaMat;
     [SerializeField] Material rojoMat;
 
+    [Header("UI Ojo Irritado")]
+    [SerializeField] private GameObject panelOjoEstado;   // primer panel (estado 2 y 3)
+    [SerializeField] private GameObject panelOjoEnemigo;  // segundo panel (cuando entra)
+
     [Header("Visual de la ventana")]
     [SerializeField] Renderer ventanaRenderer;
 
@@ -66,7 +70,6 @@ public class EnemigoVentana : MonoBehaviour
         if (enemigoEnEscena != null)
             enemigoEnEscena.SetActive(false);
     }
-
     void Update()
     {
         float deltaT = Time.deltaTime;
@@ -133,15 +136,14 @@ public class EnemigoVentana : MonoBehaviour
             }
         }
     }
-
     void AvanzarEstado()
     {
         tiempoEnEstado = 0f;
         estadoActual = Mathf.Min(estadoActual + 1, 3);
         ActualizarColorVentana();
+        ActualizarUIOjo();
         ReproducirAudio(clipAvanzar);
     }
-
     void RetrocederAEstado1()
     {
         tiempoEnEstado = 0f;
@@ -155,15 +157,16 @@ public class EnemigoVentana : MonoBehaviour
         }
 
         ActualizarColorVentana();
+        ActualizarUIOjo();
         ReproducirAudio(clipRetroceder);
     }
-
     void EntrarAHabitacion()
     {
         cuentaRegresivaActiva = false;
         tiempoRestanteParaEntrar = 0f;
         enemigoSpawned = true;
 
+        ActualizarUIOjo();
         ReproducirAudio(clipEntrar);
 
         if (enemigoEnEscena == null)
@@ -198,12 +201,6 @@ public class EnemigoVentana : MonoBehaviour
             script.ActivarPersecucion(); // 🔥 aquí se activa la persecución
         }
     }
-
-
-    // Métodos públicos para que EnemyActivator los llame
-    /// <summary>
-    /// Llamar cuando el jugador entra al trigger: arranca la cuenta regresiva sin forzar estado.
-    /// </summary>
     public void StartTriggerSequence()
     {
         // NO forzamos estadoActual = 3 aquí.
@@ -217,21 +214,15 @@ public class EnemigoVentana : MonoBehaviour
         tiempoEnEstado = 0f;
         contadorLuz = 0f;
     }
-
-    /// <summary>
-    /// Llamar cuando el jugador sale del trigger o se cancela la secuencia.
-    /// </summary>
     public void StopTriggerSequence()
     {
         cuentaRegresivaActiva = false;
         tiempoRestanteParaEntrar = 0f;
     }
-
     public void SetIluminado(bool valor)
     {
         recibiendoLuz = valor;
     }
-
     void ActualizarColorVentana()
     {
         if (ventanaRenderer == null) return;
@@ -249,7 +240,6 @@ public class EnemigoVentana : MonoBehaviour
                 break;
         }
     }
-
     public void ResetVentana()
     {
         estadoActual = 1;
@@ -277,14 +267,13 @@ public class EnemigoVentana : MonoBehaviour
 
         if (audioSource != null) audioSource.Stop();
 
+        ActualizarUIOjo();
         ActualizarColorVentana();
     }
-
     public void ForzarReset()
     {
         ResetVentana();
     }
-
     public void EnemigoDesactivado(GameObject enemigoObj)
     {
         if (enemigoEnEscena == enemigoObj)
@@ -292,7 +281,55 @@ public class EnemigoVentana : MonoBehaviour
             enemigoSpawned = false;
         }
     }
+    void ActualizarUIOjo()
+    {
+        // Panel del estado (azul/naranja/rojo)
+        if (panelOjoEstado != null)
+        {
+            var img = panelOjoEstado.GetComponent<UnityEngine.UI.Image>();
+            if (img != null)
+            {
+                Color c = img.color;
 
+                if (estadoActual == 2)
+                {
+                    panelOjoEstado.SetActive(true);
+                    c.a = 0.5f; // semi-transparente
+                }
+                else if (estadoActual == 3)
+                {
+                    panelOjoEstado.SetActive(true);
+                    c.a = 1f;   // opaco completo
+                }
+                else
+                {
+                    panelOjoEstado.SetActive(false); // estado 1 → oculto
+                }
+
+                img.color = c;
+            }
+        }
+
+        // Panel del enemigo entrando
+        if (panelOjoEnemigo != null)
+        {
+            var img2 = panelOjoEnemigo.GetComponent<UnityEngine.UI.Image>();
+            if (img2 != null)
+            {
+                if (enemigoSpawned)
+                {
+                    panelOjoEnemigo.SetActive(true);
+                    Color c2 = img2.color;
+                    c2.a = 1f; // opaco completo
+                    img2.color = c2;
+                }
+                else
+                {
+                    panelOjoEnemigo.SetActive(false);
+                }
+            }
+        }
+    }
     void ReproducirAudio(AudioClip clip)
     {
         if (clip == null || audioSource == null) return;

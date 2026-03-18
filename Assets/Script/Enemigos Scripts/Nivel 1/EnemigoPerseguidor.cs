@@ -71,16 +71,21 @@ public class EnemigoPerseguidor : MonoBehaviour
         if (collision.gameObject.CompareTag("Player"))
         {
             estadoActual = Estado.Atacando;
+            GameManager.Instancia?.RegistrarMuerte(); // ✅ registrar muerte aquí
             pantallaDeMuerte?.ActivarPantallaMuerte();
+            Debug.Log("HAS MUERTO");
         }
     }
+
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
             estadoActual = Estado.Atacando;
+            GameManager.Instancia?.RegistrarMuerte(); // ✅ registrar muerte aquí
             pantallaDeMuerte?.ActivarPantallaMuerte();
+            Debug.Log("HAS MUERTO");
         }
     }
 
