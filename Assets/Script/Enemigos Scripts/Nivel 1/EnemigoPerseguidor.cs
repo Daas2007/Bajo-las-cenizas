@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody), typeof(Collider))]
+[RequireComponent(typeof(Rigidbody), typeof(Collider), typeof(Animator))]
 public class EnemigoPerseguidor : MonoBehaviour
 {
     public Transform objetivo;
@@ -8,6 +8,7 @@ public class EnemigoPerseguidor : MonoBehaviour
     [SerializeField] private PantallaDeMuerte pantallaDeMuerte;
 
     private Rigidbody rb;
+    private Animator animator;
     private Vector3 posicionInicialLocal;
     private Quaternion rotInicialLocal;
 
@@ -16,17 +17,17 @@ public class EnemigoPerseguidor : MonoBehaviour
 
     private void OnEnable()
     {
-        // ✅ Siempre que el GameObject se active, el script queda habilitado
         if (!enabled) enabled = true;
-
-        // Opcional: reiniciar estado si quieres que siempre arranque limpio
         estadoActual = Estado.Idle;
+        ActualizarAnimacion();
     }
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
         rb.constraints = RigidbodyConstraints.FreezeRotation;
+
+        animator = GetComponent<Animator>();
 
         posicionInicialLocal = transform.localPosition;
         rotInicialLocal = transform.localRotation;
@@ -45,7 +46,7 @@ public class EnemigoPerseguidor : MonoBehaviour
                 Perseguir();
                 break;
             case Estado.Atacando:
-                // Aquí podrías poner animación o lógica de ataque
+                // Aquí podrías poner lógica adicional de ataque
                 break;
         }
     }
@@ -71,19 +72,20 @@ public class EnemigoPerseguidor : MonoBehaviour
         if (collision.gameObject.CompareTag("Player"))
         {
             estadoActual = Estado.Atacando;
-            GameManager.Instancia?.RegistrarMuerte(); // ✅ registrar muerte aquí
+            ActualizarAnimacion();
+            GameManager.Instancia?.RegistrarMuerte();
             pantallaDeMuerte?.ActivarPantallaMuerte();
             Debug.Log("HAS MUERTO");
         }
     }
-
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
             estadoActual = Estado.Atacando;
-            GameManager.Instancia?.RegistrarMuerte(); // ✅ registrar muerte aquí
+            ActualizarAnimacion();
+            GameManager.Instancia?.RegistrarMuerte();
             pantallaDeMuerte?.ActivarPantallaMuerte();
             Debug.Log("HAS MUERTO");
         }
@@ -92,11 +94,12 @@ public class EnemigoPerseguidor : MonoBehaviour
     public void ActivarPersecucion()
     {
         estadoActual = Estado.Persiguiendo;
+        ActualizarAnimacion();
     }
 
     public void ResetEnemigo()
     {
-        rb.linearVelocity = Vector3.zero; // ✅ corregido
+        rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
 
         bool prevKinematic = rb.isKinematic;
@@ -112,6 +115,14 @@ public class EnemigoPerseguidor : MonoBehaviour
         rb.useGravity = prevUseGravity;
 
         estadoActual = Estado.Idle;
+        ActualizarAnimacion();
     }
 
+    private void ActualizarAnimacion()
+    {
+        if (animator == null) return;
+
+        animator.SetBool("isWalking", estadoActual == Estado.Persiguiendo);
+        animator.SetBool("isKilling", estadoActual == Estado.Atacando);
+    }
 }
