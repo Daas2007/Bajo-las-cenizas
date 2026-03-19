@@ -12,14 +12,22 @@ public class EnemigoPerseguidor : MonoBehaviour
     private Vector3 posicionInicialLocal;
     private Quaternion rotInicialLocal;
 
-    private enum Estado { Idle, Persiguiendo, Atacando }
-    private Estado estadoActual = Estado.Idle;
+    private enum Estado { Entrando, Persiguiendo, Atacando }
+    private Estado estadoActual = Estado.Entrando;
 
     private void OnEnable()
     {
         if (!enabled) enabled = true;
-        estadoActual = Estado.Idle;
+
+        estadoActual = Estado.Entrando;
         ActualizarAnimacion();
+
+        // 🔒 Desactivar física durante la animación de entrada
+        if (rb != null)
+        {
+            rb.isKinematic = true;
+            rb.useGravity = false;
+        }
     }
 
     private void Awake()
@@ -48,19 +56,26 @@ public class EnemigoPerseguidor : MonoBehaviour
             case Estado.Atacando:
                 // Aquí podrías poner lógica adicional de ataque
                 break;
+            case Estado.Entrando:
+                // Quieto en su posición inicial
+                transform.localPosition = posicionInicialLocal;
+                break;
         }
     }
 
     private void Perseguir()
     {
+        if (estadoActual != Estado.Persiguiendo) return;
+
+        if (animator != null)
+            animator.SetBool("IsWalking", true);
+
         Vector3 direccion = (objetivo.position - transform.position).normalized;
         float distancia = Vector3.Distance(objetivo.position, transform.position);
 
-        // Rotación suave hacia el jugador
         Quaternion rotacionObjetivo = Quaternion.LookRotation(direccion);
         transform.rotation = Quaternion.Slerp(transform.rotation, rotacionObjetivo, 5f * Time.fixedDeltaTime);
 
-        // Movimiento solo si está a cierta distancia
         if (distancia > 1.2f)
         {
             rb.MovePosition(transform.position + direccion * velocidad * Time.fixedDeltaTime);
@@ -91,19 +106,10 @@ public class EnemigoPerseguidor : MonoBehaviour
         }
     }
 
-    public void ActivarPersecucion()
-    {
-        estadoActual = Estado.Persiguiendo;
-        ActualizarAnimacion();
-    }
-
     public void ResetEnemigo()
     {
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
-
-        bool prevKinematic = rb.isKinematic;
-        bool prevUseGravity = rb.useGravity;
 
         rb.isKinematic = true;
         rb.useGravity = false;
@@ -111,10 +117,7 @@ public class EnemigoPerseguidor : MonoBehaviour
         transform.localPosition = posicionInicialLocal;
         transform.localRotation = rotInicialLocal;
 
-        rb.isKinematic = prevKinematic;
-        rb.useGravity = prevUseGravity;
-
-        estadoActual = Estado.Idle;
+        estadoActual = Estado.Entrando;
         ActualizarAnimacion();
     }
 
@@ -122,7 +125,36 @@ public class EnemigoPerseguidor : MonoBehaviour
     {
         if (animator == null) return;
 
-        animator.SetBool("isWalking", estadoActual == Estado.Persiguiendo);
-        animator.SetBool("isKilling", estadoActual == Estado.Atacando);
+        animator.SetBool("IsWalking", estadoActual == Estado.Persiguiendo);
+        animator.SetBool("IsKilling", estadoActual == Estado.Atacando);
+        animator.SetBool("IsEntering", estadoActual == Estado.Entrando);
+    }
+
+    // ✅ Método llamado desde Animation Event al final de la animación de entrada
+    public void TerminarEntrada()
+    {
+        // 🔓 Reactivar física al terminar la animación
+        rb.isKinematic = false;
+        rb.useGravity = true;
+        rb.constraints = RigidbodyConstraints.FreezeRotation;
+
+        if (objetivo != null)
+        {
+            estadoActual = Estado.Persiguiendo;
+            ActualizarAnimacion();
+            Perseguir(); // empieza a moverse inmediatamente
+        }
+        else
+        {
+            estadoActual = Estado.Persiguiendo;
+            ActualizarAnimacion();
+        }
+    }
+
+    public void ActivarPersecucion()
+    {
+        if (estadoActual == Estado.Entrando) return;
+        estadoActual = Estado.Persiguiendo;
+        ActualizarAnimacion();
     }
 }

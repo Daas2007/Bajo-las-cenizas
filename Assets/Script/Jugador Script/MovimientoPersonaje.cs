@@ -45,7 +45,6 @@ public class MovimientoPersonaje : MonoBehaviour
         Stamina = StaminaMaxima;
         VelocidadBase = VelocidadMove;
     }
-
     void Update()
     {
         if (Time.timeScale == 1f)
@@ -58,13 +57,11 @@ public class MovimientoPersonaje : MonoBehaviour
             if (canvas_StaminaBar != null) canvas_StaminaBar.SetActive(false);
         }
     }
-
     void FixedUpdate()
     {
         if (Time.timeScale == 1f)
             JugadorCaminandoRB();
     }
-
     void JugadorCaminandoRB()
     {
         float h = UsarGetAxisRaw ? Input.GetAxisRaw("Horizontal") : Input.GetAxis("Horizontal");
@@ -89,7 +86,6 @@ public class MovimientoPersonaje : MonoBehaviour
             camaraScript.SetEstado(velocidadActual);
         }
     }
-
     void JugadorCorrer()
     {
         bool moviendo = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) ||
@@ -120,7 +116,6 @@ public class MovimientoPersonaje : MonoBehaviour
 
         estabaCorriendo = corriendoAhora;
     }
-
     void ActualizarBarraStamina()
     {
         if (BarraStamina != null)
@@ -137,7 +132,6 @@ public class MovimientoPersonaje : MonoBehaviour
                 canvas_StaminaBar.SetActive(false);
         }
     }
-
     IEnumerator RecargaStamina()
     {
         // Si la estamina llegó a 0, esperar más tiempo antes de recargar
@@ -154,17 +148,14 @@ public class MovimientoPersonaje : MonoBehaviour
         if (canvas_StaminaBar != null) canvas_StaminaBar.SetActive(false);
         recarga = null;
     }
-
     public void GuardarPartida()
     {
         SistemaGuardar.Guardar(this, GameManager.Instancia);
     }
-
     public void CargarPartida()
     {
         SistemaGuardar.Cargar(this, GameManager.Instancia);
     }
-
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Cristal"))
@@ -172,7 +163,6 @@ public class MovimientoPersonaje : MonoBehaviour
             CristalObtenido(other.gameObject);
         }
     }
-
     // Versión actualizada: notifica al GameManager y actualiza ZoneTriggers sin usar PlayerPrefs
     public void CristalObtenido(GameObject cristalObject = null)
     {
@@ -202,4 +192,10 @@ public class MovimientoPersonaje : MonoBehaviour
 
         Debug.Log("[MovimientoPersonaje] Cristal recogido: notificado a GameManager y actualizados ZoneTriggers.");
     }
+    public bool TieneCristal()
+    {
+        return Cristal;
+        Debug.Log("Ya casi ganas");
+    }
+
 }
