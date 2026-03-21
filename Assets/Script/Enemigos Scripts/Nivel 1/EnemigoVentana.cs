@@ -68,7 +68,7 @@ public class EnemigoVentana : MonoBehaviour
     void Start()
     {
         ActualizarColorVentana();
-        ActivarModeloPorEstado(); // inicia el modelo correcto según estadoActual
+        ActivarModeloPorEstado();
     }
     void Update()
     {
@@ -76,19 +76,17 @@ public class EnemigoVentana : MonoBehaviour
         tiempoTotalJuego += deltaT;
         tiempoEnEstado += deltaT;
 
-        // Escala dificultad con el tiempo
         if (tiempoTotalJuego >= nivelAgresividad * tiempoPorNivel)
         {
             nivelAgresividad++;
             tiempoParaAvanzar = Mathf.Max(tiempoMinimoAvance, tiempoParaAvanzar - reduccionPorNivel);
         }
 
-        // Si recibe luz, retrocede o resetea cuenta
         if (recibiendoLuz)
         {
             contadorLuz += deltaT;
 
-            if (estadoActual == 3)
+            if (estadoActual == 3 || estadoActual == 4)
             {
                 RetrocederAEstado1();
             }
@@ -107,7 +105,6 @@ public class EnemigoVentana : MonoBehaviour
         {
             contadorLuz = 0f;
 
-            // Avanza de estado si ha pasado el tiempo requerido
             if (tiempoEnEstado >= tiempoParaAvanzar)
             {
                 if (estadoActual < 3)
@@ -116,20 +113,14 @@ public class EnemigoVentana : MonoBehaviour
                 }
                 else if (estadoActual == 3 && !enemigoSpawned)
                 {
-                    // ✅ Si ya está en estado 3 y se cumple el tiempo, entra a la habitación
                     EntrarAHabitacion();
                 }
             }
         }
 
-        // --- Lógica de cuenta regresiva para entrar ---
-        // Ahora la cuenta corre si cuentaRegresivaActiva == true (no se exige estadoActual == 3)
         if (cuentaRegresivaActiva && !recibiendoLuz && !enemigoSpawned)
         {
             tiempoRestanteParaEntrar -= deltaT;
-
-            // (Opcional) aquí podrías actualizar efectos visuales o UI según tiempoRestanteParaEntrar
-            // Si llega a cero, spawnear enemigo
             if (tiempoRestanteParaEntrar <= 0f && !enemigoSpawned)
             {
                 EntrarAHabitacion();
@@ -144,7 +135,7 @@ public class EnemigoVentana : MonoBehaviour
         ActualizarUIOjo();
         ReproducirAudio(clipAvanzar);
 
-        ActivarModeloPorEstado(); // activa el modelo correspondiente
+        ActivarModeloPorEstado();
     }
     void RetrocederAEstado1()
     {
@@ -161,8 +152,7 @@ public class EnemigoVentana : MonoBehaviour
         ActualizarColorVentana();
         ActualizarUIOjo();
         ReproducirAudio(clipRetroceder);
-
-        ActivarModeloPorEstado(); // activa el modelo correspondiente
+        ActivarModeloPorEstado();
     }
     void EntrarAHabitacion()
     {
@@ -173,13 +163,8 @@ public class EnemigoVentana : MonoBehaviour
         ActualizarUIOjo();
         ReproducirAudio(clipEntrar);
 
-        // 🔹 Pasar al nuevo estado 4
         estadoActual = 4;
         ActivarModeloPorEstado();
-
-        // ⚠️ IMPORTANTE:
-        // La animación de "entrar a la habitación" en enemigoEstado4
-        // debe tener un Animation Event que llame a FinalizarAnimacionEntradaHabitacion()
     }
     public void FinalizarAnimacionEntradaHabitacion()
     {
@@ -205,14 +190,11 @@ public class EnemigoVentana : MonoBehaviour
     }
     public void StartTriggerSequence()
     {
-        // NO forzamos estadoActual = 3 aquí.
-        // Solo arrancamos la cuenta regresiva si aún no está spawneado.
         if (enemigoSpawned) return;
 
         cuentaRegresivaActiva = true;
         tiempoRestanteParaEntrar = tiempoAntesDeEntrar;
 
-        // Reset timers para evitar saltos
         tiempoEnEstado = 0f;
         contadorLuz = 0f;
     }
@@ -224,6 +206,7 @@ public class EnemigoVentana : MonoBehaviour
     public void SetIluminado(bool valor)
     {
         recibiendoLuz = valor;
+        if (!valor) contadorLuz = 0f;
     }
     void ActualizarColorVentana()
     {
@@ -252,7 +235,7 @@ public class EnemigoVentana : MonoBehaviour
         tiempoRestanteParaEntrar = 0f;
         enemigoSpawned = false;
 
-        ActivarModeloPorEstado(); // asegura que se muestre el modelo correcto
+        ActivarModeloPorEstado();
 
         if (audioSource != null) audioSource.Stop();
 
@@ -272,7 +255,6 @@ public class EnemigoVentana : MonoBehaviour
     }
     void ActualizarUIOjo()
     {
-        // Panel del estado (azul/naranja/rojo)
         if (panelOjoEstado != null)
         {
             var img = panelOjoEstado.GetComponent<UnityEngine.UI.Image>();
@@ -283,23 +265,22 @@ public class EnemigoVentana : MonoBehaviour
                 if (estadoActual == 2)
                 {
                     panelOjoEstado.SetActive(true);
-                    c.a = 0.5f; // semi-transparente
+                    c.a = 0.5f;
                 }
                 else if (estadoActual == 3)
                 {
                     panelOjoEstado.SetActive(true);
-                    c.a = 1f;   // opaco completo
+                    c.a = 1f;
                 }
                 else
                 {
-                    panelOjoEstado.SetActive(false); // estado 1 → oculto
+                    panelOjoEstado.SetActive(false);
                 }
 
                 img.color = c;
             }
         }
 
-        // Panel del enemigo entrando
         if (panelOjoEnemigo != null)
         {
             var img2 = panelOjoEnemigo.GetComponent<UnityEngine.UI.Image>();
@@ -309,7 +290,7 @@ public class EnemigoVentana : MonoBehaviour
                 {
                     panelOjoEnemigo.SetActive(true);
                     Color c2 = img2.color;
-                    c2.a = 1f; // opaco completo
+                    c2.a = 1f;
                     img2.color = c2;
                 }
                 else

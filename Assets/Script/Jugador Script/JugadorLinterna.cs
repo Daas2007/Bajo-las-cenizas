@@ -20,9 +20,6 @@ public class JugadorLinterna : MonoBehaviour
     [SerializeField] public bool tieneLinterna = false;
     [SerializeField] private EnemigoVentana enemigoDetectado;
 
-    private Quaternion rotacionInicial;
-
-    // 🔹 Referencia a MovimientoPersonaje
     MovimientoPersonaje movimientoJugador;
 
     void Awake()
@@ -34,7 +31,6 @@ public class JugadorLinterna : MonoBehaviour
     {
         linternaObjeto.SetActive(false);
         luzLinterna.SetActive(false);
-        rotacionInicial = transform.rotation;
     }
 
     void Update()
@@ -42,7 +38,7 @@ public class JugadorLinterna : MonoBehaviour
         if (!tieneLinterna) return;
         if (panelDialogo != null && panelDialogo.activeSelf) return;
 
-        if (Input.GetKeyDown(KeyCode.F) && Time.deltaTime > 0)
+        if (Input.GetKeyDown(KeyCode.F))
         {
             ToggleLinterna();
         }
@@ -70,19 +66,14 @@ public class JugadorLinterna : MonoBehaviour
         TutorialInteractivo tutorial = FindObjectOfType<TutorialInteractivo>();
         if (tutorial != null) tutorial.NotificarLinternaRecogida();
 
-        // 🔹 Activar flags en Animator
         if (movimientoJugador != null)
         {
             movimientoJugador.tieneLinterna = true;
             Animator anim = movimientoJugador.GetComponent<Animator>();
             anim.SetBool("TieneLinterna", true);
             anim.SetBool("AgarraLinterna", true);
-
-            // 🔹 Reset inmediato para evitar bucle
             StartCoroutine(ResetBool(anim, "AgarraLinterna"));
         }
-
-        Debug.Log("🔦 Linterna entregada al jugador.");
     }
 
     public void DarLinternaEncendida()
@@ -103,7 +94,6 @@ public class JugadorLinterna : MonoBehaviour
             Animator anim = movimientoJugador.GetComponent<Animator>();
             anim.SetBool("TieneLinterna", true);
             anim.SetBool("AgarraLinterna", true);
-
             StartCoroutine(ResetBool(anim, "AgarraLinterna"));
         }
     }
@@ -130,13 +120,13 @@ public class JugadorLinterna : MonoBehaviour
             EnemigoVentana enemigo = hit.collider.GetComponent<EnemigoVentana>();
             if (enemigo != null)
             {
-                enemigo.SetIluminado(true);
+                enemigo.SetIluminado(true);   // 🔹 marcar que recibe luz
                 enemigoDetectado = enemigo;
             }
         }
         else if (enemigoDetectado != null)
         {
-            enemigoDetectado.SetIluminado(false);
+            enemigoDetectado.SetIluminado(false); // 🔹 apagar flag si ya no recibe luz
             enemigoDetectado = null;
         }
     }
@@ -160,10 +150,9 @@ public class JugadorLinterna : MonoBehaviour
         }
     }
 
-    // 🔹 Corrutina para resetear bool en Animator
     private IEnumerator ResetBool(Animator anim, string parametro)
     {
-        yield return null; // esperar un frame
+        yield return null;
         anim.SetBool(parametro, false);
     }
 }
