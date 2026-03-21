@@ -14,7 +14,7 @@ public class MovimientoPersonaje : MonoBehaviour
     [SerializeField] Camara camaraScript;
     [SerializeField] Animator animator;
     [SerializeField] AudioSource audioSource;
-    [SerializeField] AudioClip jadeoClip; // Sonido de jadeo
+    [SerializeField] AudioClip jadeoClip;
 
     [Header("Configuración de velocidad Player")]
     [SerializeField] bool UsarGetAxisRaw = true;
@@ -32,6 +32,10 @@ public class MovimientoPersonaje : MonoBehaviour
     private Coroutine recarga;
     private bool estabaCorriendo = false;
 
+    // 🔹 Flags para Animator
+    public bool tieneLinterna = false;
+    public bool tieneObjeto = false;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -39,7 +43,6 @@ public class MovimientoPersonaje : MonoBehaviour
         if (camara == null && Camera.main != null) camara = Camera.main.transform;
         if (canvas_StaminaBar != null) canvas_StaminaBar.SetActive(false);
     }
-
     void Start()
     {
         Stamina = StaminaMaxima;
@@ -79,6 +82,10 @@ public class MovimientoPersonaje : MonoBehaviour
         {
             animator.SetFloat("Velocidad", velocidadActual);
             animator.SetBool("Corriendo", VelocidadMove > VelocidadBase);
+
+            // 🔹 Flags globales
+            animator.SetBool("TieneLinterna", tieneLinterna);
+            animator.SetBool("TieneObjeto", tieneObjeto);
         }
 
         if (camaraScript != null)
@@ -104,7 +111,6 @@ public class MovimientoPersonaje : MonoBehaviour
         {
             VelocidadMove = VelocidadBase;
 
-            // Si estaba corriendo y ahora no, verificar jadeo
             if (estabaCorriendo && !corriendoAhora && Stamina <= StaminaMaxima * 0.35f)
             {
                 if (audioSource != null && jadeoClip != null)
@@ -115,6 +121,13 @@ public class MovimientoPersonaje : MonoBehaviour
         }
 
         estabaCorriendo = corriendoAhora;
+
+        if (animator != null)
+        {
+            // 🔹 Flags globales
+            animator.SetBool("TieneLinterna", tieneLinterna);
+            animator.SetBool("TieneObjeto", tieneObjeto);
+        }
     }
     void ActualizarBarraStamina()
     {
@@ -134,7 +147,6 @@ public class MovimientoPersonaje : MonoBehaviour
     }
     IEnumerator RecargaStamina()
     {
-        // Si la estamina llegó a 0, esperar más tiempo antes de recargar
         float delay = (Stamina <= 0f) ? 3f : 1f;
         yield return new WaitForSeconds(delay);
 
@@ -163,7 +175,6 @@ public class MovimientoPersonaje : MonoBehaviour
             CristalObtenido(other.gameObject);
         }
     }
-    // Versión actualizada: notifica al GameManager y actualiza ZoneTriggers sin usar PlayerPrefs
     public void CristalObtenido(GameObject cristalObject = null)
     {
         if (Cristal) return;
@@ -179,7 +190,6 @@ public class MovimientoPersonaje : MonoBehaviour
             Debug.LogWarning("[MovimientoPersonaje] GameManager.Instancia es null al recoger cristal.");
         }
 
-        // Forzar actualización inmediata en triggers (opcional, los triggers también están suscritos al evento)
         ZoneTrigger[] triggers = FindObjectsOfType<ZoneTrigger>();
         foreach (var t in triggers)
         {
@@ -197,5 +207,4 @@ public class MovimientoPersonaje : MonoBehaviour
         return Cristal;
         Debug.Log("Ya casi ganas");
     }
-
 }

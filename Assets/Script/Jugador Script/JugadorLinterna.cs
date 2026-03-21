@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 
 public class JugadorLinterna : MonoBehaviour
 {
@@ -20,6 +21,14 @@ public class JugadorLinterna : MonoBehaviour
     [SerializeField] private EnemigoVentana enemigoDetectado;
 
     private Quaternion rotacionInicial;
+
+    // 🔹 Referencia a MovimientoPersonaje
+    MovimientoPersonaje movimientoJugador;
+
+    void Awake()
+    {
+        movimientoJugador = FindObjectOfType<MovimientoPersonaje>();
+    }
 
     void Start()
     {
@@ -48,21 +57,34 @@ public class JugadorLinterna : MonoBehaviour
             enemigoDetectado = null;
         }
     }
+
     public void DarLinterna()
     {
         tieneLinterna = true;
         if (linternaObjeto != null) linternaObjeto.SetActive(true);
-        if (luzLinterna != null) luzLinterna.SetActive(false); // empieza apagada
+        if (luzLinterna != null) luzLinterna.SetActive(false);
 
         GameManager gm = GameManager.Instancia;
         if (gm != null) gm.tieneLinterna = true;
 
-        // Notificar al tutorial
         TutorialInteractivo tutorial = FindObjectOfType<TutorialInteractivo>();
         if (tutorial != null) tutorial.NotificarLinternaRecogida();
 
+        // 🔹 Activar flags en Animator
+        if (movimientoJugador != null)
+        {
+            movimientoJugador.tieneLinterna = true;
+            Animator anim = movimientoJugador.GetComponent<Animator>();
+            anim.SetBool("TieneLinterna", true);
+            anim.SetBool("AgarraLinterna", true);
+
+            // 🔹 Reset inmediato para evitar bucle
+            StartCoroutine(ResetBool(anim, "AgarraLinterna"));
+        }
+
         Debug.Log("🔦 Linterna entregada al jugador.");
     }
+
     public void DarLinternaEncendida()
     {
         tieneLinterna = true;
@@ -72,10 +94,20 @@ public class JugadorLinterna : MonoBehaviour
         if (source != null && sonidoEncender != null)
             source.PlayOneShot(sonidoEncender);
 
-        // Notificar al tutorial
         TutorialInteractivo tutorial = FindObjectOfType<TutorialInteractivo>();
         if (tutorial != null) tutorial.NotificarLinternaRecogida();
+
+        if (movimientoJugador != null)
+        {
+            movimientoJugador.tieneLinterna = true;
+            Animator anim = movimientoJugador.GetComponent<Animator>();
+            anim.SetBool("TieneLinterna", true);
+            anim.SetBool("AgarraLinterna", true);
+
+            StartCoroutine(ResetBool(anim, "AgarraLinterna"));
+        }
     }
+
     private void ToggleLinterna()
     {
         bool nuevoEstado = !luzLinterna.activeSelf;
@@ -84,7 +116,6 @@ public class JugadorLinterna : MonoBehaviour
         if (source != null && sonidoEncender != null)
             source.PlayOneShot(sonidoEncender);
 
-        // 🔑 Notificar al tutorial que encendió la linterna
         TutorialInteractivo tutorial = FindObjectOfType<TutorialInteractivo>();
         if (tutorial != null && nuevoEstado) tutorial.SiguientePaso();
     }
@@ -120,5 +151,19 @@ public class JugadorLinterna : MonoBehaviour
         tieneLinterna = false;
         linternaObjeto.SetActive(false);
         luzLinterna.SetActive(false);
+
+        if (movimientoJugador != null)
+        {
+            movimientoJugador.tieneLinterna = false;
+            Animator anim = movimientoJugador.GetComponent<Animator>();
+            anim.SetBool("TieneLinterna", false);
+        }
+    }
+
+    // 🔹 Corrutina para resetear bool en Animator
+    private IEnumerator ResetBool(Animator anim, string parametro)
+    {
+        yield return null; // esperar un frame
+        anim.SetBool(parametro, false);
     }
 }

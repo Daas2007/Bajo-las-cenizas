@@ -21,19 +21,21 @@ public class EnemigoVentana : MonoBehaviour
     [SerializeField] float tiempoPorNivel = 90f;
     [SerializeField] float tiempoMinimoAvance = 3f;
 
-    [Header("Enemigo en escena (desactivado al inicio)")]
-    [Tooltip("Arrastra aquí el GameObject del enemigo que se activará cuando entre en la habitación")]
-    [SerializeField] GameObject enemigoEnEscena;
+    [Header("Modelos de enemigo por estado")]
+    [SerializeField] GameObject enemigoEstado1;   // azul
+    [SerializeField] GameObject enemigoEstado2;   // naranja
+    [SerializeField] GameObject enemigoEstado3;   // rojo (golpeando ventana)
+    [SerializeField] GameObject enemigoEstado4;   // nuevo: animación de entrar habitación
+    [SerializeField] GameObject enemigoReal;      // enemigo que persigue al jugador
 
     [Header("Spawn parent (objeto vacío que define la posición local 0,0,0)")]
-    [Tooltip("Arrastra aquí el Transform del objeto vacío que debe ser el padre del enemigo (su localPosition 0,0,0 será la posición de spawn)")]
     [SerializeField] Transform spawnParent;
 
     [Header("Temporizador fase 3")]
     [SerializeField] float tiempoAntesDeEntrar = 10f;
-    bool cuentaRegresivaActiva = false;
-    float tiempoRestanteParaEntrar;
-    bool enemigoSpawned = false;
+    [SerializeField] bool cuentaRegresivaActiva = false;
+    [SerializeField] float tiempoRestanteParaEntrar;
+    [SerializeField] bool enemigoSpawned = false;
 
     [Header("Colores Fases Ventana")]
     [SerializeField] Material azulMat;
@@ -66,9 +68,7 @@ public class EnemigoVentana : MonoBehaviour
     void Start()
     {
         ActualizarColorVentana();
-
-        if (enemigoEnEscena != null)
-            enemigoEnEscena.SetActive(false);
+        ActivarModeloPorEstado(); // inicia el modelo correcto según estadoActual
     }
     void Update()
     {
@@ -143,6 +143,8 @@ public class EnemigoVentana : MonoBehaviour
         ActualizarColorVentana();
         ActualizarUIOjo();
         ReproducirAudio(clipAvanzar);
+
+        ActivarModeloPorEstado(); // activa el modelo correspondiente
     }
     void RetrocederAEstado1()
     {
@@ -159,6 +161,8 @@ public class EnemigoVentana : MonoBehaviour
         ActualizarColorVentana();
         ActualizarUIOjo();
         ReproducirAudio(clipRetroceder);
+
+        ActivarModeloPorEstado(); // activa el modelo correspondiente
     }
     void EntrarAHabitacion()
     {
@@ -169,36 +173,34 @@ public class EnemigoVentana : MonoBehaviour
         ActualizarUIOjo();
         ReproducirAudio(clipEntrar);
 
-        if (enemigoEnEscena == null)
+        // 🔹 Pasar al nuevo estado 4
+        estadoActual = 4;
+        ActivarModeloPorEstado();
+
+        // ⚠️ IMPORTANTE:
+        // La animación de "entrar a la habitación" en enemigoEstado4
+        // debe tener un Animation Event que llame a FinalizarAnimacionEntradaHabitacion()
+    }
+    public void FinalizarAnimacionEntradaHabitacion()
+    {
+        if (enemigoEstado4 != null)
+            enemigoEstado4.SetActive(false);
+
+        if (enemigoReal != null)
         {
-            Debug.LogWarning("[EnemigoVentana] EntrarAHabitacion: enemigoEnEscena no asignado.");
-            return;
-        }
+            enemigoReal.SetActive(true);
 
-        // Colocar al enemigo en el spawn
-        if (spawnParent != null)
-        {
-            enemigoEnEscena.transform.SetParent(spawnParent, false);
-            enemigoEnEscena.transform.localPosition = Vector3.zero;
-            enemigoEnEscena.transform.localRotation = Quaternion.identity;
-        }
-
-        // ✅ Activar el GameObject
-        enemigoEnEscena.SetActive(true);
-
-        // ✅ Reiniciar y activar persecución
-        EnemigoPerseguidor script = enemigoEnEscena.GetComponent<EnemigoPerseguidor>();
-        if (script != null)
-        {
-            script.ResetEnemigo();
-
-            GameObject jugador = GameObject.FindGameObjectWithTag("Player");
-            if (jugador != null)
+            EnemigoPerseguidor script = enemigoReal.GetComponent<EnemigoPerseguidor>();
+            if (script != null)
             {
-                script.objetivo = jugador.transform;
-            }
+                script.ResetEnemigo();
 
-            script.ActivarPersecucion(); // 🔥 aquí se activa la persecución
+                GameObject jugador = GameObject.FindGameObjectWithTag("Player");
+                if (jugador != null)
+                    script.objetivo = jugador.transform;
+
+                script.ActivarPersecucion();
+            }
         }
     }
     public void StartTriggerSequence()
@@ -250,20 +252,7 @@ public class EnemigoVentana : MonoBehaviour
         tiempoRestanteParaEntrar = 0f;
         enemigoSpawned = false;
 
-        if (enemigoEnEscena != null)
-        {
-            EnemigoPerseguidor ep = enemigoEnEscena.GetComponent<EnemigoPerseguidor>();
-            if (ep != null)
-            {
-                ep.ResetEnemigo();
-                ep.gameObject.SetActive(false);
-                ep.enabled = false;
-            }
-            else
-            {
-                enemigoEnEscena.SetActive(false);
-            }
-        }
+        ActivarModeloPorEstado(); // asegura que se muestre el modelo correcto
 
         if (audioSource != null) audioSource.Stop();
 
@@ -276,7 +265,7 @@ public class EnemigoVentana : MonoBehaviour
     }
     public void EnemigoDesactivado(GameObject enemigoObj)
     {
-        if (enemigoEnEscena == enemigoObj)
+        if (enemigoEstado3 == enemigoObj || enemigoReal == enemigoObj)
         {
             enemigoSpawned = false;
         }
@@ -344,5 +333,22 @@ public class EnemigoVentana : MonoBehaviour
         audioSource.PlayOneShot(clip);
 
         audioSource.pitch = originalPitch;
+    }
+    void ActivarModeloPorEstado()
+    {
+        DesactivarTodosModelos();
+
+        if (estadoActual == 1 && enemigoEstado1 != null) enemigoEstado1.SetActive(true);
+        if (estadoActual == 2 && enemigoEstado2 != null) enemigoEstado2.SetActive(true);
+        if (estadoActual == 3 && enemigoEstado3 != null) enemigoEstado3.SetActive(true);
+        if (estadoActual == 4 && enemigoEstado4 != null) enemigoEstado4.SetActive(true);
+    }
+    void DesactivarTodosModelos()
+    {
+        if (enemigoEstado1 != null) enemigoEstado1.SetActive(false);
+        if (enemigoEstado2 != null) enemigoEstado2.SetActive(false);
+        if (enemigoEstado3 != null) enemigoEstado3.SetActive(false);
+        if (enemigoEstado4 != null) enemigoEstado4.SetActive(false);
+        if (enemigoReal != null) enemigoReal.SetActive(false);
     }
 }

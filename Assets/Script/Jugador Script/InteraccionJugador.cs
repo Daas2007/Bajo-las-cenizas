@@ -19,38 +19,33 @@ public class InteraccionJugador : MonoBehaviour
     private IInteractuable objetoActual;
     private Transform objetoTransform;
 
+    // 🔹 Referencia a MovimientoPersonaje
+    MovimientoPersonaje movimientoJugador;
+
+    void Awake()
+    {
+        movimientoJugador = FindObjectOfType<MovimientoPersonaje>();
+    }
+
     void Update()
     {
         DetectarObjeto();
 
-        // Si hay objeto interactuable enfrente
         if (objetoActual != null && Time.timeScale == 1f && (dialogoCanvas == null || !dialogoCanvas.activeSelf))
         {
             if (!panelInteraccion.activeSelf) panelInteraccion.SetActive(true);
 
-            // 🔹 Ajuste de mensajes según el tag
             if (objetoTransform.CompareTag("Puzzle"))
-            {
                 textoInteraccion.text = "Presiona [E] para agarrar pieza de puzzle";
-            }
             else if (objetoTransform.CompareTag("Agarrar"))
-            {
                 textoInteraccion.text = "Presiona [E] para agarrar objeto";
-            }
             else if (objetoTransform.CompareTag("Slot") || objetoTransform.CompareTag("Colocar"))
-            {
                 textoInteraccion.text = "Presiona [E] para colocar";
-            }
             else if (objetoTransform.CompareTag("OsoTorso"))
-            {
                 textoInteraccion.text = "Presiona [E] para colocar pieza del oso";
-            }
             else
-            {
                 textoInteraccion.text = "Presiona [E] para interactuar";
-            }
 
-            // 🔹 Interacción con E
             if (Input.GetKeyDown(KeyCode.E))
             {
                 if (objetoTransform.CompareTag("Colocar"))
@@ -59,8 +54,19 @@ public class InteraccionJugador : MonoBehaviour
                 }
                 else if (objetoTransform.CompareTag("Puzzle") || objetoTransform.CompareTag("Agarrar"))
                 {
-                    // ✅ Solo estos dos tags pueden ser agarrados con la mano izquierda
                     objetoActual.Interactuar();
+
+                    // 🔹 Activar flag de objeto en Animator
+                    if (movimientoJugador != null)
+                    {
+                        movimientoJugador.tieneObjeto = true;
+                        Animator anim = movimientoJugador.GetComponent<Animator>();
+                        anim.SetBool("TieneObjeto", true);
+                        anim.SetBool("AgarraObjeto", true);
+
+                        // 🔹 Reset inmediato para evitar bucle
+                        StartCoroutine(ResetBool(anim, "AgarraObjeto"));
+                    }
                 }
                 else
                 {
@@ -73,7 +79,7 @@ public class InteraccionJugador : MonoBehaviour
             if (panelInteraccion.activeSelf) panelInteraccion.SetActive(false);
         }
 
-        // 🔹 Mostrar opción de soltar con Q si hay algo en la mano
+        // Soltar con Q
         if (manoIzquierda.childCount > 0)
         {
             if (!panelInteraccion.activeSelf) panelInteraccion.SetActive(true);
@@ -83,7 +89,6 @@ public class InteraccionJugador : MonoBehaviour
             {
                 Transform objetoEnMano = manoIzquierda.GetChild(0);
 
-                // ✅ Soporte para piezas de puzzle y oso
                 PiezaPuzzle piezaPuzzle = objetoEnMano.GetComponent<PiezaPuzzle>();
                 if (piezaPuzzle != null)
                 {
@@ -98,9 +103,14 @@ public class InteraccionJugador : MonoBehaviour
                     }
                     else if (objetoEnMano.CompareTag("Agarrar"))
                     {
-                        // ✅ Soltar objeto normal
                         objetoEnMano.SetParent(null);
                     }
+                }
+
+                if (movimientoJugador != null)
+                {
+                    movimientoJugador.tieneObjeto = false;
+                    movimientoJugador.GetComponent<Animator>().SetBool("TieneObjeto", false);
                 }
             }
         }
@@ -160,5 +170,12 @@ public class InteraccionJugador : MonoBehaviour
                 }
             }
         }
+    }
+
+    // 🔹 Corrutina para resetear bool en Animator
+    private System.Collections.IEnumerator ResetBool(Animator anim, string parametro)
+    {
+        yield return null; // esperar un frame
+        anim.SetBool(parametro, false);
     }
 }
