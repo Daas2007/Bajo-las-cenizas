@@ -2,12 +2,11 @@ using UnityEngine;
 
 public class PuertaCandado : MonoBehaviour, IInteractuable
 {
-    [Header("Configuración de apertura")]
     [SerializeField] private float anguloApertura = 90f;
     [SerializeField] private float velocidadRotacion = 2f;
 
     private bool abierta = false;
-    private bool bloqueada = true; // ✅ por defecto bloqueada
+    private bool bloqueada = true;
     private Quaternion rotInicial;
     private Quaternion rotObjetivo;
 
@@ -34,7 +33,6 @@ public class PuertaCandado : MonoBehaviour, IInteractuable
         transform.rotation = Quaternion.Slerp(transform.rotation, rotObjetivo, Time.deltaTime * velocidadRotacion);
     }
 
-    // ✅ Método para desbloquear desde el candado
     public void DesbloquearPuerta()
     {
         bloqueada = false;

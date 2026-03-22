@@ -2,24 +2,43 @@ using UnityEngine;
 
 public class LlaveInteractuable : MonoBehaviour, IInteractuable
 {
-    [Header("Referencia al candado")]
     [SerializeField] private CandadoPuerta candado;
+    private bool enMano = false;
+    private Transform manoIzquierda;
 
-    private bool recogida = false;
+    void Start()
+    {
+        GameObject jugador = GameObject.FindWithTag("Player");
+        if (jugador != null)
+        {
+            InteraccionJugador interaccion = jugador.GetComponent<InteraccionJugador>();
+            if (interaccion != null)
+                manoIzquierda = interaccion.GetManoIzquierda();
+        }
+    }
 
     public void Interactuar()
     {
-        if (!recogida)
+        if (!enMano && manoIzquierda != null && manoIzquierda.childCount == 0)
         {
-            recogida = true;
-            gameObject.SetActive(false); // 🔹 Desaparece la llave al recogerla
+            enMano = true;
+            transform.SetParent(manoIzquierda);
+            transform.localPosition = Vector3.zero;
+            transform.localRotation = Quaternion.identity;
+        }
+    }
 
-            if (candado != null)
-            {
-                candado.UsarLlave();
-            }
+    public bool EstaEnMano()
+    {
+        return enMano;
+    }
 
-            Debug.Log("🗝️ Llave recogida y usada en el candado.");
+    public void UsarEnCandado()
+    {
+        if (candado != null)
+        {
+            candado.DestruirCandado();
+            Destroy(gameObject); // destruir llave
         }
     }
 }

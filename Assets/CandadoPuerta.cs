@@ -2,31 +2,26 @@ using UnityEngine;
 
 public class CandadoPuerta : MonoBehaviour, IInteractuable
 {
-    [Header("Referencia a la puerta")]
     [SerializeField] private PuertaCandado puerta;
-
-    private bool desbloqueado = false;
 
     public void Interactuar()
     {
-        if (!desbloqueado)
+        // Buscar si el jugador tiene la llave en la mano
+        LlaveInteractuable llave = FindObjectOfType<LlaveInteractuable>();
+        if (llave != null && llave.EstaEnMano())
         {
-            Debug.Log("🔒 El candado está cerrado. Necesitas una llave.");
+            llave.UsarEnCandado();
         }
         else
         {
-            Debug.Log("🔓 El candado ya está abierto.");
+            Debug.Log("🔒 El candado está cerrado. Necesitas una llave.");
         }
     }
 
-    // ✅ Método que la llave llamará
-    public void UsarLlave()
+    public void DestruirCandado()
     {
-        desbloqueado = true;
-        if (puerta != null)
-        {
-            puerta.DesbloquearPuerta();
-        }
-        Debug.Log("✅ Candado abierto con la llave.");
+        if (puerta != null) puerta.DesbloquearPuerta();
+        Destroy(gameObject); // destruir candado
+        Debug.Log("✅ Candado destruido con la llave.");
     }
 }
