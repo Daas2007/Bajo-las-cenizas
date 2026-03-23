@@ -13,14 +13,14 @@ public class CandadoPuerta : MonoBehaviour, IInteractuable
         }
         else
         {
-            Debug.Log("🔒 El candado está cerrado. Necesitas una llave.");
+            Debug.Log("🔒 Este candado está cerrado. Necesitas su llave.");
         }
     }
 
     public void DestruirCandado()
     {
-        if (puerta != null) puerta.DesbloquearPuerta();
         Destroy(gameObject);
         Debug.Log("✅ Candado destruido con la llave.");
+        if (puerta != null) puerta.RevisarCandados();
     }
 }

@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class LlaveInteractuable : MonoBehaviour, IInteractuable
 {
-    [SerializeField] private CandadoPuerta candado;
+    [SerializeField] private CandadoPuerta candado; // ✅ cada llave apunta a su candado
     private bool enMano = false;
     private Transform manoIzquierda;
 
@@ -42,23 +42,20 @@ public class LlaveInteractuable : MonoBehaviour, IInteractuable
             transform.localPosition = Vector3.zero;
             transform.localRotation = Quaternion.identity;
 
-            rb.isKinematic = true;   // ✅ no usa física
-            rb.useGravity = false;   // ✅ no cae
-            col.enabled = false;     // ✅ no choca mientras está en la mano
+            rb.isKinematic = true;
+            rb.useGravity = false;
+            col.enabled = false;
         }
     }
 
-    public bool EstaEnMano()
-    {
-        return enMano;
-    }
+    public bool EstaEnMano() => enMano;
 
     public void UsarEnCandado()
     {
         if (candado != null)
         {
             candado.DestruirCandado();
-            Destroy(gameObject); // ✅ destruir llave
+            Destroy(gameObject); // ✅ destruir llave tras usarla
         }
     }
 }

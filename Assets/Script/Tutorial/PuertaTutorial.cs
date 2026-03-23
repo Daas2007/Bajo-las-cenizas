@@ -24,6 +24,10 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
     [Header("PersonajeMovimiento")]
     [SerializeField] MovimientoPersonaje quedateQuieto;
 
+    [Header("Audio")]
+    [SerializeField] AudioClip sonidoAbrir;   // ✅ tu clip de sonido
+    [SerializeField] private AudioSource audioSource;          // ✅ referencia al AudioSource de la puerta
+
     public bool abierta = false;
     private Quaternion rotacionInicial;
     private Quaternion rotacionFinal;
@@ -41,6 +45,14 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
 
         if (panelDialogo != null) panelDialogo.SetActive(false);
         if (textoSaltar != null) textoSaltar.gameObject.SetActive(false);
+
+        // ✅ usar el AudioSource ya existente en la puerta
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+        audioSource.playOnAwake = false;
     }
 
     void Update()
@@ -94,6 +106,10 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
         abierta = true;
         gameObject.layer = LayerMask.NameToLayer("Default");
 
+        // ✅ reproducir sonido al abrir
+        if (sonidoAbrir != null && audioSource != null)
+            audioSource.PlayOneShot(sonidoAbrir);
+
         StartCoroutine(RotarPuerta());
 
         if (puertaVinculada != null && !puertaVinculada.abierta)
@@ -106,6 +122,11 @@ public class PuertaTutorial : MonoBehaviour, IInteractuable
     {
         abierta = true;
         gameObject.layer = LayerMask.NameToLayer("Default");
+
+        // ✅ reproducir sonido también en la puerta vinculada
+        if (sonidoAbrir != null && audioSource != null)
+            audioSource.PlayOneShot(sonidoAbrir);
+
         StartCoroutine(RotarPuerta());
     }
 

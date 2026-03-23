@@ -1,11 +1,6 @@
 using UnityEngine;
 using System.Collections;
 
-/// <summary>
-/// CajonesTV: mueve un Transform entre dos puntos (startPoint -> endPoint) en un tiempo dado.
-/// Implementa IInteractuable para ser usado con tu sistema de interacción.
-/// </summary>
-[DisallowMultipleComponent]
 public class CajonesTV : MonoBehaviour, IInteractuable
 {
     [Header("Referencias")]
@@ -25,6 +20,11 @@ public class CajonesTV : MonoBehaviour, IInteractuable
     [Tooltip("Mover usando posiciones locales en lugar de posiciones globales")]
     [SerializeField] private bool usarLocalPosition = false;
 
+    [Header("Audio")]
+    [SerializeField] private AudioSource audioSource;   // ✅ referencia al AudioSource
+    [SerializeField] private AudioClip sonidoAbrir;     // ✅ clip de abrir
+    [SerializeField] private AudioClip sonidoCerrar;    // ✅ clip de cerrar
+
     // Estado interno
     private Vector3 posicionInicial;
     private Vector3 posicionDestino;
@@ -33,7 +33,6 @@ public class CajonesTV : MonoBehaviour, IInteractuable
 
     private void Reset()
     {
-        // Si no se asignó cajon, usar el mismo GameObject
         if (cajon == null) cajon = this.transform;
     }
 
@@ -41,7 +40,6 @@ public class CajonesTV : MonoBehaviour, IInteractuable
     {
         if (cajon == null) cajon = this.transform;
 
-        // Determinar posiciones inicial y destino según los Transforms proporcionados
         if (startPoint != null)
             posicionInicial = usarLocalPosition ? startPoint.localPosition : startPoint.position;
         else
@@ -50,18 +48,21 @@ public class CajonesTV : MonoBehaviour, IInteractuable
         if (endPoint != null)
             posicionDestino = usarLocalPosition ? endPoint.localPosition : endPoint.position;
         else
-            posicionDestino = posicionInicial; // si no hay endPoint, no se moverá
+            posicionDestino = posicionInicial;
 
-        // Asegurar que el cajón comience en la posición inicial
         if (usarLocalPosition)
             cajon.localPosition = posicionInicial;
         else
             cajon.position = posicionInicial;
+
+        // ✅ si no se asignó un AudioSource en el Inspector, se crea automáticamente
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.playOnAwake = false;
+        }
     }
 
-    /// <summary>
-    /// Método de la interfaz IInteractuable: alterna entre posición inicial y destino.
-    /// </summary>
     public void Interactuar()
     {
         if (cajon == null)
@@ -70,23 +71,24 @@ public class CajonesTV : MonoBehaviour, IInteractuable
             return;
         }
 
-        // Si no hay destino distinto, no hacer nada
         if (posicionDestino == posicionInicial)
         {
             Debug.LogWarning("[CajonesTV] startPoint y endPoint son iguales o endPoint no asignado. Nada que mover.");
             return;
         }
 
-        // Si ya hay una rutina en curso, detenerla para iniciar la nueva (permite interrumpir)
         if (rutinaMovimiento != null)
         {
             StopCoroutine(rutinaMovimiento);
             rutinaMovimiento = null;
         }
 
-        // Elegir destino según estado actual
         Vector3 objetivo = abierto ? posicionInicial : posicionDestino;
         bool nuevoEstado = !abierto;
+
+        // ✅ reproducir sonido según estado
+        if (!abierto) ReproducirSonido(sonidoAbrir);
+        else ReproducirSonido(sonidoCerrar);
 
         rutinaMovimiento = StartCoroutine(MoverCajon(cajon, objetivo, duracion, nuevoEstado));
     }
@@ -96,7 +98,6 @@ public class CajonesTV : MonoBehaviour, IInteractuable
         float tiempo = 0f;
         Vector3 inicio = usarLocalPosition ? objetivoTransform.localPosition : objetivoTransform.position;
 
-        // Si la duración es 0 o negativa, saltar la interpolación
         if (tiempoTotal <= 0f)
         {
             if (usarLocalPosition) objetivoTransform.localPosition = destino;
@@ -110,7 +111,6 @@ public class CajonesTV : MonoBehaviour, IInteractuable
         while (tiempo < tiempoTotal)
         {
             float t = tiempo / tiempoTotal;
-            // suavizado opcional: t = Mathf.SmoothStep(0f, 1f, t);
             Vector3 nuevaPos = Vector3.Lerp(inicio, destino, t);
 
             if (usarLocalPosition) objetivoTransform.localPosition = nuevaPos;
@@ -120,7 +120,6 @@ public class CajonesTV : MonoBehaviour, IInteractuable
             yield return null;
         }
 
-        // Asegurar posición final exacta
         if (usarLocalPosition) objetivoTransform.localPosition = destino;
         else objetivoTransform.position = destino;
 
@@ -128,9 +127,6 @@ public class CajonesTV : MonoBehaviour, IInteractuable
         rutinaMovimiento = null;
     }
 
-    /// <summary>
-    /// Opcional: método público para forzar que el cajón vuelva a la posición inicial.
-    /// </summary>
     public void ResetToInitial(bool instant = false)
     {
         if (rutinaMovimiento != null)
@@ -150,6 +146,14 @@ public class CajonesTV : MonoBehaviour, IInteractuable
         else
         {
             rutinaMovimiento = StartCoroutine(MoverCajon(cajon, posicionInicial, duracion, false));
+        }
+    }
+
+    private void ReproducirSonido(AudioClip clip)
+    {
+        if (clip != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(clip);
         }
     }
 }

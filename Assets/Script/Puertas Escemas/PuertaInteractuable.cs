@@ -12,6 +12,11 @@ public class PuertaInteractuable : MonoBehaviour, IInteractuable
     [Header("Opciones especiales")]
     [SerializeField] private bool cierreRapidoConCristal = false;
 
+    [Header("Audio")]
+    [SerializeField] private AudioClip sonidoAbrir;   // ✅ clip de abrir
+    [SerializeField] private AudioClip sonidoCerrar;  // ✅ clip de cerrar
+    private AudioSource audioSource;                  // ✅ referencia al AudioSource
+
     private bool abierta = false;
     private bool enMovimiento = false;
     private Quaternion rotacionInicial;
@@ -27,6 +32,14 @@ public class PuertaInteractuable : MonoBehaviour, IInteractuable
 
         rotacionInicial = Quaternion.Euler(rotacionInicialEuler);
         rotacionFinal = Quaternion.Euler(rotacionFinalEuler);
+
+        // ✅ obtener AudioSource de la puerta
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+        audioSource.playOnAwake = false;
     }
 
     public void Interactuar()
@@ -48,6 +61,7 @@ public class PuertaInteractuable : MonoBehaviour, IInteractuable
         if (!abierta)
         {
             Debug.Log($"🔓 [PuertaInteractuable] '{gameObject.name}' abriendo puerta.");
+            ReproducirSonido(sonidoAbrir);
             StartCoroutine(RotarPuerta(rotacionFinal, true, duracion));
         }
         else
@@ -62,11 +76,24 @@ public class PuertaInteractuable : MonoBehaviour, IInteractuable
         enMovimiento = true;
         float tiempo = 0f;
         Quaternion inicio = engranaje.localRotation;
+        bool sonidoCerrarReproducido = false;
 
         while (tiempo < tiempoAnim)
         {
             float t = tiempo / tiempoAnim;
             engranaje.localRotation = Quaternion.Lerp(inicio, destino, t);
+
+            // ✅ reproducir sonido de cerrar cuando falten ~10° para terminar
+            if (!abrir && !sonidoCerrarReproducido)
+            {
+                float anguloRestante = Quaternion.Angle(engranaje.localRotation, destino);
+                if (anguloRestante <= 10f)
+                {
+                    ReproducirSonido(sonidoCerrar);
+                    sonidoCerrarReproducido = true;
+                }
+            }
+
             tiempo += Time.deltaTime;
             yield return null;
         }
@@ -97,4 +124,12 @@ public class PuertaInteractuable : MonoBehaviour, IInteractuable
     }
 
     public bool EstaAbierta() => abierta;
+
+    private void ReproducirSonido(AudioClip clip)
+    {
+        if (clip != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(clip);
+        }
+    }
 }

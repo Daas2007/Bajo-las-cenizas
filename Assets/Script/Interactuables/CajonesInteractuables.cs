@@ -9,6 +9,11 @@ public class CajonesInteractuables : MonoBehaviour, IInteractuable
     [SerializeField] private float distancia = 0.5f;   // cuánto se moverá
     [SerializeField] private float duracion = 1f;      // tiempo de animación
 
+    [Header("Audio")]
+    [SerializeField] private AudioSource audioSource;  // ✅ referencia asignada desde el Inspector
+    [SerializeField] private AudioClip sonidoAbrir;    // clip de abrir
+    [SerializeField] private AudioClip sonidoCerrar;   // clip de cerrar
+
     private Vector3 posicionInicial;
     private Vector3 posicionFinal;
     private bool abierto = false;
@@ -25,6 +30,13 @@ public class CajonesInteractuables : MonoBehaviour, IInteractuable
         // Guardar posición inicial y calcular final
         posicionInicial = cajon.localPosition;
         posicionFinal = posicionInicial + direccionMovimiento.normalized * distancia;
+
+        // ✅ si no asignaste un AudioSource en el Inspector, lo crea automáticamente
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.playOnAwake = false;
+        }
     }
 
     public void Interactuar()
@@ -34,9 +46,15 @@ public class CajonesInteractuables : MonoBehaviour, IInteractuable
         if (rutinaMovimiento != null) StopCoroutine(rutinaMovimiento);
 
         if (!abierto)
+        {
+            ReproducirSonido(sonidoAbrir);
             rutinaMovimiento = StartCoroutine(MoverCajon(posicionFinal, true));
+        }
         else
+        {
+            ReproducirSonido(sonidoCerrar);
             rutinaMovimiento = StartCoroutine(MoverCajon(posicionInicial, false));
+        }
     }
 
     private IEnumerator MoverCajon(Vector3 destino, bool abrir)
@@ -56,5 +74,12 @@ public class CajonesInteractuables : MonoBehaviour, IInteractuable
         abierto = abrir;
         rutinaMovimiento = null;
     }
-}
 
+    private void ReproducirSonido(AudioClip clip)
+    {
+        if (clip != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(clip);
+        }
+    }
+}

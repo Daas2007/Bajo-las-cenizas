@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class PuertaCandado : MonoBehaviour, IInteractuable
 {
+    [SerializeField] private CandadoPuerta candadoDerecho;
+    [SerializeField] private CandadoPuerta candadoIzquierdo;
+
     [SerializeField] private float anguloApertura = 90f;
     [SerializeField] private float velocidadRotacion = 2f;
 
@@ -20,7 +23,7 @@ public class PuertaCandado : MonoBehaviour, IInteractuable
     {
         if (bloqueada)
         {
-            Debug.Log("🚪 La puerta está bloqueada por el candado.");
+            Debug.Log("🚪 La puerta está bloqueada por los candados.");
             return;
         }
 
@@ -33,9 +36,13 @@ public class PuertaCandado : MonoBehaviour, IInteractuable
         transform.rotation = Quaternion.Slerp(transform.rotation, rotObjetivo, Time.deltaTime * velocidadRotacion);
     }
 
-    public void DesbloquearPuerta()
+    public void RevisarCandados()
     {
-        bloqueada = false;
-        Debug.Log("🔓 Puerta desbloqueada, ahora puede abrirse.");
+        // ✅ La puerta se desbloquea solo si ambos candados fueron destruidos
+        if (candadoDerecho == null && candadoIzquierdo == null)
+        {
+            bloqueada = false;
+            Debug.Log("🔓 Ambos candados destruidos, la puerta puede abrirse.");
+        }
     }
 }
