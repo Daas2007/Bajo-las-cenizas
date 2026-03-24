@@ -10,8 +10,8 @@ public class PuertaCandado : MonoBehaviour, IInteractuable
     [SerializeField] private float velocidadRotacion = 2f;
 
     [Header("Audio")]
-    [SerializeField] private AudioSource audioSource;   // ✅ referencia al AudioSource
-    [SerializeField] private AudioClip sonidoAbrir;     // ✅ clip de abrir
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip sonidoAbrir;
 
     private bool abierta = false;
     private bool bloqueada = true;
@@ -23,7 +23,6 @@ public class PuertaCandado : MonoBehaviour, IInteractuable
         rotInicial = transform.rotation;
         rotObjetivo = rotInicial;
 
-        // ✅ si no asignaste un AudioSource en el Inspector, se crea automáticamente
         if (audioSource == null)
         {
             audioSource = gameObject.AddComponent<AudioSource>();
@@ -43,9 +42,8 @@ public class PuertaCandado : MonoBehaviour, IInteractuable
         {
             abierta = true;
             rotObjetivo = Quaternion.Euler(0, anguloApertura, 0) * rotInicial;
-
-            // ✅ reproducir sonido de abrir
             ReproducirSonido(sonidoAbrir);
+            Debug.Log("🚪 Puerta abierta.");
         }
     }
 
@@ -54,9 +52,16 @@ public class PuertaCandado : MonoBehaviour, IInteractuable
         transform.rotation = Quaternion.Slerp(transform.rotation, rotObjetivo, Time.deltaTime * velocidadRotacion);
     }
 
+    public void NotificarCandadoDestruido(CandadoPuerta candado)
+    {
+        if (candado == candadoDerecho) candadoDerecho = null;
+        if (candado == candadoIzquierdo) candadoIzquierdo = null;
+
+        RevisarCandados();
+    }
+
     public void RevisarCandados()
     {
-        // ✅ La puerta se desbloquea solo si ambos candados fueron destruidos
         if (candadoDerecho == null && candadoIzquierdo == null)
         {
             bloqueada = false;

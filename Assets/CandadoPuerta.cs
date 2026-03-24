@@ -6,12 +6,10 @@ public class CandadoPuerta : MonoBehaviour, IInteractuable
 
     public void Interactuar()
     {
-        // ✅ Buscar todas las llaves en la escena
         LlaveInteractuable[] llaves = FindObjectsOfType<LlaveInteractuable>();
 
         foreach (LlaveInteractuable llave in llaves)
         {
-            // ✅ Solo funciona si la llave está en la mano y corresponde a este candado
             if (llave.EstaEnMano() && llave.candado == this)
             {
                 llave.UsarEnCandado();
@@ -24,8 +22,14 @@ public class CandadoPuerta : MonoBehaviour, IInteractuable
 
     public void DestruirCandado()
     {
+        PuertaCandado puertaCandado = puerta;
+
         Destroy(gameObject);
         Debug.Log("✅ Candado destruido con la llave.");
-        if (puerta != null) puerta.RevisarCandados();
+
+        if (puertaCandado != null)
+        {
+            puertaCandado.NotificarCandadoDestruido(this);
+        }
     }
 }
