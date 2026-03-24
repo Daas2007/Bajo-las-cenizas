@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using TMPro;
+using System.Collections;
 
 public class InteraccionJugador : MonoBehaviour
 {
@@ -35,6 +36,7 @@ public class InteraccionJugador : MonoBehaviour
         {
             if (!panelInteraccion.activeSelf) panelInteraccion.SetActive(true);
 
+            // ✅ Mensajes según el tag
             if (objetoTransform.CompareTag("Puzzle"))
                 textoInteraccion.text = "Presiona [E] para agarrar pieza de puzzle";
             else if (objetoTransform.CompareTag("Agarrar"))
@@ -46,6 +48,7 @@ public class InteraccionJugador : MonoBehaviour
             else
                 textoInteraccion.text = "Presiona [E] para interactuar";
 
+            // ✅ Interacción con E
             if (Input.GetKeyDown(KeyCode.E))
             {
                 if (objetoTransform.CompareTag("Colocar"))
@@ -54,18 +57,27 @@ public class InteraccionJugador : MonoBehaviour
                 }
                 else if (objetoTransform.CompareTag("Puzzle") || objetoTransform.CompareTag("Agarrar"))
                 {
-                    objetoActual.Interactuar();
+                    // ✅ Pasar referencia de la mano directamente
+                    PiezaPuzzle pieza = objetoTransform.GetComponent<PiezaPuzzle>();
+                    if (pieza != null)
+                    {
+                        pieza.SetMano(manoIzquierda);
+                    }
 
-                    // 🔹 Activar flag de objeto en Animator
+                    objetoActual.Interactuar();
+                    Debug.Log("[InteraccionJugador] Interactuando con: " + objetoTransform.name);
+
+                    // ✅ Activar flags en Animator
                     if (movimientoJugador != null)
                     {
                         movimientoJugador.tieneObjeto = true;
                         Animator anim = movimientoJugador.GetComponent<Animator>();
-                        anim.SetBool("TieneObjeto", true);
-                        anim.SetBool("AgarraObjeto", true);
-
-                        // 🔹 Reset inmediato para evitar bucle
-                        StartCoroutine(ResetBool(anim, "AgarraObjeto"));
+                        if (anim != null)
+                        {
+                            anim.SetBool("TieneObjeto", true);
+                            anim.SetBool("AgarraObjeto", true);
+                            StartCoroutine(ResetBool(anim, "AgarraObjeto"));
+                        }
                     }
                 }
                 else
@@ -79,7 +91,7 @@ public class InteraccionJugador : MonoBehaviour
             if (panelInteraccion.activeSelf) panelInteraccion.SetActive(false);
         }
 
-        // Soltar con Q
+        // ✅ Soltar con Q
         if (manoIzquierda.childCount > 0)
         {
             if (!panelInteraccion.activeSelf) panelInteraccion.SetActive(true);
@@ -110,7 +122,9 @@ public class InteraccionJugador : MonoBehaviour
                 if (movimientoJugador != null)
                 {
                     movimientoJugador.tieneObjeto = false;
-                    movimientoJugador.GetComponent<Animator>().SetBool("TieneObjeto", false);
+                    Animator anim = movimientoJugador.GetComponent<Animator>();
+                    if (anim != null)
+                        anim.SetBool("TieneObjeto", false);
                 }
             }
         }
@@ -173,7 +187,7 @@ public class InteraccionJugador : MonoBehaviour
     }
 
     // 🔹 Corrutina para resetear bool en Animator
-    private System.Collections.IEnumerator ResetBool(Animator anim, string parametro)
+    private IEnumerator ResetBool(Animator anim, string parametro)
     {
         yield return null; // esperar un frame
         anim.SetBool(parametro, false);

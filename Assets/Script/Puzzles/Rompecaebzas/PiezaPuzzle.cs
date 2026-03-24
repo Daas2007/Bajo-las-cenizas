@@ -30,7 +30,6 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
         rb.isKinematic = false;
         if (col != null) col.enabled = true;
     }
-
     void Start()
     {
         GameObject jugador = GameObject.FindWithTag("Player");
@@ -41,7 +40,6 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
                 manoIzquierda = interaccion.GetManoIzquierda();
         }
     }
-
     void Update()
     {
         if (enMano && !colocada)
@@ -58,14 +56,13 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
             transform.Rotate(90, 0, 0);
         }
     }
-
     public void Interactuar()
     {
         if (colocada) return;
 
         if (!enMano)
         {
-            if (manoIzquierda.childCount == 0)
+            if (manoIzquierda != null && manoIzquierda.childCount == 0)
             {
                 enMano = true;
                 transform.SetParent(manoIzquierda);
@@ -79,13 +76,16 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
 
                 gameObject.tag = "Puzzle";
             }
+            else
+            {
+                Debug.LogWarning("[PiezaPuzzle] manoIzquierda no asignada o ya ocupada.");
+            }
         }
         else
         {
             Soltar();
         }
     }
-
     // 🔹 Ajustado: neutraliza la pieza si está en el slot correcto
     public void MarcarColocada(bool estado = true, int slotID = -1)
     {
@@ -105,12 +105,14 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
             gameObject.layer = LayerMask.NameToLayer("Default"); // layer default
         }
     }
-
+    public void SetMano(Transform mano)
+    {
+        manoIzquierda = mano;
+    }
     public void PermitirRotacionX(bool estado)
     {
         puedeRotarX = estado;
     }
-
     public void ResetColocada()
     {
         colocada = false;
@@ -123,7 +125,6 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
 
         gameObject.tag = "Puzzle";
     }
-
     public void Soltar()
     {
         enMano = false;
