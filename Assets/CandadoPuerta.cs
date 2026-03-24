@@ -6,15 +6,20 @@ public class CandadoPuerta : MonoBehaviour, IInteractuable
 
     public void Interactuar()
     {
-        LlaveInteractuable llave = FindObjectOfType<LlaveInteractuable>();
-        if (llave != null && llave.EstaEnMano())
+        // ✅ Buscar todas las llaves en la escena
+        LlaveInteractuable[] llaves = FindObjectsOfType<LlaveInteractuable>();
+
+        foreach (LlaveInteractuable llave in llaves)
         {
-            llave.UsarEnCandado();
+            // ✅ Solo funciona si la llave está en la mano y corresponde a este candado
+            if (llave.EstaEnMano() && llave.candado == this)
+            {
+                llave.UsarEnCandado();
+                return;
+            }
         }
-        else
-        {
-            Debug.Log("🔒 Este candado está cerrado. Necesitas su llave.");
-        }
+
+        Debug.Log("🔒 Este candado está cerrado. Necesitas su llave correspondiente.");
     }
 
     public void DestruirCandado()

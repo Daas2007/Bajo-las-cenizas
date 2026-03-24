@@ -9,6 +9,7 @@ public class OsoPieza : MonoBehaviour, IInteractuable
     private Rigidbody rb;
     private Collider col;
     private int capaOriginal;
+    private Transform manoIzquierda;
 
     private void Awake()
     {
@@ -17,34 +18,33 @@ public class OsoPieza : MonoBehaviour, IInteractuable
         capaOriginal = gameObject.layer;
     }
 
+    // ✅ Método para asignar la mano desde InteraccionJugador
+    public void SetMano(Transform mano)
+    {
+        manoIzquierda = mano;
+    }
+
     public void Interactuar()
     {
-        if (!enMano)
+        if (!enMano && manoIzquierda != null && manoIzquierda.childCount == 0)
         {
-            Transform manoIzquierda = GameObject.FindWithTag("Player")
-                .GetComponent<InteraccionJugador>()
-                .GetManoIzquierda();
+            enMano = true;
+            transform.SetParent(manoIzquierda);
+            transform.localPosition = Vector3.zero;
+            transform.localRotation = Quaternion.identity;
 
-            if (manoIzquierda.childCount == 0)
+            // ✅ Desactivar físicas y colisiones mientras está en la mano
+            if (rb != null)
             {
-                enMano = true;
-                transform.SetParent(manoIzquierda);
-                transform.localPosition = Vector3.zero;
-                transform.localRotation = Quaternion.identity;
-
-                // ✅ Desactivar físicas y colisiones mientras está en la mano
-                if (rb != null)
-                {
-                    rb.isKinematic = true;
-                    rb.useGravity = false;
-                }
-                if (col != null)
-                {
-                    col.enabled = false;
-                }
-
-                gameObject.layer = LayerMask.NameToLayer("EnMano");
+                rb.isKinematic = true;
+                rb.useGravity = false;
             }
+            if (col != null)
+            {
+                col.enabled = false;
+            }
+
+            gameObject.layer = LayerMask.NameToLayer("EnMano");
         }
     }
 

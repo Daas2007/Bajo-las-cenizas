@@ -11,10 +11,20 @@ public class OsoManager : MonoBehaviour, IInteractuable
 
     public void Interactuar()
     {
-        // ✅ Si el jugador tiene una pieza en la mano, colocarla en el torso
-        Transform manoIzquierda = GameObject.FindWithTag("Player")
-            .GetComponent<InteraccionJugador>()
-            .GetManoIzquierda();
+        // ✅ Obtener la mano desde InteraccionJugador
+        InteraccionJugador interaccion = FindObjectOfType<InteraccionJugador>();
+        if (interaccion == null)
+        {
+            Debug.LogError("❌ No se encontró InteraccionJugador en la escena.");
+            return;
+        }
+
+        Transform manoIzquierda = interaccion.GetManoIzquierda();
+        if (manoIzquierda == null)
+        {
+            Debug.LogError("❌ La referencia de manoIzquierda está en null.");
+            return;
+        }
 
         if (manoIzquierda.childCount > 0)
         {
@@ -22,26 +32,37 @@ public class OsoManager : MonoBehaviour, IInteractuable
             if (pieza != null)
             {
                 ColocarPieza(pieza);
-                Destroy(pieza.gameObject); // destruir la pieza en la mano
+
+                pieza.Soltar();
+                Destroy(pieza.gameObject);
             }
+            else
+            {
+                Debug.Log("⚠️ El objeto en la mano no es una pieza del oso.");
+            }
+        }
+        else
+        {
+            Debug.Log("⚠️ No tienes ninguna pieza del oso en la mano.");
         }
     }
 
     public void ColocarPieza(OsoPieza pieza)
     {
-        // ✅ Activa la parte correspondiente del torso
         if (pieza.indiceTorso >= 0 && pieza.indiceTorso < piezasTorso.Length)
         {
             piezasTorso[pieza.indiceTorso].SetActive(true);
+            Debug.Log("✅ Pieza del oso colocada en el torso: " + pieza.indiceTorso);
         }
 
         piezasColocadas++;
 
-        // ✅ Si todas las piezas están colocadas, activar oso completo y cristal
         if (piezasColocadas >= piezasTorso.Length)
         {
             if (osoCompleto != null) osoCompleto.SetActive(true);
             if (cristalSpawner != null) cristalSpawner.SpawnCristal();
+
+            Debug.Log("🎉 Oso completo armado. Cristal generado.");
         }
     }
 }

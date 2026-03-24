@@ -18,6 +18,7 @@ TagManager:
   - Puzzle
   - Candado
   - Dialogo
+  - Llave
   layers:
   - Default
   - TransparentFX

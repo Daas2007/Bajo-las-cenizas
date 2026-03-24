@@ -44,7 +44,9 @@ public class InteraccionJugador : MonoBehaviour
             else if (objetoTransform.CompareTag("Slot") || objetoTransform.CompareTag("Colocar"))
                 textoInteraccion.text = "Presiona [E] para colocar";
             else if (objetoTransform.CompareTag("OsoTorso"))
-                textoInteraccion.text = "Presiona [E] para colocar pieza del oso";
+                textoInteraccion.text = "Presiona [E] para agarrar pieza del oso";
+            else if (objetoTransform.CompareTag("Llave"))
+                textoInteraccion.text = "Presiona [E] para agarrar llave";
             else
                 textoInteraccion.text = "Presiona [E] para interactuar";
 
@@ -55,14 +57,17 @@ public class InteraccionJugador : MonoBehaviour
                 {
                     IntentarColocar(objetoTransform.GetComponent<SlotPuzzle>());
                 }
-                else if (objetoTransform.CompareTag("Puzzle") || objetoTransform.CompareTag("Agarrar"))
+                else if (objetoTransform.CompareTag("Puzzle") || objetoTransform.CompareTag("Agarrar") || objetoTransform.CompareTag("OsoTorso") || objetoTransform.CompareTag("Llave"))
                 {
-                    // ✅ Pasar referencia de la mano directamente
-                    PiezaPuzzle pieza = objetoTransform.GetComponent<PiezaPuzzle>();
-                    if (pieza != null)
-                    {
-                        pieza.SetMano(manoIzquierda);
-                    }
+                    // ✅ Pasar referencia de la mano a cualquier tipo de pieza
+                    PiezaPuzzle piezaPuzzle = objetoTransform.GetComponent<PiezaPuzzle>();
+                    if (piezaPuzzle != null) piezaPuzzle.SetMano(manoIzquierda);
+
+                    OsoPieza piezaOso = objetoTransform.GetComponent<OsoPieza>();
+                    if (piezaOso != null) piezaOso.SetMano(manoIzquierda);
+
+                    LlaveInteractuable llave = objetoTransform.GetComponent<LlaveInteractuable>();
+                    if (llave != null) llave.SetMano(manoIzquierda);
 
                     objetoActual.Interactuar();
                     Debug.Log("[InteraccionJugador] Interactuando con: " + objetoTransform.name);
@@ -113,9 +118,17 @@ public class InteraccionJugador : MonoBehaviour
                     {
                         piezaOso.Soltar();
                     }
-                    else if (objetoEnMano.CompareTag("Agarrar"))
+                    else
                     {
-                        objetoEnMano.SetParent(null);
+                        LlaveInteractuable llave = objetoEnMano.GetComponent<LlaveInteractuable>();
+                        if (llave != null)
+                        {
+                            llave.Soltar();
+                        }
+                        else if (objetoEnMano.CompareTag("Agarrar"))
+                        {
+                            objetoEnMano.SetParent(null);
+                        }
                     }
                 }
 
