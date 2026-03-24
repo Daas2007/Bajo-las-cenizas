@@ -87,8 +87,12 @@ public class CanvasController : MonoBehaviour
     {
         if (panelPausa != null) panelPausa.SetActive(false);
         panelActivo = null;
+
         Time.timeScale = 1f;
-        panelUIActivo();
+
+        if (panelHUD != null)
+            panelHUD.SetActive(true); // ✅ restaurar HUD al volver al juego
+
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -162,10 +166,15 @@ public class CanvasController : MonoBehaviour
 
                 if (panelActivo == panelPausa)
                 {
-                    Time.timeScale = 0f;
-                    Cursor.lockState = CursorLockMode.None;
-                    Cursor.visible = true;
+                    Time.timeScale = 0f; // ✅ pausa solo si era el menú de pausa
                 }
+                else
+                {
+                    Time.timeScale = 1f; // ✅ cualquier otro panel mantiene tiempo en 1
+                }
+
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
             }
         }
     }
@@ -287,6 +296,10 @@ public class CanvasController : MonoBehaviour
     private void ActivarPanel(GameObject panel, bool pausarJuego)
     {
         DesactivarTodos();
+
+        if (panelHUD != null)
+            panelHUD.SetActive(false); // ✅ siempre desactivar HUD al abrir cualquier panel
+
         if (panel != null)
         {
             panel.SetActive(true);
@@ -294,10 +307,17 @@ public class CanvasController : MonoBehaviour
 
             if (pausarJuego)
             {
+                // ✅ solo los paneles que realmente pausan el juego
                 Time.timeScale = 0f;
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
             }
+            else
+            {
+                // ✅ forzar que el tiempo siga en 1 para evitar problemas
+                Time.timeScale = 1f;
+            }
+
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
         }
     }
     public void panelUIActivo()
@@ -307,7 +327,7 @@ public class CanvasController : MonoBehaviour
     }
     private void DesactivarTodos()
     {
-        if (panelHUD != null) panelHUD.SetActive(false);
+        if (panelHUD != null) panelHUD.SetActive(false); // ✅ siempre desactivar HUD
         if (panelPausa != null) panelPausa.SetActive(false);
         if (panelOpciones != null) panelOpciones.SetActive(false);
         if (panelMuerte != null) panelMuerte.SetActive(false);

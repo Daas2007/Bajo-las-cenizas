@@ -13,9 +13,9 @@ public class PuertaInteractuable : MonoBehaviour, IInteractuable
     [SerializeField] private bool cierreRapidoConCristal = false;
 
     [Header("Audio")]
-    [SerializeField] private AudioClip sonidoAbrir;   // ✅ clip de abrir
-    [SerializeField] private AudioClip sonidoCerrar;  // ✅ clip de cerrar
-    private AudioSource audioSource;                  // ✅ referencia al AudioSource
+    [SerializeField] private AudioSource audioSource;   // ✅ referencia asignada desde el Inspector
+    [SerializeField] private AudioClip sonidoAbrir;     // clip de abrir
+    [SerializeField] private AudioClip sonidoCerrar;    // clip de cerrar
 
     private bool abierta = false;
     private bool enMovimiento = false;
@@ -33,13 +33,12 @@ public class PuertaInteractuable : MonoBehaviour, IInteractuable
         rotacionInicial = Quaternion.Euler(rotacionInicialEuler);
         rotacionFinal = Quaternion.Euler(rotacionFinalEuler);
 
-        // ✅ obtener AudioSource de la puerta
-        audioSource = GetComponent<AudioSource>();
+        // ✅ si no asignaste un AudioSource en el Inspector, se crea automáticamente
         if (audioSource == null)
         {
             audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.playOnAwake = false;
         }
-        audioSource.playOnAwake = false;
     }
 
     public void Interactuar()

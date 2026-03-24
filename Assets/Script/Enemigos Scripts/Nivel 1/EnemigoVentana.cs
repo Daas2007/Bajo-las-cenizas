@@ -82,11 +82,11 @@ public class EnemigoVentana : MonoBehaviour
             tiempoParaAvanzar = Mathf.Max(tiempoMinimoAvance, tiempoParaAvanzar - reduccionPorNivel);
         }
 
-        if (recibiendoLuz)
+        if (recibiendoLuz && estadoActual != 4) // ✅ ignorar luz en estado 4
         {
             contadorLuz += deltaT;
 
-            if (estadoActual == 3 || estadoActual == 4)
+            if (estadoActual == 3)
             {
                 RetrocederAEstado1();
             }
@@ -187,6 +187,8 @@ public class EnemigoVentana : MonoBehaviour
                 script.ActivarPersecucion();
             }
         }
+
+        enemigoSpawned = true;
     }
     public void StartTriggerSequence()
     {
@@ -205,9 +207,12 @@ public class EnemigoVentana : MonoBehaviour
     }
     public void SetIluminado(bool valor)
     {
+        if (estadoActual == 4) return; // ✅ no responder a la linterna en estado 4
+
         recibiendoLuz = valor;
         if (!valor) contadorLuz = 0f;
     }
+
     void ActualizarColorVentana()
     {
         if (ventanaRenderer == null) return;

@@ -5,8 +5,13 @@ public class PuertaCandado : MonoBehaviour, IInteractuable
     [SerializeField] private CandadoPuerta candadoDerecho;
     [SerializeField] private CandadoPuerta candadoIzquierdo;
 
+    [Header("Configuración de apertura")]
     [SerializeField] private float anguloApertura = 90f;
     [SerializeField] private float velocidadRotacion = 2f;
+
+    [Header("Audio")]
+    [SerializeField] private AudioSource audioSource;   // ✅ referencia al AudioSource
+    [SerializeField] private AudioClip sonidoAbrir;     // ✅ clip de abrir
 
     private bool abierta = false;
     private bool bloqueada = true;
@@ -17,6 +22,13 @@ public class PuertaCandado : MonoBehaviour, IInteractuable
     {
         rotInicial = transform.rotation;
         rotObjetivo = rotInicial;
+
+        // ✅ si no asignaste un AudioSource en el Inspector, se crea automáticamente
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.playOnAwake = false;
+        }
     }
 
     public void Interactuar()
@@ -27,8 +39,14 @@ public class PuertaCandado : MonoBehaviour, IInteractuable
             return;
         }
 
-        abierta = !abierta;
-        rotObjetivo = abierta ? Quaternion.Euler(0, anguloApertura, 0) * rotInicial : rotInicial;
+        if (!abierta)
+        {
+            abierta = true;
+            rotObjetivo = Quaternion.Euler(0, anguloApertura, 0) * rotInicial;
+
+            // ✅ reproducir sonido de abrir
+            ReproducirSonido(sonidoAbrir);
+        }
     }
 
     void Update()
@@ -43,6 +61,14 @@ public class PuertaCandado : MonoBehaviour, IInteractuable
         {
             bloqueada = false;
             Debug.Log("🔓 Ambos candados destruidos, la puerta puede abrirse.");
+        }
+    }
+
+    private void ReproducirSonido(AudioClip clip)
+    {
+        if (clip != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(clip);
         }
     }
 }

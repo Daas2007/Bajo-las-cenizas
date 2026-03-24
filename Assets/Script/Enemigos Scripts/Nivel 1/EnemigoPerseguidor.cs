@@ -1,40 +1,33 @@
 ﻿using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody), typeof(Collider), typeof(Animator))]
+[RequireComponent(typeof(Collider), typeof(Animator))]
 public class EnemigoPerseguidor : MonoBehaviour
 {
     public Transform objetivo;
     [SerializeField] private float velocidad = 3f;
     [SerializeField] private PantallaDeMuerte pantallaDeMuerte;
 
-    private Rigidbody rb;
     private Animator animator;
     private Vector3 posicionInicialLocal;
     private Quaternion rotInicialLocal;
 
-    private enum Estado { Entrando, Persiguiendo, Atacando }
-    private Estado estadoActual = Estado.Entrando;
+    private enum Estado { Idle, Persiguiendo, Atacando }
+    private Estado estadoActual = Estado.Idle;
 
     private void OnEnable()
     {
         if (!enabled) enabled = true;
 
-        estadoActual = Estado.Entrando;
-        ActualizarAnimacion();
+        if (objetivo != null)
+            estadoActual = Estado.Persiguiendo; // ✅ empieza persiguiendo si ya tiene objetivo
+        else
+            estadoActual = Estado.Idle;
 
-        // 🔒 Desactivar física durante la animación de entrada
-        if (rb != null)
-        {
-            rb.isKinematic = true;
-            rb.useGravity = false;
-        }
+        ActualizarAnimacion();
     }
 
     private void Awake()
     {
-        rb = GetComponent<Rigidbody>();
-        rb.constraints = RigidbodyConstraints.FreezeRotation;
-
         animator = GetComponent<Animator>();
 
         posicionInicialLocal = transform.localPosition;
@@ -54,11 +47,10 @@ public class EnemigoPerseguidor : MonoBehaviour
                 Perseguir();
                 break;
             case Estado.Atacando:
-                // Aquí podrías poner lógica adicional de ataque
+                // lógica de ataque si quieres
                 break;
-            case Estado.Entrando:
-                // Quieto en su posición inicial
-                transform.localPosition = posicionInicialLocal;
+            case Estado.Idle:
+                // quieto en su posición inicial
                 break;
         }
     }
@@ -67,18 +59,19 @@ public class EnemigoPerseguidor : MonoBehaviour
     {
         if (estadoActual != Estado.Persiguiendo) return;
 
-        if (animator != null)
-            animator.SetBool("IsWalking", true);
+        animator.SetBool("IsWalking", true);
 
         Vector3 direccion = (objetivo.position - transform.position).normalized;
         float distancia = Vector3.Distance(objetivo.position, transform.position);
 
+        // rotar hacia el jugador
         Quaternion rotacionObjetivo = Quaternion.LookRotation(direccion);
         transform.rotation = Quaternion.Slerp(transform.rotation, rotacionObjetivo, 5f * Time.fixedDeltaTime);
 
+        // avanzar hacia el jugador
         if (distancia > 1.2f)
         {
-            rb.MovePosition(transform.position + direccion * velocidad * Time.fixedDeltaTime);
+            transform.position += direccion * velocidad * Time.fixedDeltaTime;
         }
     }
 
@@ -108,16 +101,10 @@ public class EnemigoPerseguidor : MonoBehaviour
 
     public void ResetEnemigo()
     {
-        rb.linearVelocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
-
-        rb.isKinematic = true;
-        rb.useGravity = false;
-
         transform.localPosition = posicionInicialLocal;
         transform.localRotation = rotInicialLocal;
 
-        estadoActual = Estado.Entrando;
+        estadoActual = Estado.Idle;
         ActualizarAnimacion();
     }
 
@@ -127,33 +114,10 @@ public class EnemigoPerseguidor : MonoBehaviour
 
         animator.SetBool("IsWalking", estadoActual == Estado.Persiguiendo);
         animator.SetBool("IsKilling", estadoActual == Estado.Atacando);
-        animator.SetBool("IsEntering", estadoActual == Estado.Entrando);
-    }
-
-    // ✅ Método llamado desde Animation Event al final de la animación de entrada
-    public void TerminarEntrada()
-    {
-        // 🔓 Reactivar física al terminar la animación
-        rb.isKinematic = false;
-        rb.useGravity = true;
-        rb.constraints = RigidbodyConstraints.FreezeRotation;
-
-        if (objetivo != null)
-        {
-            estadoActual = Estado.Persiguiendo;
-            ActualizarAnimacion();
-            Perseguir(); // empieza a moverse inmediatamente
-        }
-        else
-        {
-            estadoActual = Estado.Persiguiendo;
-            ActualizarAnimacion();
-        }
     }
 
     public void ActivarPersecucion()
     {
-        if (estadoActual == Estado.Entrando) return;
         estadoActual = Estado.Persiguiendo;
         ActualizarAnimacion();
     }

@@ -45,6 +45,9 @@ public class Dialogo : MonoBehaviour, IInteractuable
     private bool escribiendoLinea = false;
     private string textoActualCompleto = "";
 
+
+    [SerializeField] private Animator animator;
+
     // Bandera global para evitar interferencias con otras UIs
     public static bool AnyDialogActive { get; private set; } = false;
 
@@ -147,7 +150,6 @@ public class Dialogo : MonoBehaviour, IInteractuable
             return;
         }
 
-        // Asegurar estado limpio antes de abrir
         DetenerTodo();
         ResetEstadoInterno();
 
@@ -158,10 +160,10 @@ public class Dialogo : MonoBehaviour, IInteractuable
 
         BloquearJugador(true);
 
-        // Nota: sonido de inicio no se reproduce automáticamente si no lo deseas.
-        // if (audioSource != null && sonidoInicio != null) audioSource.PlayOneShot(sonidoInicio);
+        // ✅ activar animación de hablar
+        if (animator != null)
+            animator.SetBool("Hablando", true);
 
-        // Delay de inicio antes de la primera línea (tiempo real)
         inicioDelayCoroutine = StartCoroutine(DelayYMostrarPrimeraLinea(delayInicio));
     }
 
@@ -297,6 +299,10 @@ public class Dialogo : MonoBehaviour, IInteractuable
         AnyDialogActive = false;
 
         BloquearJugador(false);
+
+        // ✅ volver a estado normal
+        if (animator != null)
+            animator.SetBool("Hablando", false);
 
         if (!HaHablado)
         {
