@@ -43,6 +43,8 @@ public class PantallaDeMuerte : MonoBehaviour
     public void ActivarPantallaMuerte()
     {
         panelMuerte.SetActive(true);
+
+        // ✅ resetear siempre
         textoMoriste.gameObject.SetActive(false);
         botonReintentar.SetActive(false);
         botonSalir.SetActive(false);
@@ -51,9 +53,9 @@ public class PantallaDeMuerte : MonoBehaviour
 
         fondo.color = new Color(1f, 0f, 0f, 0f);
 
+        StopAllCoroutines(); // ✅ detener corrutinas previas
         StartCoroutine(FadeRojoANegro());
     }
-
     IEnumerator FadeRojoANegro()
     {
         float t = 0f;
@@ -82,19 +84,18 @@ public class PantallaDeMuerte : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
-
     public void Reintentar()
     {
+        panelMuerte.SetActive(false); // ✅ cerrar panel antes de reintentar
         CanvasController cc = FindObjectOfType<CanvasController>();
         if (cc != null) cc.ReintentarDesdeMuerte();
         cc.panelUIActivo();
     }
-
     public void SalirAlMenu()
     {
+        panelMuerte.SetActive(false); // ✅ cerrar panel
         StartCoroutine(SalirMenuCoroutine("MainMenu"));
     }
-
     private IEnumerator SalirMenuCoroutine(string nombreEscena)
     {
         if (panelLoading != null)
