@@ -51,7 +51,7 @@ public class Camara : MonoBehaviour
 
         rotacionHorizontal += valorX;
         rotacionVertical -= valorY;
-        rotacionVertical = math.clamp(rotacionVertical, -60f, 60f);
+        rotacionVertical = math.clamp(rotacionVertical, -60f, 50f);
 
         transform.localRotation = Quaternion.Euler(rotacionVertical, 0f, 0f);
 
