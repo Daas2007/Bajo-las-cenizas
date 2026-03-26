@@ -17,27 +17,32 @@ public class VerificadorGanar : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             MovimientoPersonaje MP = other.GetComponent<MovimientoPersonaje>();
-            if (MP != null && MP.TieneCristal())
+            if (MP != null)
             {
-                Debug.Log("✅ Jugador con cristal pasó por el trigger. Iniciando diálogo de victoria...");
-                if (dialogo != null)
+                // ✅ Solo si el cristal ya fue obtenido
+                if (MP.TieneCristal())
                 {
-                    dialogo.ResetHaHablado();
-                    dialogo.OnDialogoCompleto.AddListener(() =>
+                    Debug.Log("✅ Jugador con cristal pasó por el trigger. Iniciando diálogo de victoria...");
+
+                    if (dialogo != null)
                     {
+                        dialogo.ResetHaHablado();
+                        dialogo.OnDialogoCompleto.AddListener(() =>
+                        {
+                            StartCoroutine(SalirMenuCoroutine("MainMenu"));
+                        });
+                        dialogo.IniciarDialogo();
+                    }
+                    else
+                    {
+                        // Si no hay diálogo asignado, ir directo al menú
                         StartCoroutine(SalirMenuCoroutine("MainMenu"));
-                    });
-                    dialogo.IniciarDialogo();
+                    }
                 }
                 else
                 {
-                    // Si no hay diálogo asignado, ir directo al menú
-                    StartCoroutine(SalirMenuCoroutine("MainMenu"));
+                    Debug.Log("⚠️ Jugador pasó por el trigger pero NO tiene el cristal.");
                 }
-            }
-            else
-            {
-                Debug.Log("⚠️ Jugador pasó por el trigger pero no tiene el cristal.");
             }
         }
     }
