@@ -13,15 +13,15 @@ public class VerificadorGanar : MonoBehaviour
     [SerializeField] private Dialogo dialogo;
 
     [Header("Objetos de escena")]
-    [SerializeField] private PuertaInteractuable puerta;   // ✅ referencia a tu script de puerta
+    [SerializeField] private PuertaInteractuable puerta;
     [SerializeField] private GameObject enemigoVentana;
     [SerializeField] private GameObject enemigoNormal;
     [SerializeField] private Transform jugador;
-    [SerializeField] private MonoBehaviour scriptMovimientoJugador; // ✅ para bloquear movimiento
-    [SerializeField] private MonoBehaviour scriptCamara;            // ✅ para bloquear cámara
+    [SerializeField] private MonoBehaviour scriptMovimientoJugador;
+    [SerializeField] private MonoBehaviour scriptCamara;
 
     [Header("Trigger de enemigo")]
-    [SerializeField] private Collider triggerEnemigo; // collider con isTrigger
+    [SerializeField] private Collider triggerEnemigo;
 
     private bool enemigoPasoTrigger = false;
 
@@ -55,56 +55,65 @@ public class VerificadorGanar : MonoBehaviour
         }
     }
 
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("EnemigoPerseguidor"))
+        {
+            if (puerta != null)
+            {
+                puerta.Interactuar();
+                Debug.Log("🚪 Puerta cerrada porque el enemigo salió del área.");
+            }
+
+            if (enemigoNormal != null)
+            {
+                enemigoNormal.SetActive(false);
+                Debug.Log("❌ Enemigo desactivado al salir del área.");
+            }
+
+            enemigoPasoTrigger = true;
+        }
+    }
+
     private IEnumerator FlujoVictoria()
     {
-        // 🔹 1. Desactivar enemigo ventana
         if (enemigoVentana != null) enemigoVentana.SetActive(false);
-
-        // 🔹 2. Activar enemigo normal
         if (enemigoNormal != null) enemigoNormal.SetActive(true);
 
-        // 🔹 3. Girar jugador 180° en Y
         if (jugador != null)
         {
             Vector3 rot = jugador.eulerAngles;
             jugador.eulerAngles = new Vector3(rot.x, rot.y + 180f, rot.z);
         }
 
-        // 🔹 4. Bloquear movimiento y cámara
         if (scriptMovimientoJugador != null) scriptMovimientoJugador.enabled = false;
         if (scriptCamara != null) scriptCamara.enabled = false;
 
-        // 🔹 5. Esperar a que enemigo pase por el trigger
         enemigoPasoTrigger = false;
         while (!enemigoPasoTrigger)
         {
             yield return null;
         }
 
-        // 🔹 6. Cerrar puerta de golpe (rotación inicial)
         if (puerta != null)
         {
-            puerta.Interactuar(); // fuerza cierre hacia rotacionInicialEuler
+            puerta.Interactuar();
             Debug.Log("🚪 Puerta cerrada de golpe.");
         }
 
-        // 🔹 7. Esperar a que la puerta esté cerrada
         while (puerta != null && puerta.EstaAbierta())
         {
             yield return null;
         }
 
-        // 🔹 8. Desactivar enemigo normal
         if (enemigoNormal != null) enemigoNormal.SetActive(false);
 
-        // 🔹 9. Fade y volver al menú
-        yield return StartCoroutine(SalirMenuCoroutine("MainMenu"));
+        IrAlMenu("MainMenu");
     }
 
     private void OnTriggerStay(Collider other)
     {
-        // ✅ Si el enemigo normal pasa por el trigger, marcar bandera
-        if (triggerEnemigo != null && other.gameObject == enemigoNormal)
+        if (triggerEnemigo != null && other.CompareTag("EnemigoPerseguidor"))
         {
             enemigoPasoTrigger = true;
         }
@@ -137,4 +146,16 @@ public class VerificadorGanar : MonoBehaviour
             SceneManager.LoadScene(nombreEscena);
         }
     }
+
+    // 🔹 Método público para invocar el fade desde otros scripts
+    // 🔹 Método público para invocar el fade desde otros scripts
+    public void IrAlMenu(string nombreEscena)
+    {
+        StartCoroutine(SalirMenuCoroutine(nombreEscena));
+
+        // ✅ Asegurar que el cursor quede visible y desbloqueado
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+    }
+
 }

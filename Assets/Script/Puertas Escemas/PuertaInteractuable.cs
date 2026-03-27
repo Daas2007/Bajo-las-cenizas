@@ -13,9 +13,9 @@ public class PuertaInteractuable : MonoBehaviour, IInteractuable
     [SerializeField] private bool cierreRapidoConCristal = false;
 
     [Header("Audio")]
-    [SerializeField] private AudioSource audioSource;   // ✅ referencia asignada desde el Inspector
-    [SerializeField] private AudioClip sonidoAbrir;     // clip de abrir
-    [SerializeField] private AudioClip sonidoCerrar;    // clip de cerrar
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip sonidoAbrir;
+    [SerializeField] private AudioClip sonidoCerrar;
 
     private bool abierta = false;
     private bool enMovimiento = false;
@@ -33,7 +33,6 @@ public class PuertaInteractuable : MonoBehaviour, IInteractuable
         rotacionInicial = Quaternion.Euler(rotacionInicialEuler);
         rotacionFinal = Quaternion.Euler(rotacionFinalEuler);
 
-        // ✅ si no asignaste un AudioSource en el Inspector, se crea automáticamente
         if (audioSource == null)
         {
             audioSource = gameObject.AddComponent<AudioSource>();
@@ -43,29 +42,18 @@ public class PuertaInteractuable : MonoBehaviour, IInteractuable
 
     public void Interactuar()
     {
-        if (engranaje == null)
-        {
-            Debug.LogError($"❌ [PuertaInteractuable] '{gameObject.name}' no puede interactuar: engranaje nulo.");
-            return;
-        }
-
-        if (enMovimiento)
-        {
-            Debug.Log($"⏳ [PuertaInteractuable] '{gameObject.name}' está en movimiento, ignorando interacción.");
-            return;
-        }
+        if (engranaje == null) return;
+        if (enMovimiento) return;
 
         StopAllCoroutines();
 
         if (!abierta)
         {
-            Debug.Log($"🔓 [PuertaInteractuable] '{gameObject.name}' abriendo puerta.");
             ReproducirSonido(sonidoAbrir);
             StartCoroutine(RotarPuerta(rotacionFinal, true, duracion));
         }
         else
         {
-            Debug.Log($"🔒 [PuertaInteractuable] '{gameObject.name}' cerrando puerta.");
             StartCoroutine(RotarPuerta(rotacionInicial, false, duracion));
         }
     }
@@ -82,7 +70,6 @@ public class PuertaInteractuable : MonoBehaviour, IInteractuable
             float t = tiempo / tiempoAnim;
             engranaje.localRotation = Quaternion.Lerp(inicio, destino, t);
 
-            // ✅ reproducir sonido de cerrar cuando falten ~10° para terminar
             if (!abrir && !sonidoCerrarReproducido)
             {
                 float anguloRestante = Quaternion.Angle(engranaje.localRotation, destino);
@@ -104,21 +91,12 @@ public class PuertaInteractuable : MonoBehaviour, IInteractuable
 
     public void CerrarSiCristal()
     {
-        if (!cierreRapidoConCristal)
-        {
-            Debug.Log($"🛑 [PuertaInteractuable] '{gameObject.name}' no tiene cierre rápido activado.");
-            return;
-        }
+        if (!cierreRapidoConCristal) return;
 
         if (PlayerPrefs.GetInt("TieneCristal", 0) == 1)
         {
             StopAllCoroutines();
             StartCoroutine(RotarPuerta(rotacionInicial, false, 0.3f));
-            Debug.Log($"🚪 [PuertaInteractuable] '{gameObject.name}' cerrada rápidamente por condición de cristal.");
-        }
-        else
-        {
-            Debug.Log($"🔍 [PuertaInteractuable] '{gameObject.name}' no se cierra: el jugador no tiene cristal.");
         }
     }
 
@@ -127,8 +105,19 @@ public class PuertaInteractuable : MonoBehaviour, IInteractuable
     private void ReproducirSonido(AudioClip clip)
     {
         if (clip != null && audioSource != null)
-        {
             audioSource.PlayOneShot(clip);
+    }
+
+    // 🔹 Nuevo método público para forzar el engranaje a 0,0,0
+    public void ForzarCerrarEngranaje()
+    {
+        StopAllCoroutines();
+        if (engranaje != null)
+        {
+            engranaje.localEulerAngles = Vector3.zero;
+            abierta = false;
+            enMovimiento = false;
+            Debug.Log("⚙️ Engranaje forzado a rotación inicial (0,0,0).");
         }
     }
 }

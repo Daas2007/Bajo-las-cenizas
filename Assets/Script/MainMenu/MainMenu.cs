@@ -28,13 +28,19 @@ public class MainMenu : MonoBehaviour
 
     private void OnEnable()
     {
-        // 🔹 Cada vez que el menú se habilita (inicio o regreso desde otra escena)
         if (panelLoading != null && loadingImage != null)
         {
             panelLoading.SetActive(true);
             loadingImage.color = new Color(loadingImage.color.r, loadingImage.color.g, loadingImage.color.b, 1f);
             StartCoroutine(FadeOut()); // aclarar al entrar al menú
         }
+    }
+
+    private void Update()
+    {
+        // 🔹 Forzar siempre el mouse visible y desbloqueado
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
     // 🔹 Jugar con transición de pantalla de carga
@@ -55,7 +61,6 @@ public class MainMenu : MonoBehaviour
         }
     }
 
-    // 🔹 Fade In (oscurece en fadeDuration)
     private IEnumerator FadeIn()
     {
         float t = 0f;
@@ -70,7 +75,6 @@ public class MainMenu : MonoBehaviour
         loadingImage.color = new Color(c.r, c.g, c.b, 1f);
     }
 
-    // 🔹 Fade Out (aclara en fadeDuration)
     public IEnumerator FadeOut()
     {
         float t = 0f;
@@ -92,8 +96,6 @@ public class MainMenu : MonoBehaviour
         if (opcionesPanel != null) opcionesPanel.SetActive(false);
 
         Time.timeScale = 1f;
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
 
         MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
         GameManager gm = GameManager.Instancia;
@@ -109,8 +111,6 @@ public class MainMenu : MonoBehaviour
     {
         if (opcionesPanel != null) opcionesPanel.SetActive(true);
         if (mainPanel != null) mainPanel.SetActive(false);
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
     }
 
     public void CerrarOpciones()
@@ -129,7 +129,7 @@ public class MainMenu : MonoBehaviour
         if (panelLoading != null)
         {
             panelLoading.SetActive(true);
-            yield return StartCoroutine(FadeIn()); // oscurece la pantalla primero
+            yield return StartCoroutine(FadeIn());
             yield return new WaitForSecondsRealtime(1f);
         }
 
