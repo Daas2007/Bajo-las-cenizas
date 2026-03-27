@@ -19,7 +19,7 @@ public class MovimientoPersonaje : MonoBehaviour
     [Header("Configuración de velocidad Player")]
     [SerializeField] bool UsarGetAxisRaw = true;
     [SerializeField] float VelocidadMove = 5f;
-    [SerializeField] float VelocidadBase;
+    [SerializeField] public float VelocidadBase;
 
     [Header("Stamina")]
     [SerializeField] GameObject canvas_StaminaBar;
