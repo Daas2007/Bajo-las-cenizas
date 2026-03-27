@@ -6,6 +6,11 @@ public class GestorAnimacionesJugador : MonoBehaviour
     [Header("Referencias")]
     [SerializeField] private MovimientoPersonaje movimientoJugador;
 
+    [Header("Animators")]
+    [SerializeField] private RuntimeAnimatorController animatorNormal;
+    [SerializeField] private RuntimeAnimatorController animatorLinterna;
+    [SerializeField] private RuntimeAnimatorController animatorLinternaObjeto;
+
     private Animator animator;
     private Rigidbody rb;
 
@@ -22,46 +27,28 @@ public class GestorAnimacionesJugador : MonoBehaviour
     {
         if (animator == null || movimientoJugador == null) return;
 
-        // 🔹 Flags globales desde MovimientoPersonaje
         bool tieneLinterna = movimientoJugador.tieneLinterna;
         bool tieneObjeto = movimientoJugador.tieneObjeto;
 
-        // ✅ Actualizar parámetros en Animator (para transiciones automáticas si las configuras)
-        animator.SetBool("TieneLinterna", tieneLinterna);
-        animator.SetBool("TieneObjeto", tieneObjeto);
+        // 🔹 Cambiar Animator según estado
+        if (tieneLinterna && tieneObjeto)
+        {
+            if (animator.runtimeAnimatorController != animatorLinternaObjeto)
+                animator.runtimeAnimatorController = animatorLinternaObjeto;
+        }
+        else if (tieneLinterna)
+        {
+            if (animator.runtimeAnimatorController != animatorLinterna)
+                animator.runtimeAnimatorController = animatorLinterna;
+        }
+        else
+        {
+            if (animator.runtimeAnimatorController != animatorNormal)
+                animator.runtimeAnimatorController = animatorNormal;
+        }
 
-        // 🔹 Selección de animación según estado
+        // 🔹 Actualizar velocidad para transiciones
         float velocidad = rb.linearVelocity.magnitude;
-
-        if (velocidad < 0.1f)
-        {
-            // IDLE
-            if (tieneLinterna && tieneObjeto)
-                animator.Play("IdleConLinternaYObjeto");
-            else if (tieneLinterna)
-                animator.Play("IdleConLinterna");
-            else
-                animator.Play("Idle");
-        }
-        else if (velocidad > 0.1f && velocidad < movimientoJugador.VelocidadBase * 1.2f)
-        {
-            // CAMINAR
-            if (tieneLinterna && tieneObjeto)
-                animator.Play("CaminarConLinternaYObjeto");
-            else if (tieneLinterna)
-                animator.Play("CaminarConLinterna");
-            else
-                animator.Play("Caminar");
-        }
-        else if (velocidad >= movimientoJugador.VelocidadBase * 1.2f)
-        {
-            // CORRER
-            if (tieneLinterna && tieneObjeto)
-                animator.Play("CorrerConLinternaYObjeto");
-            else if (tieneLinterna)
-                animator.Play("CorrerConLinterna");
-            else
-                animator.Play("Correr");
-        }
+        animator.SetFloat("Velocidad", velocidad);
     }
 }
