@@ -21,10 +21,15 @@ public class VerificadorGanar : MonoBehaviour
     [SerializeField] private MonoBehaviour scriptCamara;
 
     [Header("Trigger de enemigo")]
-    [SerializeField] private Collider triggerEnemigo;
+    [SerializeField] private GameObject triggerEnemigo;
+
 
     private bool enemigoPasoTrigger = false;
 
+    private void Awake()
+    {
+        triggerEnemigo.SetActive(false);
+    }
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
@@ -33,7 +38,7 @@ public class VerificadorGanar : MonoBehaviour
             if (MP != null && MP.TieneCristal())
             {
                 Debug.Log("✅ Jugador con cristal pasó por el trigger. Iniciando diálogo de victoria...");
-
+                triggerEnemigo.SetActive(true);
                 if (dialogo != null)
                 {
                     dialogo.ResetHaHablado();
