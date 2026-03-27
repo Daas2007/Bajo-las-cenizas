@@ -5,12 +5,12 @@ public class TutorialCuaderno : MonoBehaviour, IInteractuable
 {
     [SerializeField] GameObject canvasCuaderno;
     [SerializeField] List<GameObject> paginas; // lista de páginas (imágenes)
+    [SerializeField] private Dialogo dialogo;   // 🔹 referencia al sistema de diálogo
 
     private bool yaInteractuado = false;
     private bool canvasAbierto = false;
-    private int paginaActual = 0; // índice de la primera página visible
+    private int paginaActual = 0;
 
-    // referencias runtime
     MovimientoPersonaje movimientoJugador;
     MonoBehaviour scriptCamara;
 
@@ -25,10 +25,10 @@ public class TutorialCuaderno : MonoBehaviour, IInteractuable
         if (scriptCamara == null)
             scriptCamara = FindObjectOfType<Camara>() as MonoBehaviour;
 
-        // Apagar todas las páginas al inicio
         foreach (var p in paginas)
             if (p != null) p.SetActive(false);
     }
+
     void Update()
     {
         if (canvasAbierto && Input.GetKeyDown(KeyCode.Escape))
@@ -37,15 +37,35 @@ public class TutorialCuaderno : MonoBehaviour, IInteractuable
             return;
         }
     }
+
     public void Interactuar()
     {
         if (!yaInteractuado)
         {
             yaInteractuado = true;
+
+            // 🔹 Mostrar diálogo la primera vez
+            if (dialogo != null && dialogo.dialogoCanvas != null && dialogo.dialogoTexto != null)
+            {
+                dialogo.ResetHaHablado();
+                dialogo.IniciarDialogo();
+
+                // Cuando termine el diálogo, abrir el cuaderno
+                dialogo.OnDialogoCompleto.AddListener(() =>
+                {
+                    AbrirCanvas();
+                });
+                return;
+            }
+            else
+            {
+                Debug.LogWarning("⚠️ No hay diálogo asignado o referencias faltantes, abriendo cuaderno directamente.");
+            }
         }
 
         AbrirCanvas();
     }
+
     void AbrirCanvas()
     {
         if (canvasCuaderno == null) return;
@@ -61,6 +81,7 @@ public class TutorialCuaderno : MonoBehaviour, IInteractuable
 
         MostrarPaginas(0); // mostrar las dos primeras páginas
     }
+
     public void CerrarCanvas()
     {
         if (canvasCuaderno == null) return;
@@ -74,20 +95,18 @@ public class TutorialCuaderno : MonoBehaviour, IInteractuable
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
-    // ✅ Mostrar dos páginas a la vez
+
     private void MostrarPaginas(int indice)
     {
-        // Apagar todas
         foreach (var p in paginas)
             if (p != null) p.SetActive(false);
 
         paginaActual = indice;
 
-        // Encender las dos siguientes si existen
         if (indice < paginas.Count) paginas[indice].SetActive(true);
         if (indice + 1 < paginas.Count) paginas[indice + 1].SetActive(true);
     }
-    // ✅ Botón siguiente
+
     public void PaginaSiguiente()
     {
         if (paginaActual + 2 < paginas.Count)
@@ -95,7 +114,7 @@ public class TutorialCuaderno : MonoBehaviour, IInteractuable
             MostrarPaginas(paginaActual + 2);
         }
     }
-    // ✅ Botón anterior
+
     public void PaginaAnterior()
     {
         if (paginaActual - 2 >= 0)

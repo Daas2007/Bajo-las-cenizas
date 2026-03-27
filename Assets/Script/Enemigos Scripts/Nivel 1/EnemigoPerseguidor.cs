@@ -7,6 +7,10 @@ public class EnemigoPerseguidor : MonoBehaviour
     [SerializeField] private float velocidad = 3f;
     [SerializeField] private PantallaDeMuerte pantallaDeMuerte;
 
+    [Header("Audio")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip sonidoMuerte; // 🔹 grito desgarrador bajo
+
     private Animator animator;
     private Vector3 posicionInicialLocal;
     private Quaternion rotInicialLocal;
@@ -19,7 +23,7 @@ public class EnemigoPerseguidor : MonoBehaviour
         if (!enabled) enabled = true;
 
         if (objetivo != null)
-            estadoActual = Estado.Persiguiendo; // ✅ empieza persiguiendo si ya tiene objetivo
+            estadoActual = Estado.Persiguiendo;
         else
             estadoActual = Estado.Idle;
 
@@ -35,6 +39,16 @@ public class EnemigoPerseguidor : MonoBehaviour
 
         if (pantallaDeMuerte == null)
             pantallaDeMuerte = Object.FindFirstObjectByType<PantallaDeMuerte>();
+
+        // 🔹 Configurar AudioSource si no está asignado
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.playOnAwake = false;
+        }
+
+        // 🔹 Ignorar pausas globales (Time.timeScale)
+        audioSource.ignoreListenerPause = true;
     }
 
     private void FixedUpdate()
@@ -47,10 +61,8 @@ public class EnemigoPerseguidor : MonoBehaviour
                 Perseguir();
                 break;
             case Estado.Atacando:
-                // lógica de ataque si quieres
                 break;
             case Estado.Idle:
-                // quieto en su posición inicial
                 break;
         }
     }
@@ -64,11 +76,9 @@ public class EnemigoPerseguidor : MonoBehaviour
         Vector3 direccion = (objetivo.position - transform.position).normalized;
         float distancia = Vector3.Distance(objetivo.position, transform.position);
 
-        // rotar hacia el jugador
         Quaternion rotacionObjetivo = Quaternion.LookRotation(direccion);
         transform.rotation = Quaternion.Slerp(transform.rotation, rotacionObjetivo, 5f * Time.fixedDeltaTime);
 
-        // avanzar hacia el jugador
         if (distancia > 1.2f)
         {
             transform.position += direccion * velocidad * Time.fixedDeltaTime;
@@ -79,11 +89,7 @@ public class EnemigoPerseguidor : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player"))
         {
-            estadoActual = Estado.Atacando;
-            ActualizarAnimacion();
-            GameManager.Instancia?.RegistrarMuerte();
-            pantallaDeMuerte?.ActivarPantallaMuerte();
-            Debug.Log("HAS MUERTO");
+            MatarJugador();
         }
     }
 
@@ -91,12 +97,25 @@ public class EnemigoPerseguidor : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            estadoActual = Estado.Atacando;
-            ActualizarAnimacion();
-            GameManager.Instancia?.RegistrarMuerte();
-            pantallaDeMuerte?.ActivarPantallaMuerte();
-            Debug.Log("HAS MUERTO");
+            MatarJugador();
         }
+    }
+
+    private void MatarJugador()
+    {
+        estadoActual = Estado.Atacando;
+        ActualizarAnimacion();
+
+        GameManager.Instancia?.RegistrarMuerte();
+        pantallaDeMuerte?.ActivarPantallaMuerte();
+
+        // 🔹 Reproducir sonido de muerte ignorando Time.timeScale
+        if (sonidoMuerte != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(sonidoMuerte);
+        }
+
+        Debug.Log("HAS MUERTO");
     }
 
     public void ResetEnemigo()
