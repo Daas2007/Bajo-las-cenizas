@@ -5,33 +5,29 @@ public class CajonesInteractuables : MonoBehaviour, IInteractuable
 {
     [Header("Configuración del cajón")]
     [SerializeField] private Transform cajon;          // referencia al cajón
-    [SerializeField] private Vector3 direccionMovimiento = Vector3.forward; // dirección del movimiento
-    [SerializeField] private float distancia = 0.5f;   // cuánto se moverá
+    [SerializeField] private Transform pivoteInicial;  // posición inicial
+    [SerializeField] private Transform pivoteFinal;    // posición final
     [SerializeField] private float duracion = 1f;      // tiempo de animación
 
     [Header("Audio")]
-    [SerializeField] private AudioSource audioSource;  // ✅ referencia asignada desde el Inspector
-    [SerializeField] private AudioClip sonidoAbrir;    // clip de abrir
-    [SerializeField] private AudioClip sonidoCerrar;   // clip de cerrar
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip sonidoAbrir;
+    [SerializeField] private AudioClip sonidoCerrar;
 
-    private Vector3 posicionInicial;
-    private Vector3 posicionFinal;
-    private bool abierto = false;
+    private bool abierto = false; // estado actual
     private Coroutine rutinaMovimiento;
 
     void Start()
     {
-        if (cajon == null)
+        if (cajon == null || pivoteInicial == null || pivoteFinal == null)
         {
-            Debug.LogError("⚠️ No se asignó el cajón en el Inspector.");
+            Debug.LogError("⚠️ Faltan referencias en el Inspector (cajón o pivotes).");
             return;
         }
 
-        // Guardar posición inicial y calcular final
-        posicionInicial = cajon.localPosition;
-        posicionFinal = posicionInicial + direccionMovimiento.normalized * distancia;
+        // Colocar cajón en la posición inicial al empezar
+        cajon.localPosition = pivoteInicial.localPosition;
 
-        // ✅ si no asignaste un AudioSource en el Inspector, lo crea automáticamente
         if (audioSource == null)
         {
             audioSource = gameObject.AddComponent<AudioSource>();
@@ -41,19 +37,19 @@ public class CajonesInteractuables : MonoBehaviour, IInteractuable
 
     public void Interactuar()
     {
-        if (cajon == null) return;
+        if (cajon == null || pivoteInicial == null || pivoteFinal == null) return;
 
         if (rutinaMovimiento != null) StopCoroutine(rutinaMovimiento);
 
         if (!abierto)
         {
             ReproducirSonido(sonidoAbrir);
-            rutinaMovimiento = StartCoroutine(MoverCajon(posicionFinal, true));
+            rutinaMovimiento = StartCoroutine(MoverCajon(pivoteFinal.localPosition, true));
         }
         else
         {
             ReproducirSonido(sonidoCerrar);
-            rutinaMovimiento = StartCoroutine(MoverCajon(posicionInicial, false));
+            rutinaMovimiento = StartCoroutine(MoverCajon(pivoteInicial.localPosition, false));
         }
     }
 
