@@ -9,6 +9,9 @@ public class TutorialInteractivo : MonoBehaviour
     [SerializeField] private TMP_Text textoTutorial;
     [SerializeField] private TMP_Text textoTemporal;
 
+    [Header("Dialogo inicial")]
+    [SerializeField] private Dialogo dialogo; // 🔹 referencia al sistema de diálogo
+
     [Header("Pasos del tutorial")]
     [SerializeField]
     private string[] pasos = {
@@ -19,7 +22,7 @@ public class TutorialInteractivo : MonoBehaviour
     };
 
     private int pasoActual = 0;
-    private bool tutorialActivo = true;
+    private bool tutorialActivo = false; // 🔹 ahora empieza desactivado, se activa tras el diálogo
 
     // Flags
     private bool presionoMovimiento = false;
@@ -36,18 +39,43 @@ public class TutorialInteractivo : MonoBehaviour
     [SerializeField] private float duracionMensajeTemporal = 2f;
 
     [Header("Objetos del tutorial")]
-    [SerializeField] private GameObject linternaObjeto; // 🔹 referencia a la linterna en la escena
+    [SerializeField] private GameObject linternaObjeto;
 
     void Start()
     {
-        if (panelTutorial != null) panelTutorial.SetActive(true);
         if (camaraPrincipal == null) camaraPrincipal = Camera.main;
         pasoActual = 0;
-        MostrarPaso();
+
         if (textoTemporal != null) textoTemporal.text = "";
 
         // 🔹 Linterna desactivada al inicio
         if (linternaObjeto != null) linternaObjeto.SetActive(false);
+
+        // 🔹 Panel del tutorial apagado al inicio
+        if (panelTutorial != null) panelTutorial.SetActive(false);
+
+        // 🔹 Iniciar diálogo antes del tutorial
+        if (dialogo != null)
+        {
+            dialogo.ResetHaHablado();
+            dialogo.OnDialogoCompleto.AddListener(() =>
+            {
+                ActivarTutorial();
+            });
+            dialogo.IniciarDialogo();
+        }
+        else
+        {
+            // Si no hay diálogo, activar tutorial directamente
+            ActivarTutorial();
+        }
+    }
+
+    private void ActivarTutorial()
+    {
+        tutorialActivo = true;
+        if (panelTutorial != null) panelTutorial.SetActive(true);
+        MostrarPaso();
     }
 
     void Update()
@@ -97,7 +125,6 @@ public class TutorialInteractivo : MonoBehaviour
                 break;
 
             case 2:
-                // 🔹 Activar linterna al llegar a este paso
                 if (linternaObjeto != null && !linternaObjeto.activeSelf)
                     linternaObjeto.SetActive(true);
 
