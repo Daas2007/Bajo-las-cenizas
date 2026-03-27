@@ -9,8 +9,8 @@ public class TutorialInteractivo : MonoBehaviour
     [SerializeField] private TMP_Text textoTutorial;
     [SerializeField] private TMP_Text textoTemporal;
 
-    [Header("Dialogo inicial")]
-    [SerializeField] private Dialogo dialogo; // 🔹 referencia al sistema de diálogo
+    [Header("Control externo")]
+    [SerializeField] private GameObject objetoControl; // 🔹 objeto que controla el panel
 
     [Header("Pasos del tutorial")]
     [SerializeField]
@@ -22,7 +22,7 @@ public class TutorialInteractivo : MonoBehaviour
     };
 
     private int pasoActual = 0;
-    private bool tutorialActivo = false; // 🔹 ahora empieza desactivado, se activa tras el diálogo
+    private bool tutorialActivo = true;
 
     // Flags
     private bool presionoMovimiento = false;
@@ -33,7 +33,6 @@ public class TutorialInteractivo : MonoBehaviour
     [Header("Interacción (raycast)")]
     [SerializeField] private Camera camaraPrincipal;
     [SerializeField] private float distanciaInteraccion = 3f;
-    [SerializeField] private string layerInteraccionName = "Interaccion";
 
     [Header("Mensajes")]
     [SerializeField] private float duracionMensajeTemporal = 2f;
@@ -47,39 +46,23 @@ public class TutorialInteractivo : MonoBehaviour
         pasoActual = 0;
 
         if (textoTemporal != null) textoTemporal.text = "";
-
-        // 🔹 Linterna desactivada al inicio
         if (linternaObjeto != null) linternaObjeto.SetActive(false);
 
-        // 🔹 Panel del tutorial apagado al inicio
-        if (panelTutorial != null) panelTutorial.SetActive(false);
-
-        // 🔹 Iniciar diálogo antes del tutorial
-        if (dialogo != null)
-        {
-            dialogo.ResetHaHablado();
-            dialogo.OnDialogoCompleto.AddListener(() =>
-            {
-                ActivarTutorial();
-            });
-            dialogo.IniciarDialogo();
-        }
-        else
-        {
-            // Si no hay diálogo, activar tutorial directamente
-            ActivarTutorial();
-        }
-    }
-
-    private void ActivarTutorial()
-    {
-        tutorialActivo = true;
-        if (panelTutorial != null) panelTutorial.SetActive(true);
         MostrarPaso();
     }
 
     void Update()
     {
+        // 🔹 Control del panel según el objeto externo, pero solo mientras el tutorial esté activo
+        if (tutorialActivo && panelTutorial != null && objetoControl != null)
+        {
+            if (objetoControl.activeSelf)
+                panelTutorial.SetActive(false);
+            else
+                panelTutorial.SetActive(true);
+        }
+
+        // Si el tutorial ya terminó, no hacer nada más
         if (!tutorialActivo) return;
 
         bool w = Input.GetKey(KeyCode.W);
@@ -87,11 +70,7 @@ public class TutorialInteractivo : MonoBehaviour
         bool s = Input.GetKey(KeyCode.S);
         bool d = Input.GetKey(KeyCode.D);
 
-        int movimientoCount = 0;
-        if (w) movimientoCount++;
-        if (a) movimientoCount++;
-        if (s) movimientoCount++;
-        if (d) movimientoCount++;
+        int movimientoCount = (w ? 1 : 0) + (a ? 1 : 0) + (s ? 1 : 0) + (d ? 1 : 0);
 
         bool movimientoPresionadoDown = Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.A) ||
                                         Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.D);
@@ -112,15 +91,12 @@ public class TutorialInteractivo : MonoBehaviour
                 break;
 
             case 1:
-                if (!corrio)
+                if (!corrio && ((movimientoSostenido && shiftPresionadoDown) ||
+                                (shiftSostenido && movimientoPresionadoDown) ||
+                                (shiftSostenido && movimientoSostenido)))
                 {
-                    if ((movimientoSostenido && shiftPresionadoDown) ||
-                        (shiftSostenido && movimientoPresionadoDown) ||
-                        (shiftSostenido && movimientoSostenido))
-                    {
-                        corrio = true;
-                        SiguientePaso();
-                    }
+                    corrio = true;
+                    SiguientePaso();
                 }
                 break;
 
@@ -130,12 +106,6 @@ public class TutorialInteractivo : MonoBehaviour
 
                 if (Input.GetKeyDown(KeyCode.E))
                 {
-                    if (camaraPrincipal == null)
-                    {
-                        Debug.LogWarning("[TutorialInteractivo] Cámara principal no asignada.");
-                        break;
-                    }
-
                     Ray ray = new Ray(camaraPrincipal.transform.position, camaraPrincipal.transform.forward);
                     if (Physics.Raycast(ray, out RaycastHit hit, distanciaInteraccion))
                     {
@@ -145,17 +115,10 @@ public class TutorialInteractivo : MonoBehaviour
                             MostrarMensajeTemporal("Has recogido la linterna. Ahora presiona F para encenderla.", duracionMensajeTemporal);
                             SiguientePaso();
                         }
-                        else if (hit.collider.GetComponent<PuertaTutorial>() != null)
+                        else if (hit.collider.GetComponent<PuertaTutorial>() != null ||
+                                 hit.collider.GetComponent<CajonesInteractuables>() != null)
                         {
                             SiguientePaso();
-                        }
-                        else if (hit.collider.GetComponent<CajonesInteractuables>() != null)
-                        {
-                            SiguientePaso();
-                        }
-                        else
-                        {
-                            Debug.Log("[TutorialInteractivo] Objeto interactuado no válido para el tutorial.");
                         }
                     }
                 }
@@ -196,19 +159,21 @@ public class TutorialInteractivo : MonoBehaviour
             MostrarPaso();
         }
     }
-
     private void CompletarTutorial()
     {
         tutorialActivo = false;
-        if (panelTutorial != null) panelTutorial.SetActive(false);
         pasoActual = 0;
+
+        if (panelTutorial != null)
+            panelTutorial.SetActive(false); // 🔹 apagar panel definitivamente
+
         Debug.Log("✅ Tutorial completado y panel apagado.");
     }
+
 
     public void NotificarLinternaRecogida()
     {
         tieneLinterna = true;
-        Debug.Log("[TutorialInteractivo] Notificado: jugador tiene linterna.");
         if (pasoActual == 2)
         {
             MostrarMensajeTemporal("Has recogido la linterna. Ahora presiona F para encenderla.", duracionMensajeTemporal);
