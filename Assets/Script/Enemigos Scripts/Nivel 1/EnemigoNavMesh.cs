@@ -1,19 +1,25 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-[RequireComponent(typeof(Collider), typeof(Animator), typeof(NavMeshAgent))]
+[RequireComponent(typeof(Animator), typeof(NavMeshAgent))]
 public class EnemigoNavMesh : MonoBehaviour
 {
     [Header("Objetivo")]
-    public Transform objetivo; // 🔹 asigna el jugador en el inspector
+    [SerializeField] private Transform objetivo; // Jugador
     [SerializeField] private PantallaDeMuerte pantallaDeMuerte;
+
+    [Header("Movimiento")]
+    [SerializeField] private float velocidad = 3f;
+    private NavMeshAgent agente;
+
+    [Header("Detección / Área de matar")]
+    [SerializeField] private BoxCollider areaDeteccion; // 🔹 arrástralo en el inspector
 
     [Header("Audio")]
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private AudioClip sonidoMuerte;
 
     private Animator animator;
-    private NavMeshAgent agente;
     private Vector3 posicionInicial;
     private Quaternion rotInicial;
 
@@ -25,7 +31,6 @@ public class EnemigoNavMesh : MonoBehaviour
         animator = GetComponent<Animator>();
         agente = GetComponent<NavMeshAgent>();
 
-        // Guardar posición inicial en coordenadas globales
         posicionInicial = transform.position;
         rotInicial = transform.rotation;
 
@@ -39,16 +44,21 @@ public class EnemigoNavMesh : MonoBehaviour
         }
 
         audioSource.ignoreListenerPause = true;
+
+        // 🔹 Configurar el área de detección
+        if (areaDeteccion != null)
+        {
+            areaDeteccion.isTrigger = true; // debe ser trigger
+        }
     }
 
     private void OnEnable()
     {
-        agente.isStopped = true; // 🔹 detenido al inicio
+        agente.isStopped = true;
         agente.ResetPath();
         estadoActual = Estado.Idle;
         ActualizarAnimacion();
 
-        // 🔹 Si ya tienes asignado el jugador como objetivo, empieza persiguiendo
         if (objetivo != null)
         {
             ActivarPersecucion();
@@ -58,6 +68,8 @@ public class EnemigoNavMesh : MonoBehaviour
     private void Update()
     {
         if (objetivo == null) return;
+
+        agente.speed = velocidad;
 
         switch (estadoActual)
         {
@@ -80,19 +92,18 @@ public class EnemigoNavMesh : MonoBehaviour
         animator.SetBool("IsWalking", true);
 
         agente.isStopped = false;
-        agente.SetDestination(objetivo.position);
-    }
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("Player"))
+        if (agente.isOnNavMesh)
         {
-            MatarJugador();
+            agente.SetDestination(objetivo.position);
         }
     }
 
+    // 🔹 El área de detección se encarga de matar
     private void OnTriggerEnter(Collider other)
     {
+        if (areaDeteccion != null && other == areaDeteccion) return; // evitar auto-trigger
+
         if (other.CompareTag("Player"))
         {
             MatarJugador();
@@ -136,6 +147,12 @@ public class EnemigoNavMesh : MonoBehaviour
 
     public void ActivarPersecucion()
     {
+        if (objetivo == null)
+        {
+            Debug.LogWarning("⚠️ No se asignó objetivo al enemigo.");
+            return;
+        }
+
         estadoActual = Estado.Persiguiendo;
         agente.isStopped = false;
         ActualizarAnimacion();

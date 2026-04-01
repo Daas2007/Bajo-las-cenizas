@@ -34,7 +34,6 @@ public class CanvasController : MonoBehaviour
 
         Time.timeScale = 1f;
     }
-
     private void OnEnable()
     {
         DesactivarTodos();
@@ -48,7 +47,6 @@ public class CanvasController : MonoBehaviour
             StartCoroutine(FadeOut());
         }
     }
-
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -77,7 +75,6 @@ public class CanvasController : MonoBehaviour
             }
         }
     }
-
     //---------------Pausa---------------
     public void MostrarPausa()
     {
