@@ -46,6 +46,12 @@ public class EnemigoVentana : MonoBehaviour
     [SerializeField] private GameObject panelOjoEstado;   // primer panel (estado 2 y 3)
     [SerializeField] private GameObject panelOjoEnemigo;  // segundo panel (cuando entra)
 
+    [Header("Audio Ojo Irritado")]
+    [SerializeField] private AudioSource audioSourceOjo;
+    [SerializeField] private AudioClip clipOjo;
+    [SerializeField] private float velocidadNormal = 1f;
+    [SerializeField] private float velocidadRapida = 2f;
+
     [Header("Visual de la ventana")]
     [SerializeField] Renderer ventanaRenderer;
 
@@ -212,7 +218,6 @@ public class EnemigoVentana : MonoBehaviour
         recibiendoLuz = valor;
         if (!valor) contadorLuz = 0f;
     }
-
     void ActualizarColorVentana()
     {
         if (ventanaRenderer == null) return;
@@ -260,6 +265,9 @@ public class EnemigoVentana : MonoBehaviour
     }
     void ActualizarUIOjo()
     {
+        bool panel1Activo = false;
+        bool panel2Activo = false;
+
         if (panelOjoEstado != null)
         {
             var img = panelOjoEstado.GetComponent<UnityEngine.UI.Image>();
@@ -271,11 +279,13 @@ public class EnemigoVentana : MonoBehaviour
                 {
                     panelOjoEstado.SetActive(true);
                     c.a = 0.5f;
+                    panel1Activo = true;
                 }
                 else if (estadoActual == 3)
                 {
                     panelOjoEstado.SetActive(true);
                     c.a = 1f;
+                    panel1Activo = true;
                 }
                 else
                 {
@@ -297,12 +307,37 @@ public class EnemigoVentana : MonoBehaviour
                     Color c2 = img2.color;
                     c2.a = 1f;
                     img2.color = c2;
+                    panel2Activo = true;
                 }
                 else
                 {
                     panelOjoEnemigo.SetActive(false);
                 }
             }
+        }
+
+        // 🔊 reproducir audio según panel activo
+        ReproducirAudioOjo(panel1Activo, panel2Activo);
+    }
+    private void ReproducirAudioOjo(bool panel1Activo, bool panel2Activo)
+    {
+        if (audioSourceOjo == null || clipOjo == null) return;
+
+        if (panel1Activo)
+        {
+            audioSourceOjo.pitch = velocidadNormal;
+            if (!audioSourceOjo.isPlaying)
+                audioSourceOjo.PlayOneShot(clipOjo);
+        }
+        else if (panel2Activo)
+        {
+            audioSourceOjo.pitch = velocidadRapida;
+            if (!audioSourceOjo.isPlaying)
+                audioSourceOjo.PlayOneShot(clipOjo);
+        }
+        else
+        {
+            audioSourceOjo.Stop();
         }
     }
     void ReproducirAudio(AudioClip clip)

@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[RequireComponent(typeof(BoxCollider))]
 public class PiezaPuzzle : MonoBehaviour, IInteractuable
 {
     [Header("Configuración")]
@@ -13,7 +14,7 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
 
     private Vector3 escalaOriginal;
     private Rigidbody rb;
-    private Collider col;
+    private BoxCollider boxCol; // 🔹 siempre será BoxCollider
 
     void Awake()
     {
@@ -23,13 +24,13 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
         rb = GetComponent<Rigidbody>();
         if (rb == null) rb = gameObject.AddComponent<Rigidbody>();
 
-        col = GetComponent<Collider>();
-        if (col == null) col = gameObject.AddComponent<BoxCollider>();
+        boxCol = GetComponent<BoxCollider>();
 
         rb.useGravity = true;
         rb.isKinematic = false;
-        if (col != null) col.enabled = true;
+        boxCol.enabled = true;
     }
+
     void Start()
     {
         GameObject jugador = GameObject.FindWithTag("Player");
@@ -40,6 +41,7 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
                 manoIzquierda = interaccion.GetManoIzquierda();
         }
     }
+
     void Update()
     {
         if (enMano && !colocada)
@@ -56,6 +58,7 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
             transform.Rotate(90, 0, 0);
         }
     }
+
     public void Interactuar()
     {
         if (colocada) return;
@@ -72,7 +75,7 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
 
                 rb.isKinematic = true;
                 rb.useGravity = false;
-                if (col != null) col.enabled = false;
+                boxCol.enabled = false;
 
                 gameObject.tag = "Puzzle";
             }
@@ -86,7 +89,8 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
             Soltar();
         }
     }
-    // 🔹 Ajustado: neutraliza la pieza si está en el slot correcto
+
+    // 🔹 Ajustado: desactiva el BoxCollider si está en el slot correcto
     public void MarcarColocada(bool estado = true, int slotID = -1)
     {
         colocada = estado;
@@ -95,24 +99,26 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
         rb.isKinematic = true;
         rb.useGravity = false;
 
-        if (col != null) col.enabled = true;
+        boxCol.enabled = true;
 
-        // ✅ Si la pieza está en el slot correcto → neutralizar
         if (estado && slotID == piezaID)
         {
-            if (col != null) col.enabled = false; // desactivar collider
-            gameObject.tag = "Untagged";          // quitar tag
-            gameObject.layer = LayerMask.NameToLayer("Default"); // layer default
+            boxCol.enabled = false; // ✅ desactivar collider
+            gameObject.tag = "Untagged";
+            gameObject.layer = LayerMask.NameToLayer("Default");
         }
     }
+
     public void SetMano(Transform mano)
     {
         manoIzquierda = mano;
     }
+
     public void PermitirRotacionX(bool estado)
     {
         puedeRotarX = estado;
     }
+
     public void ResetColocada()
     {
         colocada = false;
@@ -121,10 +127,11 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
 
         rb.isKinematic = false;
         rb.useGravity = true;
-        if (col != null) col.enabled = true;
+        boxCol.enabled = true;
 
         gameObject.tag = "Puzzle";
     }
+
     public void Soltar()
     {
         enMano = false;
@@ -132,7 +139,7 @@ public class PiezaPuzzle : MonoBehaviour, IInteractuable
 
         rb.isKinematic = false;
         rb.useGravity = true;
-        if (col != null) col.enabled = true;
+        boxCol.enabled = true;
 
         gameObject.tag = "Puzzle";
     }
