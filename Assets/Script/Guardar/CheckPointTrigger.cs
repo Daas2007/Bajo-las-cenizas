@@ -15,6 +15,9 @@ public class CheckpointTrigger : MonoBehaviour
             {
                 SistemaGuardar.Guardar(mov, gm);
                 Debug.Log($"✅ Checkpoint {checkpointID} activado y guardado.");
+
+                // 🔹 Destruir el objeto del checkpoint después de guardar
+                Destroy(gameObject);
             }
         }
     }

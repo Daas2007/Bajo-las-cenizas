@@ -23,6 +23,8 @@ public class VerificadorGanar : MonoBehaviour
     [Header("Trigger de enemigo")]
     [SerializeField] private GameObject triggerEnemigo;
 
+    [Header("Rotación al terminar diálogo")]
+    [SerializeField] private float anguloFinalY = 180f; // 🔹 configurable en Inspector
 
     private bool enemigoPasoTrigger = false;
 
@@ -30,27 +32,40 @@ public class VerificadorGanar : MonoBehaviour
     {
         triggerEnemigo.SetActive(false);
     }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
-            MovimientoPersonaje MP = other.GetComponent<MovimientoPersonaje>();
+            MovimientoPersonaje MP = other.GetComponentInParent<MovimientoPersonaje>();
             if (MP != null && MP.TieneCristal())
             {
                 Debug.Log("✅ Jugador con cristal pasó por el trigger. Iniciando diálogo de victoria...");
-                triggerEnemigo.SetActive(true);
+
+                if (triggerEnemigo != null && !triggerEnemigo.activeSelf)
+                    triggerEnemigo.SetActive(true);
+
                 if (dialogo != null)
                 {
                     dialogo.ResetHaHablado();
                     dialogo.OnDialogoCompleto.AddListener(() =>
                     {
-                        StartCoroutine(FlujoVictoria());
+                        if (jugador != null)
+                        {
+                            Vector3 rot = jugador.eulerAngles;
+                            jugador.eulerAngles = new Vector3(rot.x, anguloFinalY, rot.z);
+                            Debug.Log("🔄 Personaje girado al ángulo Y: " + anguloFinalY);
+                        }
+
+                        if (gameObject.activeInHierarchy) // ✅ aseguramos que este objeto esté activo
+                            StartCoroutine(FlujoVictoria());
                     });
                     dialogo.IniciarDialogo();
                 }
                 else
                 {
-                    StartCoroutine(FlujoVictoria());
+                    if (gameObject.activeInHierarchy) // ✅ aseguramos que este objeto esté activo
+                        StartCoroutine(FlujoVictoria());
                 }
             }
             else
@@ -84,12 +99,6 @@ public class VerificadorGanar : MonoBehaviour
     {
         if (enemigoVentana != null) enemigoVentana.SetActive(false);
         if (enemigoNormal != null) enemigoNormal.SetActive(true);
-
-        if (jugador != null)
-        {
-            Vector3 rot = jugador.eulerAngles;
-            jugador.eulerAngles = new Vector3(rot.x, rot.y + 180f, rot.z);
-        }
 
         if (scriptMovimientoJugador != null) scriptMovimientoJugador.enabled = false;
         if (scriptCamara != null) scriptCamara.enabled = false;
@@ -152,15 +161,11 @@ public class VerificadorGanar : MonoBehaviour
         }
     }
 
-    // 🔹 Método público para invocar el fade desde otros scripts
-    // 🔹 Método público para invocar el fade desde otros scripts
     public void IrAlMenu(string nombreEscena)
     {
         StartCoroutine(SalirMenuCoroutine(nombreEscena));
 
-        // ✅ Asegurar que el cursor quede visible y desbloqueado
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
-
 }

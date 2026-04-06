@@ -12,8 +12,10 @@ public class Dialogo : MonoBehaviour, IInteractuable
 
     [Header("Audio")]
     [SerializeField] private AudioSource audioSource;
-    [SerializeField] private AudioClip sonidoLetra;
-    [SerializeField] private AudioClip sonidoInicio;
+    [SerializeField] private AudioClip clipCorto; // 🔹 solo este
+    [SerializeField] private float intervaloSonido = 0.1f;
+    private float ultimoSonidoTime = 0f;
+
 
     [Header("Líneas de diálogo")]
     [TextArea(2, 5)]
@@ -158,14 +160,16 @@ public class Dialogo : MonoBehaviour, IInteractuable
         mostrandoDialogo = true;
         AnyDialogActive = true;
 
-        BloquearJugador(true);
+        // ❌ No bloquear jugador ni pausar nada
+        // ❌ No llamar a CanvasController aquí
 
-        // ✅ activar animación de hablar
         if (animator != null)
             animator.SetBool("Hablando", true);
 
         inicioDelayCoroutine = StartCoroutine(DelayYMostrarPrimeraLinea(delayInicio));
     }
+
+
 
     private IEnumerator DelayYMostrarPrimeraLinea(float delay)
     {
@@ -215,25 +219,30 @@ public class Dialogo : MonoBehaviour, IInteractuable
 
         for (int i = 0; i < linea.Length; i++)
         {
-            // Si escribiendo fue cancelado externamente, salir del bucle
             if (!escribiendoLinea) break;
 
             dialogoTexto.text += linea[i];
 
-            // Solo reproducir sonido si seguimos en modo escribiendo
-            if (escribiendoLinea && audioSource != null && sonidoLetra != null)
-                audioSource.PlayOneShot(sonidoLetra);
+            // ✅ reproducir solo clip corto
+            if (escribiendoLinea && audioSource != null && clipCorto != null)
+            {
+                if (Time.unscaledTime - ultimoSonidoTime >= intervaloSonido)
+                {
+                    audioSource.PlayOneShot(clipCorto);
+                    ultimoSonidoTime = Time.unscaledTime;
+                }
+            }
 
             yield return new WaitForSecondsRealtime(tiempoEntreLetras);
         }
 
-        // Si no fue cancelado, asegurar texto completo
         if (escribiendoLinea)
             dialogoTexto.text = linea;
 
         escribiendoLinea = false;
         rutinaTexto = null;
     }
+
 
     // Completa la línea instantáneamente
     private void TerminarLineaInstantanea()
@@ -298,11 +307,19 @@ public class Dialogo : MonoBehaviour, IInteractuable
         escribiendoLinea = false;
         AnyDialogActive = false;
 
-        BloquearJugador(false);
-
-        // ✅ volver a estado normal
         if (animator != null)
             animator.SetBool("Hablando", false);
+
+        // 🔹 limpiar referencia en CanvasController
+        CanvasController canvasCtrl = FindObjectOfType<CanvasController>();
+        if (canvasCtrl != null)
+        {
+            // si el panel activo era este diálogo, lo limpiamos
+            if (canvasCtrl.gameObject == dialogoCanvas)
+                canvasCtrl.CerrarPanelActivo();
+            else
+                canvasCtrl.CerrarPanelActivo(); // fuerza null
+        }
 
         if (!HaHablado)
         {
@@ -310,6 +327,7 @@ public class Dialogo : MonoBehaviour, IInteractuable
             OnDialogoCompleto?.Invoke();
         }
     }
+
 
     // Detiene todas las coroutines y evita que se sigan reproduciendo sonidos por escritura
     private void DetenerTodo()
@@ -350,4 +368,5 @@ public class Dialogo : MonoBehaviour, IInteractuable
     {
         HaHablado = false;
     }
+
 }

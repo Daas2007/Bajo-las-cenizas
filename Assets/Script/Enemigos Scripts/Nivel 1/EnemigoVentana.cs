@@ -44,7 +44,6 @@ public class EnemigoVentana : MonoBehaviour
 
     [Header("UI Ojo Irritado")]
     [SerializeField] private GameObject panelOjoEstado;   // primer panel (estado 2 y 3)
-    [SerializeField] private GameObject panelOjoEnemigo;  // segundo panel (cuando entra)
 
     [Header("Audio Ojo Irritado")]
     [SerializeField] private AudioSource audioSourceOjo;
@@ -265,9 +264,6 @@ public class EnemigoVentana : MonoBehaviour
     }
     void ActualizarUIOjo()
     {
-        bool panel1Activo = false;
-        bool panel2Activo = false;
-
         if (panelOjoEstado != null)
         {
             var img = panelOjoEstado.GetComponent<UnityEngine.UI.Image>();
@@ -275,71 +271,64 @@ public class EnemigoVentana : MonoBehaviour
             {
                 Color c = img.color;
 
-                if (estadoActual == 2)
+                if (estadoActual == 1)
+                {
+                    panelOjoEstado.SetActive(false);
+                    c.a = 0f;
+                }
+                else if (estadoActual == 2)
                 {
                     panelOjoEstado.SetActive(true);
-                    c.a = 0.5f;
-                    panel1Activo = true;
+                    c.a = 0.05f; // 🔹 5% opacidad
                 }
                 else if (estadoActual == 3)
                 {
                     panelOjoEstado.SetActive(true);
-                    c.a = 1f;
-                    panel1Activo = true;
+                    c.a = 0.3f; // 🔹 30% opacidad
                 }
-                else
+                else if (estadoActual == 4) // enemigo entra
                 {
                     panelOjoEstado.SetActive(false);
+                    c.a = 0f;
                 }
 
                 img.color = c;
             }
         }
 
-        if (panelOjoEnemigo != null)
-        {
-            var img2 = panelOjoEnemigo.GetComponent<UnityEngine.UI.Image>();
-            if (img2 != null)
-            {
-                if (enemigoSpawned)
-                {
-                    panelOjoEnemigo.SetActive(true);
-                    Color c2 = img2.color;
-                    c2.a = 1f;
-                    img2.color = c2;
-                    panel2Activo = true;
-                }
-                else
-                {
-                    panelOjoEnemigo.SetActive(false);
-                }
-            }
-        }
-
-        // 🔊 reproducir audio según panel activo
-        ReproducirAudioOjo(panel1Activo, panel2Activo);
+        // 🔊 reproducir audio según estado
+        ReproducirAudioOjo();
     }
-    private void ReproducirAudioOjo(bool panel1Activo, bool panel2Activo)
+    private void ReproducirAudioOjo()
     {
         if (audioSourceOjo == null || clipOjo == null) return;
 
-        if (panel1Activo)
+        if (estadoActual == 2)
         {
             audioSourceOjo.pitch = velocidadNormal;
             if (!audioSourceOjo.isPlaying)
-                audioSourceOjo.PlayOneShot(clipOjo);
+            {
+                audioSourceOjo.clip = clipOjo;
+                audioSourceOjo.loop = true; // 🔹 aseguramos que sea loop
+                audioSourceOjo.Play();
+            }
         }
-        else if (panel2Activo)
+        else if (estadoActual == 3)
         {
             audioSourceOjo.pitch = velocidadRapida;
             if (!audioSourceOjo.isPlaying)
-                audioSourceOjo.PlayOneShot(clipOjo);
+            {
+                audioSourceOjo.clip = clipOjo;
+                audioSourceOjo.loop = true; // 🔹 aseguramos que sea loop
+                audioSourceOjo.Play();
+            }
         }
         else
         {
             audioSourceOjo.Stop();
         }
     }
+
     void ReproducirAudio(AudioClip clip)
     {
         if (clip == null || audioSource == null) return;

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.AI;
+using System.Collections;
 
 [RequireComponent(typeof(Animator), typeof(NavMeshAgent))]
 public class EnemigoNavMesh : MonoBehaviour
@@ -45,7 +46,6 @@ public class EnemigoNavMesh : MonoBehaviour
 
         audioSource.ignoreListenerPause = true;
 
-        // 🔹 Configurar el área de detección
         if (areaDeteccion != null)
         {
             areaDeteccion.isTrigger = true; // debe ser trigger
@@ -90,7 +90,6 @@ public class EnemigoNavMesh : MonoBehaviour
         if (estadoActual != Estado.Persiguiendo || objetivo == null) return;
 
         animator.SetBool("IsWalking", true);
-
         agente.isStopped = false;
 
         if (agente.isOnNavMesh)
@@ -99,7 +98,6 @@ public class EnemigoNavMesh : MonoBehaviour
         }
     }
 
-    // 🔹 El área de detección se encarga de matar
     private void OnTriggerEnter(Collider other)
     {
         if (areaDeteccion != null && other == areaDeteccion) return; // evitar auto-trigger
@@ -115,13 +113,42 @@ public class EnemigoNavMesh : MonoBehaviour
         estadoActual = Estado.Atacando;
         ActualizarAnimacion();
 
-        GameManager.Instancia?.RegistrarMuerte();
-        pantallaDeMuerte?.ActivarPantallaMuerte();
+        agente.isStopped = true;
 
+        // 🔹 Iniciar secuencia de muerte
+        StartCoroutine(SecuenciaMuerte());
+    }
+
+    private IEnumerator SecuenciaMuerte()
+    {
+        // 1) Girar al jugador hacia el enemigo
+        GameObject jugadorObj = GameObject.FindGameObjectWithTag("Player");
+        if (jugadorObj != null)
+        {
+            Vector3 direccion = (transform.position - jugadorObj.transform.position).normalized;
+            direccion.y = 0f;
+            Quaternion rotacion = Quaternion.LookRotation(direccion);
+            jugadorObj.transform.rotation = rotacion;
+        }
+
+        // 2) Reproducir animación de matar
+        if (animator != null)
+        {
+            animator.SetBool("IsKilling", true);
+        }
+
+        // 3) Reproducir sonido de muerte
         if (sonidoMuerte != null && audioSource != null)
         {
             audioSource.PlayOneShot(sonidoMuerte);
         }
+
+        // 4) Esperar duración de la animación antes de fade
+        yield return new WaitForSeconds(2f); // ajusta según tu animación
+
+        // 5) Registrar la muerte y activar pantalla
+        GameManager.Instancia?.RegistrarMuerte();
+        pantallaDeMuerte?.ActivarPantallaMuerte();
 
         Debug.Log("HAS MUERTO");
     }

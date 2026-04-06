@@ -6,7 +6,8 @@ using System.Collections;
 public class MovimientoPersonaje : MonoBehaviour
 {
     [Header("Cristal Obtenido")]
-    [SerializeField] bool Cristal = false;
+    [SerializeField] public bool Cristal = false;
+    [SerializeField] private GameObject Verificadorganar; // 🔹 referencia al trigger de ganar
 
     [Header("Referencias")]
     [SerializeField] Transform camara;
@@ -38,16 +39,22 @@ public class MovimientoPersonaje : MonoBehaviour
 
     void Awake()
     {
+        if (Verificadorganar != null)
+            Verificadorganar.SetActive(false);
+
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
+
         if (camara == null && Camera.main != null) camara = Camera.main.transform;
         if (canvas_StaminaBar != null) canvas_StaminaBar.SetActive(false);
     }
+
     void Start()
     {
         Stamina = StaminaMaxima;
         VelocidadBase = VelocidadMove;
     }
+
     void Update()
     {
         if (Time.timeScale == 1f)
@@ -60,11 +67,13 @@ public class MovimientoPersonaje : MonoBehaviour
             if (canvas_StaminaBar != null) canvas_StaminaBar.SetActive(false);
         }
     }
+
     void FixedUpdate()
     {
         if (Time.timeScale == 1f)
             JugadorCaminandoRB();
     }
+
     void JugadorCaminandoRB()
     {
         float h = UsarGetAxisRaw ? Input.GetAxisRaw("Horizontal") : Input.GetAxis("Horizontal");
@@ -83,7 +92,6 @@ public class MovimientoPersonaje : MonoBehaviour
             animator.SetFloat("Velocidad", velocidadActual);
             animator.SetBool("Corriendo", VelocidadMove > VelocidadBase);
 
-            // 🔹 Flags globales
             animator.SetBool("TieneLinterna", tieneLinterna);
             animator.SetBool("TieneObjeto", tieneObjeto);
         }
@@ -93,6 +101,7 @@ public class MovimientoPersonaje : MonoBehaviour
             camaraScript.SetEstado(velocidadActual);
         }
     }
+
     void JugadorCorrer()
     {
         bool moviendo = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) ||
@@ -124,11 +133,11 @@ public class MovimientoPersonaje : MonoBehaviour
 
         if (animator != null)
         {
-            // 🔹 Flags globales
             animator.SetBool("TieneLinterna", tieneLinterna);
             animator.SetBool("TieneObjeto", tieneObjeto);
         }
     }
+
     void ActualizarBarraStamina()
     {
         if (BarraStamina != null)
@@ -145,6 +154,7 @@ public class MovimientoPersonaje : MonoBehaviour
                 canvas_StaminaBar.SetActive(false);
         }
     }
+
     IEnumerator RecargaStamina()
     {
         float delay = (Stamina <= 0f) ? 3f : 1f;
@@ -160,14 +170,17 @@ public class MovimientoPersonaje : MonoBehaviour
         if (canvas_StaminaBar != null) canvas_StaminaBar.SetActive(false);
         recarga = null;
     }
+
     public void GuardarPartida()
     {
         SistemaGuardar.Guardar(this, GameManager.Instancia);
     }
+
     public void CargarPartida()
     {
         SistemaGuardar.Cargar(this, GameManager.Instancia);
     }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Cristal"))
@@ -175,6 +188,7 @@ public class MovimientoPersonaje : MonoBehaviour
             CristalObtenido(other.gameObject);
         }
     }
+
     public void CristalObtenido(GameObject cristalObject = null)
     {
         if (Cristal) return;
@@ -200,11 +214,22 @@ public class MovimientoPersonaje : MonoBehaviour
         if (cristalObject != null)
             Destroy(cristalObject);
 
-        Debug.Log("[MovimientoPersonaje] Cristal recogido: notificado a GameManager y actualizados ZoneTriggers.");
+        // 🔹 Activar trigger de ganar al recoger cristal
+        if (Verificadorganar != null)
+            Verificadorganar.SetActive(true);
+
+        Debug.Log("[MovimientoPersonaje] Cristal recogido: notificado a GameManager y activado VerificadorGanar.");
     }
+
     public bool TieneCristal()
     {
+        Debug.Log("[MovimientoPersonaje] TieneCristal llamado. Estado actual: " + Cristal);
+
+        if (Cristal && Verificadorganar != null)
+        {
+            Verificadorganar.SetActive(true);
+        }
+
         return Cristal;
-        Debug.Log("Ya casi ganas");
     }
 }

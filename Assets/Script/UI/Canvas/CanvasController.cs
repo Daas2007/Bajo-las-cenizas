@@ -11,6 +11,13 @@ public class CanvasController : MonoBehaviour
     [SerializeField] GameObject panelMuerte;
     [SerializeField] GameObject panelDialogo;
 
+    [Header("Paneles de diálogo adicionales")]
+    [SerializeField] private GameObject panelDialogoCuaderno;
+    [SerializeField] private GameObject panelDialogoPapelTutorial;
+    [SerializeField] private GameObject panelDialogoIntroduccion;
+    [SerializeField] private GameObject panelDialogoMasContexto;
+
+
     [Header("HUD siempre visible")]
     [SerializeField] GameObject panelHUD;
 
@@ -46,11 +53,38 @@ public class CanvasController : MonoBehaviour
             loadingImage.color = new Color(0f, 0f, 0f, 1f);
             StartCoroutine(FadeOut());
         }
+        else
+        {
+            // ✅ Si no hay fade, activar directamente introducción
+            MostrarDialogoIntroduccionInicial();
+        }
     }
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
+            // 🔹 Caso especial: cerrar diálogo si está activo
+            if (Dialogo.AnyDialogActive)
+            {
+                Dialogo[] dialogos = FindObjectsOfType<Dialogo>();
+                foreach (var d in dialogos)
+                {
+                    if (d.mostrandoDialogo)
+                    {
+                        d.TerminarDialogo();
+                    }
+                }
+
+                // ✅ restaurar HUD y controles
+                if (panelHUD != null) panelHUD.SetActive(true);
+                Time.timeScale = 1f;
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+
+                return;
+            }
+
+            // 🔹 Lógica normal de pausa
             if (panelActivo == panelCandado)
             {
                 CerrarPanelCandado();
@@ -75,6 +109,7 @@ public class CanvasController : MonoBehaviour
             }
         }
     }
+
     //---------------Pausa---------------
     public void MostrarPausa()
     {
@@ -138,7 +173,13 @@ public class CanvasController : MonoBehaviour
         }
         loadingImage.color = new Color(c.r, c.g, c.b, 0f);
         panelLoading.SetActive(false);
+
+        // ✅ Mostrar introducción sin pausar y con HUD activo
+        MostrarDialogoIntroduccionInicial();
     }
+
+
+
     //---------------Opciones---------------
     public void MostrarOpciones()
     {
@@ -254,6 +295,27 @@ public class CanvasController : MonoBehaviour
     }
     //---------------Dialogo---------------
     public void MostrarDialogo() => ActivarPanel(panelDialogo, true);
+    //---------------Dialogos adicionales---------------
+    public void MostrarDialogoCuaderno()
+    {
+        ActivarPanel(panelDialogoCuaderno, true);
+    }
+
+    public void MostrarDialogoPapelTutorial()
+    {
+        ActivarPanel(panelDialogoPapelTutorial, true);
+    }
+
+    public void MostrarDialogoIntroduccion()
+    {
+        ActivarPanel(panelDialogoIntroduccion, true);
+    }
+
+    public void MostrarDialogoMasContexto()
+    {
+        ActivarPanel(panelDialogoMasContexto, true);
+    }
+
     //---------------Panel Candado---------------
     public void MostrarPanelCandado()
     {
@@ -324,14 +386,43 @@ public class CanvasController : MonoBehaviour
     }
     private void DesactivarTodos()
     {
-        if (panelHUD != null) panelHUD.SetActive(false); // ✅ siempre desactivar HUD
+        if (panelHUD != null) panelHUD.SetActive(false);
         if (panelPausa != null) panelPausa.SetActive(false);
         if (panelOpciones != null) panelOpciones.SetActive(false);
         if (panelMuerte != null) panelMuerte.SetActive(false);
         if (panelDialogo != null) panelDialogo.SetActive(false);
         if (panelCandado != null) panelCandado.SetActive(false);
+
+        // 🔹 nuevos paneles
+        if (panelDialogoCuaderno != null) panelDialogoCuaderno.SetActive(false);
+        if (panelDialogoPapelTutorial != null) panelDialogoPapelTutorial.SetActive(false);
+        if (panelDialogoIntroduccion != null) panelDialogoIntroduccion.SetActive(false);
+        if (panelDialogoMasContexto != null) panelDialogoMasContexto.SetActive(false);
+
         panelActivo = null;
     }
+    public void MostrarDialogoIntroduccionInicial()
+    {
+        DesactivarTodos();
+
+        // ✅ Mantener HUD activo
+        if (panelHUD != null)
+            panelHUD.SetActive(true);
+
+        if (panelDialogoIntroduccion != null)
+        {
+            panelDialogoIntroduccion.SetActive(true);
+            panelActivo = panelDialogoIntroduccion;
+
+            // ✅ No pausar el juego
+            Time.timeScale = 1f;
+
+            // ✅ Bloquear mouse como en gameplay normal
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+    }
+
     public void BloquearMouse()
     {
         Cursor.lockState = CursorLockMode.Locked;
