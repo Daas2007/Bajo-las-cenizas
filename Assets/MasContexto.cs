@@ -22,6 +22,7 @@ public class MasContexto : MonoBehaviour
 
             // 🔹 Desactivar el trigger para que no se repita
             gameObject.SetActive(false);
+            Destroy(gameObject);
         }
     }
 }

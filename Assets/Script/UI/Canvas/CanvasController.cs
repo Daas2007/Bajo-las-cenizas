@@ -174,9 +174,14 @@ public class CanvasController : MonoBehaviour
         loadingImage.color = new Color(c.r, c.g, c.b, 0f);
         panelLoading.SetActive(false);
 
-        // ✅ Mostrar introducción sin pausar y con HUD activo
-        MostrarDialogoIntroduccionInicial();
+        // ✅ Mostrar introducción solo si no se ha mostrado antes
+        if (!GameManager.Instancia.introduccionMostrada)
+        {
+            MostrarDialogoIntroduccionInicial();
+            GameManager.Instancia.introduccionMostrada = true;
+        }
     }
+
 
 
 
@@ -234,20 +239,24 @@ public class CanvasController : MonoBehaviour
     }
     private IEnumerator ReintentarConFade()
     {
-        // ✅ Mostrar panel de carga y hacer fade in
+        // Mostrar panel de carga y hacer fade in
         if (panelLoading != null && loadingImage != null)
         {
             panelLoading.SetActive(true);
             yield return StartCoroutine(FadeIn());
-            yield return new WaitForSecondsRealtime(2f); // tiempo opaco antes de reaparecer
+            yield return new WaitForSecondsRealtime(2f);
         }
 
-        // ✅ Cerrar panel de muerte y restaurar HUD
+        // Cerrar panel de muerte y restaurar HUD
         if (panelMuerte != null) panelMuerte.SetActive(false);
         panelActivo = null;
         if (panelHUD != null) panelHUD.SetActive(true);
 
-        // ✅ Restaurar estado del juego
+        // ✅ Cerrar panel de introducción si estaba activo
+        if (panelDialogoIntroduccion != null)
+            panelDialogoIntroduccion.SetActive(false);
+
+        // Restaurar estado del juego
         GameManager gm = GameManager.Instancia;
         MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
 
@@ -266,22 +275,23 @@ public class CanvasController : MonoBehaviour
             }
         }
 
-        // ✅ Reactivar jugador y cámara
+        // Reactivar jugador y cámara
         if (jugador != null) jugador.enabled = true;
         Camera cam = jugador.GetComponentInChildren<Camera>();
         if (cam != null) cam.enabled = true;
 
-        // ✅ Restaurar tiempo y controles
+        // Restaurar tiempo y controles
         Time.timeScale = 1f;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
-        // ✅ Fade out para volver al juego
+        // Fade out para volver al juego
         if (panelLoading != null && loadingImage != null)
         {
             yield return StartCoroutine(FadeOut());
         }
     }
+
     public void SalirAlMenuDesdeMuerte()
     {
         SceneManager.LoadScene("MainMenu");
@@ -293,6 +303,31 @@ public class CanvasController : MonoBehaviour
 
         Debug.Log("✅ Volviendo al menú principal desde pantalla de muerte.");
     }
+    public IEnumerator CanvasFadeInRapido()
+    {
+        if (panelLoading == null || loadingImage == null)
+            yield break;
+
+        panelLoading.SetActive(true);
+
+        float t = 0f;
+        float duracionRapida = 0.5f;
+        Color c = loadingImage.color;
+
+        while (t < duracionRapida)
+        {
+            t += Time.unscaledDeltaTime;
+            float alpha = Mathf.Lerp(0f, 1f, t / duracionRapida);
+            loadingImage.color = new Color(c.r, c.g, c.b, alpha);
+            yield return null;
+        }
+
+        loadingImage.color = new Color(c.r, c.g, c.b, 1f);
+
+        // ✅ Apagar el panel negro para que se vea la pantalla de muerte
+        panelLoading.SetActive(false);
+    }
+
     //---------------Dialogo---------------
     public void MostrarDialogo() => ActivarPanel(panelDialogo, true);
     //---------------Dialogos adicionales---------------

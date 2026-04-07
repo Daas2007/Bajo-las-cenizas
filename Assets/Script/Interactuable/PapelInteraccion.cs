@@ -68,7 +68,12 @@ public class PapelInteraccion : MonoBehaviour, IInteractuable
 
         if (GameManager.Instancia != null)
             muertesRegistradas = GameManager.Instancia.GetMuertes();
+
+        // ✅ Apagar la luz al interactuar por primera vez
+        if (!yaInteractuado && LuzInterracion != null)
+            LuzInterracion.gameObject.SetActive(false);
     }
+
 
     public void CerrarCanvas()
     {

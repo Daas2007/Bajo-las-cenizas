@@ -14,7 +14,7 @@ public class EnemigoNavMesh : MonoBehaviour
     private NavMeshAgent agente;
 
     [Header("Detección / Área de matar")]
-    [SerializeField] private BoxCollider areaDeteccion; // 🔹 arrástralo en el inspector
+    [SerializeField] private BoxCollider areaDeteccion;
 
     [Header("Audio")]
     [SerializeField] private AudioSource audioSource;
@@ -47,9 +47,7 @@ public class EnemigoNavMesh : MonoBehaviour
         audioSource.ignoreListenerPause = true;
 
         if (areaDeteccion != null)
-        {
-            areaDeteccion.isTrigger = true; // debe ser trigger
-        }
+            areaDeteccion.isTrigger = true;
     }
 
     private void OnEnable()
@@ -60,9 +58,7 @@ public class EnemigoNavMesh : MonoBehaviour
         ActualizarAnimacion();
 
         if (objetivo != null)
-        {
             ActivarPersecucion();
-        }
     }
 
     private void Update()
@@ -73,15 +69,9 @@ public class EnemigoNavMesh : MonoBehaviour
 
         switch (estadoActual)
         {
-            case Estado.Persiguiendo:
-                Perseguir();
-                break;
-            case Estado.Atacando:
-                agente.isStopped = true;
-                break;
-            case Estado.Idle:
-                agente.isStopped = true;
-                break;
+            case Estado.Persiguiendo: Perseguir(); break;
+            case Estado.Atacando: agente.isStopped = true; break;
+            case Estado.Idle: agente.isStopped = true; break;
         }
     }
 
@@ -93,35 +83,28 @@ public class EnemigoNavMesh : MonoBehaviour
         agente.isStopped = false;
 
         if (agente.isOnNavMesh)
-        {
             agente.SetDestination(objetivo.position);
-        }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (areaDeteccion != null && other == areaDeteccion) return; // evitar auto-trigger
+        if (areaDeteccion != null && other == areaDeteccion) return;
 
         if (other.CompareTag("Player"))
-        {
             MatarJugador();
-        }
     }
 
     private void MatarJugador()
     {
         estadoActual = Estado.Atacando;
         ActualizarAnimacion();
-
         agente.isStopped = true;
-
-        // 🔹 Iniciar secuencia de muerte
         StartCoroutine(SecuenciaMuerte());
     }
 
     private IEnumerator SecuenciaMuerte()
     {
-        // 1) Girar al jugador hacia el enemigo
+        // Girar al jugador hacia el enemigo y bloquear movimiento
         GameObject jugadorObj = GameObject.FindGameObjectWithTag("Player");
         if (jugadorObj != null)
         {
@@ -129,45 +112,69 @@ public class EnemigoNavMesh : MonoBehaviour
             direccion.y = 0f;
             Quaternion rotacion = Quaternion.LookRotation(direccion);
             jugadorObj.transform.rotation = rotacion;
+
+            // Bloquear movimiento del jugador inmediatamente
+            MovimientoPersonaje mov = jugadorObj.GetComponent<MovimientoPersonaje>();
+            if (mov != null) mov.enabled = false;
         }
 
-        // 2) Reproducir animación de matar
+        // Animación de matar
         if (animator != null)
-        {
             animator.SetBool("IsKilling", true);
-        }
 
-        // 3) Reproducir sonido de muerte
+        // Sonido de muerte
         if (sonidoMuerte != null && audioSource != null)
-        {
             audioSource.PlayOneShot(sonidoMuerte);
-        }
 
-        // 4) Esperar duración de la animación antes de fade
-        yield return new WaitForSeconds(2f); // ajusta según tu animación
+        // ✅ Iniciar fade rápido casi al inicio del ataque
+        yield return new WaitForSeconds(0.5f);
+        CanvasController cv = FindObjectOfType<CanvasController>();
+        if (cv != null)
+            yield return cv.CanvasFadeInRapido(); // esperar a que el fade termine
 
-        // 5) Registrar la muerte y activar pantalla
+        // ✅ Justo después del fade, activar pantalla de muerte
         GameManager.Instancia?.RegistrarMuerte();
         pantallaDeMuerte?.ActivarPantallaMuerte();
+
+        // Acomodar enemigo en spawn
+        PrepararDesactivacion();
 
         Debug.Log("HAS MUERTO");
     }
 
-    public void ResetEnemigo()
+    public void PrepararDesactivacion()
     {
-        transform.position = posicionInicial;
-        transform.rotation = rotInicial;
+        if (agente != null && agente.isOnNavMesh)
+            agente.Warp(posicionInicial);
+        else
+            transform.position = posicionInicial;
 
+        transform.rotation = rotInicial;
         estadoActual = Estado.Idle;
         agente.isStopped = true;
         agente.ResetPath();
+        agente.velocity = Vector3.zero;
+        ActualizarAnimacion();
+    }
+
+    public void ResetEnemigo()
+    {
+        if (agente != null && agente.isOnNavMesh)
+            agente.Warp(posicionInicial);
+        else
+            transform.position = posicionInicial;
+
+        transform.rotation = rotInicial;
+        estadoActual = Estado.Idle;
+        agente.isStopped = true;
+        agente.ResetPath();
+        agente.velocity = Vector3.zero;
         ActualizarAnimacion();
     }
 
     private void ActualizarAnimacion()
     {
         if (animator == null) return;
-
         animator.SetBool("IsWalking", estadoActual == Estado.Persiguiendo);
         animator.SetBool("IsKilling", estadoActual == Estado.Atacando);
     }

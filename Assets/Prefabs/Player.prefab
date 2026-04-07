@@ -1410,7 +1410,6 @@ GameObject:
   m_Component:
   - component: {fileID: 7552867594070614678}
   - component: {fileID: 3842955180466685412}
-  - component: {fileID: 5957751927824367809}
   m_Layer: 8
   m_Name: PlayerModelo
   m_TagString: Player
@@ -1551,27 +1550,6 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.0001239581, y: 0.014164866, z: -0.0002934608}
     m_Extent: {x: 0.005106544, y: 0.014613881, z: 0.0018980744}
   m_DirtyAABB: 0
---- !u!65 &5957751927824367809
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2772507553354292258}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1.0938809, y: 0.66655123, z: 2.9817016}
-  m_Center: {x: -0.07669453, y: 1.5845969, z: -0.56000733}
 --- !u!1 &2837848305128806191
 GameObject:
   m_ObjectHideFlags: 0
@@ -2294,6 +2272,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Cristal: 0
+  Verificadorganar: {fileID: 0}
   camara: {fileID: 3107972493954796442}
   rb: {fileID: 1893367683504889159}
   camaraScript: {fileID: 2472194701006336179}

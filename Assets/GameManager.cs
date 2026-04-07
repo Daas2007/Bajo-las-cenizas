@@ -6,6 +6,9 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instancia;
 
+    [Header("Estado de UI")]
+    public bool introduccionMostrada = false;
+
     [Header("Puzzle del oso")]
     public int piezasRecogidas = 0;
     public int piezasNecesarias = 5;
@@ -90,9 +93,13 @@ public class GameManager : MonoBehaviour
         foreach (PuertaTutorial puerta in FindObjectsOfType<PuertaTutorial>())
             puerta.ResetPuerta();
 
-        // Reset enemigos
+        // Reset enemigos perseguidor
         foreach (EnemigoPerseguidor enemigo in FindObjectsOfType<EnemigoPerseguidor>())
             enemigo.ResetEnemigo();
+
+        // ✅ Reset enemigos NavMesh
+        foreach (EnemigoNavMesh enemigoNav in FindObjectsOfType<EnemigoNavMesh>())
+            enemigoNav.ResetEnemigo();
 
         // Reset ventanas
         foreach (EnemigoVentana ventana in FindObjectsOfType<EnemigoVentana>())

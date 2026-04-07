@@ -18,10 +18,6 @@ public class PantallaDeMuerte : MonoBehaviour
     [SerializeField] private float fadeDuration = 0.5f;   // transición rápida
     [SerializeField] private float holdDuration = 5f;     // permanece opaco 5 segundos
 
-    [Header("Configuración")]
-    [SerializeField] float tiempoRojo = 1f;
-    [SerializeField] float tiempoNegro = 1f;
-
     private Image fondo;
     private Image loadingImage;
 
@@ -44,58 +40,38 @@ public class PantallaDeMuerte : MonoBehaviour
     {
         panelMuerte.SetActive(true);
 
-        // ✅ resetear siempre
-        textoMoriste.gameObject.SetActive(false);
-        botonReintentar.SetActive(false);
-        botonSalir.SetActive(false);
-
-        if (gameplayUI != null) gameplayUI.SetActive(false);
-
-        fondo.color = new Color(1f, 0f, 0f, 0f);
-
-        StopAllCoroutines(); // ✅ detener corrutinas previas
-        StartCoroutine(FadeRojoANegro());
-    }
-    IEnumerator FadeRojoANegro()
-    {
-        float t = 0f;
-        while (t < tiempoRojo)
-        {
-            t += Time.deltaTime;
-            float progreso = t / tiempoRojo;
-            fondo.color = new Color(1f, 0f, 0f, progreso);
-            yield return null;
-        }
-
-        t = 0f;
-        while (t < tiempoNegro)
-        {
-            t += Time.deltaTime;
-            float progreso = t / tiempoNegro;
-            fondo.color = Color.Lerp(new Color(1f, 0f, 0f, 1f), new Color(0f, 0f, 0f, 1f), progreso);
-            yield return null;
-        }
-
         textoMoriste.gameObject.SetActive(true);
         botonReintentar.SetActive(true);
         botonSalir.SetActive(true);
+
+        if (gameplayUI != null) gameplayUI.SetActive(false);
+
+        if (fondo != null)
+            fondo.color = new Color(0f, 0f, 0f, 1f); // fondo negro fijo
+
+        if (panelLoading != null)
+            panelLoading.SetActive(false); // asegurarse que no tape la UI
 
         Time.timeScale = 0f;
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
+
+
     public void Reintentar()
     {
-        panelMuerte.SetActive(false); // ✅ cerrar panel antes de reintentar
+        panelMuerte.SetActive(false);
         CanvasController cc = FindObjectOfType<CanvasController>();
         if (cc != null) cc.ReintentarDesdeMuerte();
         cc.panelUIActivo();
     }
+
     public void SalirAlMenu()
     {
-        panelMuerte.SetActive(false); // ✅ cerrar panel
+        panelMuerte.SetActive(false);
         StartCoroutine(SalirMenuCoroutine("MainMenu"));
     }
+
     private IEnumerator SalirMenuCoroutine(string nombreEscena)
     {
         if (panelLoading != null)
@@ -104,7 +80,7 @@ public class PantallaDeMuerte : MonoBehaviour
             yield return StartCoroutine(FadeIn());
             yield return new WaitForSecondsRealtime(holdDuration);
 
-            SceneManager.LoadScene(nombreEscena); // ✅ carga directamente la escena MainMenu
+            SceneManager.LoadScene(nombreEscena);
         }
         else
         {
