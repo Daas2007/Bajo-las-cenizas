@@ -12,6 +12,9 @@ public class VerificadorGanar : MonoBehaviour
     [Header("Dialogo")]
     [SerializeField] private Dialogo dialogo;
 
+    [Header("Panel de UI a ocultar")]
+    [SerializeField] private GameObject panelUI;
+
     [Header("Objetos de escena")]
     [SerializeField] private PuertaInteractuable puerta;
     [SerializeField] private GameObject enemigoVentana;
@@ -32,7 +35,6 @@ public class VerificadorGanar : MonoBehaviour
     {
         triggerEnemigo.SetActive(false);
     }
-
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
@@ -44,6 +46,10 @@ public class VerificadorGanar : MonoBehaviour
 
                 if (triggerEnemigo != null && !triggerEnemigo.activeSelf)
                     triggerEnemigo.SetActive(true);
+
+                // 🔹 Desactivar panel de UI al iniciar la secuencia
+                if (panelUI != null)
+                    panelUI.SetActive(false);
 
                 if (dialogo != null)
                 {
@@ -57,14 +63,18 @@ public class VerificadorGanar : MonoBehaviour
                             Debug.Log("🔄 Personaje girado al ángulo Y: " + anguloFinalY);
                         }
 
-                        if (gameObject.activeInHierarchy) // ✅ aseguramos que este objeto esté activo
+                        if (gameObject.activeInHierarchy)
                             StartCoroutine(FlujoVictoria());
                     });
+
                     dialogo.IniciarDialogo();
+
+                    // 🔎 Verificar si el diálogo se interrumpe antes de terminar
+                    StartCoroutine(VerificarDialogoInterrumpido());
                 }
                 else
                 {
-                    if (gameObject.activeInHierarchy) // ✅ aseguramos que este objeto esté activo
+                    if (gameObject.activeInHierarchy)
                         StartCoroutine(FlujoVictoria());
                 }
             }
@@ -75,6 +85,33 @@ public class VerificadorGanar : MonoBehaviour
         }
     }
 
+    private IEnumerator VerificarDialogoInterrumpido()
+    {
+        // Esperar mientras el panel del diálogo esté activo
+        while (dialogo != null && dialogo.dialogoCanvas.activeSelf)
+        {
+            yield return null;
+        }
+
+        // Si se cerró antes de terminar, forzar la secuencia
+        if (dialogo != null && !dialogo.HaHablado)
+        {
+            Debug.Log("⚠️ Diálogo interrumpido, forzando secuencia de victoria...");
+
+            if (jugador != null)
+            {
+                Vector3 rot = jugador.eulerAngles;
+                jugador.eulerAngles = new Vector3(rot.x, anguloFinalY, rot.z);
+            }
+
+            if (scriptMovimientoJugador != null) scriptMovimientoJugador.enabled = false;
+            if (scriptCamara != null) scriptCamara.enabled = false;
+            if (enemigoNormal != null) enemigoNormal.SetActive(true);
+
+            if (gameObject.activeInHierarchy)
+                StartCoroutine(FlujoVictoria());
+        }
+    }
     private void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("EnemigoPerseguidor"))

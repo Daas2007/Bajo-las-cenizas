@@ -8,7 +8,7 @@ public class EnemigoVentana : MonoBehaviour
     [SerializeField] float tiempoEnEstado = 0f;
 
     [Header("Agresividad y tiempos")]
-    [SerializeField] float tiempoParaAvanzar = 10f;
+    [SerializeField] float tiempoParaAvanzar = 23f;
     [SerializeField] float tiempoParaRetroceder = 4f;
     [SerializeField] float tiempoTotalJuego = 0f;
     [SerializeField] int nivelAgresividad = 1;
@@ -81,10 +81,14 @@ public class EnemigoVentana : MonoBehaviour
         tiempoTotalJuego += deltaT;
         tiempoEnEstado += deltaT;
 
-        if (tiempoTotalJuego >= nivelAgresividad * tiempoPorNivel)
+        // Definimos los tiempos fijos por nivel
+        float[] tiemposPorNivel = { 23f, 18f, 13f, 8f, 3f };
+
+        // Subir agresividad cada 90s y asignar tiempo correspondiente
+        if (tiempoTotalJuego >= nivelAgresividad * tiempoPorNivel && nivelAgresividad < tiemposPorNivel.Length)
         {
             nivelAgresividad++;
-            tiempoParaAvanzar = Mathf.Max(tiempoMinimoAvance, tiempoParaAvanzar - reduccionPorNivel);
+            tiempoParaAvanzar = tiemposPorNivel[nivelAgresividad - 1];
         }
 
         if (recibiendoLuz && estadoActual != 4) // ✅ ignorar luz en estado 4
@@ -132,6 +136,7 @@ public class EnemigoVentana : MonoBehaviour
             }
         }
     }
+
     void AvanzarEstado()
     {
         tiempoEnEstado = 0f;
@@ -328,7 +333,6 @@ public class EnemigoVentana : MonoBehaviour
             audioSourceOjo.Stop();
         }
     }
-
     void ReproducirAudio(AudioClip clip)
     {
         if (clip == null || audioSource == null) return;

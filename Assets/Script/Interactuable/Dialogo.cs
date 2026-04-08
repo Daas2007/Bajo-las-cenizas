@@ -16,6 +16,10 @@ public class Dialogo : MonoBehaviour, IInteractuable
     [SerializeField] private float intervaloSonido = 0.1f;
     private float ultimoSonidoTime = 0f;
 
+    [Header("Audio por línea específica")]
+    [SerializeField] private AudioClip[] clipsPorLinea;
+
+
 
     [Header("Líneas de diálogo")]
     [TextArea(2, 5)]
@@ -168,9 +172,6 @@ public class Dialogo : MonoBehaviour, IInteractuable
 
         inicioDelayCoroutine = StartCoroutine(DelayYMostrarPrimeraLinea(delayInicio));
     }
-
-
-
     private IEnumerator DelayYMostrarPrimeraLinea(float delay)
     {
         yield return new WaitForSecondsRealtime(delay);
@@ -209,8 +210,16 @@ public class Dialogo : MonoBehaviour, IInteractuable
         // programar auto-avance usando tiempo real (no depende de Time.timeScale)
         if (tiempoAutoAvance > 0f)
             autoAvanceCoroutine = StartCoroutine(AutoAvanzarCoroutine(tiempoAutoAvance));
-    }
 
+        // 🔊 reproducir audio específico si está asignado para esta línea
+        if (clipsPorLinea != null && indiceLinea < clipsPorLinea.Length && clipsPorLinea[indiceLinea] != null)
+        {
+            if (audioSource != null)
+            {
+                audioSource.PlayOneShot(clipsPorLinea[indiceLinea]);
+            }
+        }
+    }
     // Escritura letra a letra (usa WaitForSecondsRealtime)
     private IEnumerator EscribirLinea(string linea)
     {
