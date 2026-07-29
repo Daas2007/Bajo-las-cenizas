@@ -1,139 +1,190 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class MainMenu : MonoBehaviour
 {
-    [SerializeField] GameObject mainPanel;       // Panel principal del menú
-    [SerializeField] GameObject opcionesPanel;   // Panel de opciones
-    [SerializeField] GameObject panelLoading;    // Panel de carga con Image
-    [SerializeField] float fadeDuration = 0.5f;  // Duración del fade in/out
-    [SerializeField] float holdDuration = 5f;    // Tiempo opaco antes de cambiar de escena
+    [Header("Paneles UI")]
+    [SerializeField] private GameObject mainPanel;
+    [SerializeField] private GameObject opcionesPanel;
+    [SerializeField] private GameObject panelLoading;
 
-    private Image loadingImage;
+    [Header("Configuración de Transición")]
+    [SerializeField] private Image loadingImage;
+    [SerializeField] private float fadeDuration = 0.8f;
+    [SerializeField] private float fadeDurationRapido = 0.2f; // 🔹 Fundido rápido para opciones
+    [SerializeField] private float holdDuration = 1.0f;
+
+    private bool isTransitioning;
 
     private void Awake()
     {
+        Time.timeScale = 1f;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
         if (mainPanel != null) mainPanel.SetActive(true);
         if (opcionesPanel != null) opcionesPanel.SetActive(false);
-
-        if (panelLoading != null)
-        {
-            loadingImage = panelLoading.GetComponent<Image>();
-        }
-
-        Time.timeScale = 1f;
     }
 
-    private void OnEnable()
+    private async void Start()
     {
         if (panelLoading != null && loadingImage != null)
         {
             panelLoading.SetActive(true);
-            loadingImage.color = new Color(loadingImage.color.r, loadingImage.color.g, loadingImage.color.b, 1f);
-            StartCoroutine(FadeOut()); // aclarar al entrar al menú
+            SetImageAlpha(1f);
+
+            await WaitRealtimeAsync(0.2f);
+            await DoFadeAsync(1f, 0f, fadeDuration);
+
+            panelLoading.SetActive(false);
         }
     }
 
-    private void Update()
+    public async void JugarConLoading(string nombreEscena)
     {
-        // 🔹 Forzar siempre el mouse visible y desbloqueado
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
-    }
+        if (isTransitioning) return;
+        isTransitioning = true;
 
-    // 🔹 Jugar con transición de pantalla de carga
-    public void JugarConLoading(string nombreEscena)
-    {
-        StartCoroutine(LoadingTransitionCoroutine(nombreEscena));
-    }
-
-    private IEnumerator LoadingTransitionCoroutine(string nombreEscena)
-    {
-        if (panelLoading != null)
+        if (panelLoading != null && loadingImage != null)
         {
             panelLoading.SetActive(true);
-            yield return StartCoroutine(FadeIn());
-            yield return new WaitForSecondsRealtime(holdDuration);
+            SetImageAlpha(0f);
 
+            await DoFadeAsync(0f, 1f, fadeDuration);
+
+            AsyncOperation loadOp = SceneManager.LoadSceneAsync(nombreEscena);
+            loadOp.allowSceneActivation = false;
+
+            float elapsed = 0f;
+            while (elapsed < holdDuration || loadOp.progress < 0.9f)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                await Awaitable.NextFrameAsync();
+            }
+
+            loadOp.allowSceneActivation = true;
+        }
+        else
+        {
             SceneManager.LoadScene(nombreEscena);
         }
     }
 
-    private IEnumerator FadeIn()
+    // 🔹 Entrar a opciones con un fundido rápido de pantalla (Fade Out -> Cambiar Panel -> Fade In)
+    public async void AbrirOpciones()
     {
-        float t = 0f;
-        Color c = loadingImage.color;
-        while (t < fadeDuration)
+        if (isTransitioning) return;
+        isTransitioning = true;
+
+        if (panelLoading != null && loadingImage != null)
         {
-            t += Time.unscaledDeltaTime;
-            float alpha = Mathf.Lerp(0f, 1f, t / fadeDuration);
-            loadingImage.color = new Color(c.r, c.g, c.b, alpha);
-            yield return null;
+            panelLoading.SetActive(true);
+            SetImageAlpha(0f);
+            await DoFadeAsync(0f, 1f, fadeDurationRapido); // Oscurece rápido
+
+            if (mainPanel != null) mainPanel.SetActive(false);
+            if (opcionesPanel != null) opcionesPanel.SetActive(true);
+
+            await DoFadeAsync(1f, 0f, fadeDurationRapido); // Aclara rápido
+            panelLoading.SetActive(false);
         }
-        loadingImage.color = new Color(c.r, c.g, c.b, 1f);
+        else
+        {
+            TogglePanels(main: false, opciones: true);
+        }
+
+        isTransitioning = false;
     }
 
-    public IEnumerator FadeOut()
+    // 🔹 Salir de opciones con el mismo fundido rápido de pantalla
+    public async void CerrarOpciones()
+    {
+        if (isTransitioning) return;
+        isTransitioning = true;
+
+        if (panelLoading != null && loadingImage != null)
+        {
+            panelLoading.SetActive(true);
+            SetImageAlpha(0f);
+            await DoFadeAsync(0f, 1f, fadeDurationRapido); // Oscurece rápido
+
+            if (opcionesPanel != null) opcionesPanel.SetActive(false);
+            if (mainPanel != null) mainPanel.SetActive(true);
+
+            await DoFadeAsync(1f, 0f, fadeDurationRapido); // Aclara rápido
+            panelLoading.SetActive(false);
+        }
+        else
+        {
+            TogglePanels(main: true, opciones: false);
+        }
+
+        isTransitioning = false;
+    }
+
+    private async Awaitable DoFadeAsync(float startAlpha, float targetAlpha, float duration)
     {
         float t = 0f;
-        Color c = loadingImage.color;
-        while (t < fadeDuration)
+        while (t < duration)
         {
             t += Time.unscaledDeltaTime;
-            float alpha = Mathf.Lerp(1f, 0f, t / fadeDuration);
-            loadingImage.color = new Color(c.r, c.g, c.b, alpha);
-            yield return null;
+            float currentAlpha = Mathf.Lerp(startAlpha, targetAlpha, t / duration);
+            SetImageAlpha(currentAlpha);
+            await Awaitable.NextFrameAsync();
         }
-        loadingImage.color = new Color(c.r, c.g, c.b, 0f);
-        panelLoading.SetActive(false);
+        SetImageAlpha(targetAlpha);
+    }
+
+    private async Awaitable WaitRealtimeAsync(float duration)
+    {
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            await Awaitable.NextFrameAsync();
+        }
+    }
+
+    private void SetImageAlpha(float alpha)
+    {
+        if (loadingImage == null) return;
+        Color c = loadingImage.color;
+        c.a = alpha;
+        loadingImage.color = c;
     }
 
     public void CargarPartida()
     {
-        if (mainPanel != null) mainPanel.SetActive(false);
-        if (opcionesPanel != null) opcionesPanel.SetActive(false);
-
-        Time.timeScale = 1f;
-
-        MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
-        GameManager gm = GameManager.Instancia;
-
-        if (jugador != null && gm != null)
+        if (GameManager.Instancia != null)
         {
-            SistemaGuardar.Cargar(jugador, gm);
-            Debug.Log("✅ Partida cargada desde archivo de guardado.");
+            SistemaGuardar.Cargar(null, GameManager.Instancia);
         }
     }
 
-    public void AbrirOpciones()
+    private void TogglePanels(bool main, bool opciones)
     {
-        if (opcionesPanel != null) opcionesPanel.SetActive(true);
-        if (mainPanel != null) mainPanel.SetActive(false);
+        if (mainPanel != null) mainPanel.SetActive(main);
+        if (opcionesPanel != null) opcionesPanel.SetActive(opciones);
     }
 
-    public void CerrarOpciones()
+    public async void SalirJuego()
     {
-        if (opcionesPanel != null) opcionesPanel.SetActive(false);
-        if (mainPanel != null) mainPanel.SetActive(true);
-    }
+        if (isTransitioning) return;
+        isTransitioning = true;
 
-    public void SalirJuego()
-    {
-        StartCoroutine(SalirJuegoConFade());
-    }
-
-    private IEnumerator SalirJuegoConFade()
-    {
-        if (panelLoading != null)
+        if (panelLoading != null && loadingImage != null)
         {
             panelLoading.SetActive(true);
-            yield return StartCoroutine(FadeIn());
-            yield return new WaitForSecondsRealtime(1f);
+            SetImageAlpha(0f);
+            await DoFadeAsync(0f, 1f, fadeDuration);
+            await WaitRealtimeAsync(0.5f);
         }
 
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
         Application.Quit();
-        Debug.Log("Juego cerrado desde el menú principal con fade.");
+#endif
     }
 }

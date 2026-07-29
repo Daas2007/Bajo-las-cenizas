@@ -1,189 +1,185 @@
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 
 [RequireComponent(typeof(Rigidbody))]
 public class MovimientoPersonaje : MonoBehaviour
 {
     [Header("Cristal Obtenido")]
-    [SerializeField] public bool Cristal = false;
-    [SerializeField] private GameObject Verificadorganar; // 🔹 referencia al trigger de ganar
+    public bool Cristal = false;
+    [SerializeField] private GameObject verificadorGanar;
 
     [Header("Referencias")]
-    [SerializeField] Transform camara;
-    [SerializeField] Rigidbody rb;
-    [SerializeField] Camara camaraScript;
-    [SerializeField] Animator animator;
-    [SerializeField] AudioSource audioSource;
-    [SerializeField] AudioClip jadeoClip;
+    [SerializeField] private Transform camara;
+    [SerializeField] private Rigidbody rb;
+    [SerializeField] private Camara camaraScript;
+    [SerializeField] private Animator animator;
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip jadeoClip;
 
-    [Header("Configuración de velocidad Player")]
-    [SerializeField] bool UsarGetAxisRaw = true;
-    [SerializeField] float VelocidadMove = 5f;
-    [SerializeField] public float VelocidadBase;
+    [Header("Configuración de Velocidad")]
+    [SerializeField] private bool usarGetAxisRaw = true;
+    [SerializeField] private float velocidadMove = 5f;
+    public float VelocidadBase { get; private set; }
 
     [Header("Stamina")]
-    [SerializeField] GameObject canvas_StaminaBar;
-    [SerializeField] Image BarraStamina;
-    [SerializeField] float StaminaMaxima = 100f;
-    [SerializeField] float Stamina;
-    [SerializeField] float CostoCorrer = 15f;
-    [SerializeField] float RecargarStamina = 10f;
+    [SerializeField] private GameObject canvasStaminaBar;
+    [SerializeField] private Image barraStamina;
+    [SerializeField] private float staminaMaxima = 100f;
+    [SerializeField] private float costoCorrer = 15f;
+    [SerializeField] private float recargarStamina = 10f;
 
-    private Coroutine recarga;
-    private bool estabaCorriendo = false;
+    public float Stamina { get; private set; }
 
-    // 🔹 Flags para Animator
-    public bool tieneLinterna = false;
-    public bool tieneObjeto = false;
+    // Control Interno de Stamina (Evita Corrutinas / GC Allocations)
+    private float temporizadorRecarga;
+    private bool estabaCorriendo;
 
-    void Awake()
+    // Flags para Animator
+    [HideInInspector] public bool tieneLinterna;
+    [HideInInspector] public bool tieneObjeto;
+
+    // Caché de Inputs y Físicas
+    private Vector3 direccionInput;
+    private bool quiereCorrer;
+    private bool estaMoviendose;
+
+    // 🔹 Optimization: Animator Hashes (Evita alloc de Strings por frame)
+    private static readonly int HashVelocidad = Animator.StringToHash("Velocidad");
+    private static readonly int HashCorriendo = Animator.StringToHash("Corriendo");
+    private static readonly int HashLinterna = Animator.StringToHash("TieneLinterna");
+    private static readonly int HashObjeto = Animator.StringToHash("TieneObjeto");
+
+    // 🔹 Optimization: Tag Hash
+    private static readonly string TagCristal = "Cristal";
+
+    private void Awake()
     {
-        if (Verificadorganar != null)
-            Verificadorganar.SetActive(false);
+        if (verificadorGanar != null)
+            verificadorGanar.SetActive(false);
 
-        rb = GetComponent<Rigidbody>();
+        if (rb == null) rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
 
-        if (camara == null && Camera.main != null) camara = Camera.main.transform;
-        if (canvas_StaminaBar != null) canvas_StaminaBar.SetActive(false);
+        if (camara == null && Camera.main != null)
+            camara = Camera.main.transform;
+
+        if (canvasStaminaBar != null)
+            canvasStaminaBar.SetActive(false);
     }
 
-    void Start()
+    private void Start()
     {
-        Stamina = StaminaMaxima;
-        VelocidadBase = VelocidadMove;
+        Stamina = staminaMaxima;
+        VelocidadBase = velocidadMove;
     }
 
-    void Update()
+    private void Update()
     {
-        if (Time.timeScale == 1f)
+        if (Mathf.Approximately(Time.timeScale, 0f))
         {
-            JugadorCorrer();
-            ActualizarBarraStamina();
+            if (canvasStaminaBar != null && canvasStaminaBar.activeSelf)
+                canvasStaminaBar.SetActive(false);
+            return;
         }
-        else
-        {
-            if (canvas_StaminaBar != null) canvas_StaminaBar.SetActive(false);
-        }
+
+        LeerEntradas();
+        GestionarStamina();
+        ActualizarBarraStaminaUI();
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
-        if (Time.timeScale == 1f)
-            JugadorCaminandoRB();
+        if (Time.timeScale > 0f)
+            MoverJugador();
     }
 
-    void JugadorCaminandoRB()
+    private void LeerEntradas()
     {
-        float h = UsarGetAxisRaw ? Input.GetAxisRaw("Horizontal") : Input.GetAxis("Horizontal");
-        float v = UsarGetAxisRaw ? Input.GetAxisRaw("Vertical") : Input.GetAxis("Vertical");
+        float h = usarGetAxisRaw ? Input.GetAxisRaw("Horizontal") : Input.GetAxis("Horizontal");
+        float v = usarGetAxisRaw ? Input.GetAxisRaw("Vertical") : Input.GetAxis("Vertical");
 
-        Vector3 adelanteCamara = camara.forward; adelanteCamara.y = 0f; adelanteCamara.Normalize();
-        Vector3 derechaCamara = camara.right; derechaCamara.y = 0f; derechaCamara.Normalize();
+        // Calculamos dirección orientada a la cámara
+        Vector3 adelante = camara.forward; adelante.y = 0f; adelante.Normalize();
+        Vector3 derecha = camara.right; derecha.y = 0f; derecha.Normalize();
 
-        Vector3 direccionPlano = (derechaCamara * h + adelanteCamara * v).normalized;
-        rb.linearVelocity = direccionPlano * VelocidadMove;
+        direccionInput = (derecha * h + adelante * v).normalized;
+        estaMoviendose = direccionInput.sqrMagnitude > 0.01f; // Más rápido que Vector3.magnitude
 
-        float velocidadActual = rb.linearVelocity.magnitude;
+        quiereCorrer = Input.GetKey(KeyCode.LeftShift) && estaMoviendose && Stamina > 0f;
+    }
 
+    private void MoverJugador()
+    {
+        // Preservamos la velocidad vertical Y (gravedad, caídas)
+        Vector3 velocidadObjetivo = direccionInput * velocidadMove;
+        velocidadObjetivo.y = rb.linearVelocity.y;
+
+        rb.linearVelocity = velocidadObjetivo;
+
+        float velocidadPlano = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z).magnitude;
+
+        // Actualizar Animaciones con Hashes
         if (animator != null)
         {
-            animator.SetFloat("Velocidad", velocidadActual);
-            animator.SetBool("Corriendo", VelocidadMove > VelocidadBase);
-
-            animator.SetBool("TieneLinterna", tieneLinterna);
-            animator.SetBool("TieneObjeto", tieneObjeto);
+            animator.SetFloat(HashVelocidad, velocidadPlano);
+            animator.SetBool(HashCorriendo, velocidadMove > VelocidadBase);
+            animator.SetBool(HashLinterna, tieneLinterna);
+            animator.SetBool(HashObjeto, tieneObjeto);
         }
 
         if (camaraScript != null)
-        {
-            camaraScript.SetEstado(velocidadActual);
-        }
+            camaraScript.SetEstado(velocidadPlano);
     }
 
-    void JugadorCorrer()
+    private void GestionarStamina()
     {
-        bool moviendo = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) ||
-                        Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D);
-
-        bool corriendoAhora = Input.GetKey(KeyCode.LeftShift) && moviendo && Stamina > 0f;
-
-        if (corriendoAhora)
+        if (quiereCorrer)
         {
-            VelocidadMove = VelocidadBase * 1.5f;
-            Stamina -= CostoCorrer * Time.deltaTime;
-            if (Stamina < 0f) Stamina = 0f;
-            if (recarga != null) { StopCoroutine(recarga); recarga = null; }
+            velocidadMove = VelocidadBase * 1.5f;
+            Stamina = Mathf.Max(0f, Stamina - costoCorrer * Time.deltaTime);
+            temporizadorRecarga = (Stamina <= 0f) ? 3f : 1f; // Delay dinámico
+            estabaCorriendo = true;
         }
         else
         {
-            VelocidadMove = VelocidadBase;
+            velocidadMove = VelocidadBase;
 
-            if (estabaCorriendo && !corriendoAhora && Stamina <= StaminaMaxima * 0.35f)
+            // Sonido de jadeo al agotar la energía
+            if (estabaCorriendo && Stamina <= staminaMaxima * 0.35f)
             {
                 if (audioSource != null && jadeoClip != null)
                     audioSource.PlayOneShot(jadeoClip);
             }
+            estabaCorriendo = false;
 
-            if (recarga == null) recarga = StartCoroutine(RecargaStamina());
-        }
-
-        estabaCorriendo = corriendoAhora;
-
-        if (animator != null)
-        {
-            animator.SetBool("TieneLinterna", tieneLinterna);
-            animator.SetBool("TieneObjeto", tieneObjeto);
-        }
-    }
-
-    void ActualizarBarraStamina()
-    {
-        if (BarraStamina != null)
-            BarraStamina.fillAmount = Stamina / StaminaMaxima;
-
-        bool moviendo = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) ||
-                        Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D);
-
-        if (canvas_StaminaBar != null)
-        {
-            if ((Input.GetKey(KeyCode.LeftShift) && moviendo && Stamina > 0f) || Stamina < StaminaMaxima)
-                canvas_StaminaBar.SetActive(true);
-            else
-                canvas_StaminaBar.SetActive(false);
+            // Recarga limpia por tiempo (Sin Corrutinas)
+            if (temporizadorRecarga > 0f)
+            {
+                temporizadorRecarga -= Time.deltaTime;
+            }
+            else if (Stamina < staminaMaxima)
+            {
+                Stamina = Mathf.Min(staminaMaxima, Stamina + recargarStamina * Time.deltaTime);
+            }
         }
     }
 
-    IEnumerator RecargaStamina()
+    private void ActualizarBarraStaminaUI()
     {
-        float delay = (Stamina <= 0f) ? 3f : 1f;
-        yield return new WaitForSeconds(delay);
+        if (canvasStaminaBar == null) return;
 
-        while (Stamina < StaminaMaxima)
-        {
-            Stamina += RecargarStamina * Time.deltaTime;
-            if (Stamina > StaminaMaxima) Stamina = StaminaMaxima;
-            if (BarraStamina != null) BarraStamina.fillAmount = Stamina / StaminaMaxima;
-            yield return null;
-        }
-        if (canvas_StaminaBar != null) canvas_StaminaBar.SetActive(false);
-        recarga = null;
-    }
+        bool mostrarBarra = (quiereCorrer) || (Stamina < staminaMaxima);
 
-    public void GuardarPartida()
-    {
-        SistemaGuardar.Guardar(this, GameManager.Instancia);
-    }
+        if (canvasStaminaBar.activeSelf != mostrarBarra)
+            canvasStaminaBar.SetActive(mostrarBarra);
 
-    public void CargarPartida()
-    {
-        SistemaGuardar.Cargar(this, GameManager.Instancia);
+        if (mostrarBarra && barraStamina != null)
+            barraStamina.fillAmount = Stamina / staminaMaxima;
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Cristal"))
+        if (other.CompareTag(TagCristal))
         {
             CristalObtenido(other.gameObject);
         }
@@ -199,37 +195,32 @@ public class MovimientoPersonaje : MonoBehaviour
         {
             GameManager.Instancia.NotifyCrystalCollected();
         }
-        else
-        {
-            Debug.LogWarning("[MovimientoPersonaje] GameManager.Instancia es null al recoger cristal.");
-        }
 
+        // 💡 RECOMENDACIÓN: Sustituir FindObjectsOfType en el futuro usando un sistema de Eventos o Registro.
         ZoneTrigger[] triggers = FindObjectsOfType<ZoneTrigger>();
-        foreach (var t in triggers)
+        for (int i = 0; i < triggers.Length; i++)
         {
-            if (t != null)
-                t.ForzarActualizarEstado();
+            if (triggers[i] != null)
+                triggers[i].ForzarActualizarEstado();
         }
 
         if (cristalObject != null)
             Destroy(cristalObject);
 
-        // 🔹 Activar trigger de ganar al recoger cristal
-        if (Verificadorganar != null)
-            Verificadorganar.SetActive(true);
-
-        Debug.Log("[MovimientoPersonaje] Cristal recogido: notificado a GameManager y activado VerificadorGanar.");
+        if (verificadorGanar != null)
+            verificadorGanar.SetActive(true);
     }
 
     public bool TieneCristal()
     {
-        Debug.Log("[MovimientoPersonaje] TieneCristal llamado. Estado actual: " + Cristal);
-
-        if (Cristal && Verificadorganar != null)
+        if (Cristal && verificadorGanar != null && !verificadorGanar.activeSelf)
         {
-            Verificadorganar.SetActive(true);
+            verificadorGanar.SetActive(true);
         }
 
         return Cristal;
     }
+
+    public void GuardarPartida() => SistemaGuardar.Guardar(this, GameManager.Instancia);
+    public void CargarPartida() => SistemaGuardar.Cargar(this, GameManager.Instancia);
 }
