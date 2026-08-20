@@ -33,14 +33,40 @@ public class Camara : MonoBehaviour
     void Start()
     {
         posicionInicial = transform.localPosition;
-        // ❌ No ocultar el mouse aquí, que lo maneje el menú
     }
 
     //---------------Update---------------
     void Update()
     {
-        RotacionMouse();
-        AplicarBalanceo();
+        GestionarEstadoCursor();
+
+        // Si el juego está en pausa (timeScale == 0), no procesamos la rotación ni el balanceo
+        if (Time.timeScale > 0f)
+        {
+            RotacionMouse();
+            AplicarBalanceo();
+        }
+    }
+
+    //---------------Control del Mouse Automático---------------
+    void GestionarEstadoCursor()
+    {
+        // Si el tiempo corre normal (1), bloquea y oculta el mouse
+        if (Time.timeScale > 0f)
+        {
+            if (Cursor.lockState != CursorLockMode.Locked)
+            {
+                OcultarMouse();
+            }
+        }
+        // Si el tiempo se detiene (0), libera y muestra el mouse
+        else
+        {
+            if (Cursor.lockState != CursorLockMode.None)
+            {
+                MostrarMouse();
+            }
+        }
     }
 
     //---------------Rotación---------------
@@ -102,7 +128,7 @@ public class Camara : MonoBehaviour
         else estado = Estado.Run;
     }
 
-    //---------------Control del Mouse---------------
+    //---------------Control del Mouse Manual---------------
     public void OcultarMouse()
     {
         Cursor.lockState = CursorLockMode.Locked;

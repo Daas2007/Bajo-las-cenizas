@@ -44,7 +44,7 @@ public class CanvasController : MonoBehaviour
     private void OnEnable()
     {
         DesactivarTodos();
-        BloquearMouse();
+        //BloquearMouse();
         if (panelHUD != null) panelHUD.SetActive(true);
 
         if (panelLoading != null && loadingImage != null)
@@ -410,8 +410,8 @@ public class CanvasController : MonoBehaviour
                 Time.timeScale = 1f;
             }
 
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
+            //Cursor.lockState = CursorLockMode.None;
+            //Cursor.visible = true;
         }
     }
     public void panelUIActivo()
@@ -453,14 +453,14 @@ public class CanvasController : MonoBehaviour
             Time.timeScale = 1f;
 
             // ✅ Bloquear mouse como en gameplay normal
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
+            //Cursor.lockState = CursorLockMode.Locked;
+            //Cursor.visible = false;
         }
     }
 
-    public void BloquearMouse()
-    {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-    }
+    //public void BloquearMouse()
+    //{
+    //    Cursor.lockState = CursorLockMode.Locked;
+    //    Cursor.visible = false;
+    //}
 }

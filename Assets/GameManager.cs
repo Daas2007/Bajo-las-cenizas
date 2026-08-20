@@ -15,6 +15,16 @@ public class GameManager : MonoBehaviour
     public bool osoCompleto = false;
     public Action OnOsoCompleto;
 
+    [Header("Inventario Invisible de Cristales")]
+    [SerializeField] private int maxCristales = 3;
+    public int cristalesObtenidos = 0;
+
+    // Evento de Cristales
+    public event Action OnCrystalCollected;
+
+    // Compatibilidad con la propiedad previa (true si se tiene al menos 1 cristal)
+    public bool HasCrystal => cristalesObtenidos > 0;
+
     [Header("Objetos de la escena")]
     public GameObject linternaEnMano;
     public GameObject linternaPickup;
@@ -36,20 +46,57 @@ public class GameManager : MonoBehaviour
     public GameObject enemigo;
     public bool tieneLinterna = false;
 
-    // -----------------------
-    // Estado de sesión: si el jugador tiene el cristal en la partida actual.
-    // NO se persiste en PlayerPrefs ni en disco.
-    // -----------------------
-    public bool HasCrystal { get; private set; } = false;
-
-    // Evento para notificar a otros sistemas que se recogió el cristal
-    public event Action OnCrystalCollected;
-
     void Awake()
     {
-        if (Instancia == null) Instancia = this;
-        else Destroy(gameObject);
+        if (Instancia == null)
+        {
+            Instancia = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
+
+    // ------------------- INVENTARIO DE CRISTALES -------------------
+    public bool AgregarCristal()
+    {
+        // Solo permite acumular si no se ha alcanzado el límite de 3
+        if (cristalesObtenidos < maxCristales)
+        {
+            cristalesObtenidos++;
+            OnCrystalCollected?.Invoke();
+            Debug.Log($"[GameManager] Cristal agregado al inventario. Total: {cristalesObtenidos}/{maxCristales}");
+            return true;
+        }
+
+        Debug.LogWarning($"[GameManager] Inventario lleno: Ya tienes el máximo permitido ({maxCristales} cristales).");
+        return false;
+    }
+
+    public bool InventarioLleno() => cristalesObtenidos >= maxCristales;
+    public bool TieneCristales() => cristalesObtenidos > 0;
+
+    public void NotifyCrystalCollected()
+    {
+        AgregarCristal();
+    }
+
+    public void RecogerCristal()
+    {
+        if (AgregarCristal())
+        {
+            MuroBloqueo[] muros = FindObjectsOfType<MuroBloqueo>();
+            foreach (var muro in muros)
+            {
+                if (muro != null)
+                    muro.QuitarMuro();
+            }
+
+            Debug.Log("[GameManager] RecogerCristal: Cristal registrado y muros quitados en la escena.");
+        }
+    }
+
     // ------------------- MÉTODOS DE JUEGO -------------------
     public void RecogerPieza()
     {
@@ -60,11 +107,13 @@ public class GameManager : MonoBehaviour
             OnOsoCompleto?.Invoke();
         }
     }
+
     public void ResetearPuzzleOso()
     {
         piezasRecogidas = 0;
         osoCompleto = false;
     }
+
     public void RegistrarMuerte(string habitacion = "global")
     {
         muertes++;
@@ -72,12 +121,15 @@ public class GameManager : MonoBehaviour
             muertesPorHabitacion[habitacion] = 0;
         muertesPorHabitacion[habitacion]++;
     }
+
     public int GetMuertes() => muertes;
+
     public bool CristalDañado(string habitacion = "global")
     {
         if (!muertesPorHabitacion.ContainsKey(habitacion)) return false;
         return muertesPorHabitacion[habitacion] > 2;
     }
+
     // ------------------- REINICIO -------------------
     public void ReiniciarEstado()
     {
@@ -97,7 +149,7 @@ public class GameManager : MonoBehaviour
         foreach (EnemigoPerseguidor enemigo in FindObjectsOfType<EnemigoPerseguidor>())
             enemigo.ResetEnemigo();
 
-        // ✅ Reset enemigos NavMesh
+        // Reset enemigos NavMesh
         foreach (EnemigoNavMesh enemigoNav in FindObjectsOfType<EnemigoNavMesh>())
             enemigoNav.ResetEnemigo();
 
@@ -115,29 +167,29 @@ public class GameManager : MonoBehaviour
         puzzle2Completado = false;
         cristalMetaActivo = false;
 
-        // Reset cristal de sesión (no persistente)
-        HasCrystal = false;
+        // Reset inventario de cristales
+        cristalesObtenidos = 0;
     }
+
     // ------------------- NUEVA PARTIDA -------------------
     public void NuevaPartida()
     {
         ReiniciarEstado();
-        // Borrar archivo de guardado para asegurar inicio limpio
         SistemaGuardar.BorrarArchivo();
-        // Teleport seguro al spawn inicial
         TeleportarASpawnInicial();
-        // Linterna inicial
+
         if (linternaEnMano != null) linternaEnMano.SetActive(false);
         if (linternaPickup != null) linternaPickup.SetActive(true);
         tieneLinterna = false;
-        // Reactivar UI
+
         GameObject gameplayUI = GameObject.Find("GameplayUI");
         if (gameplayUI != null) gameplayUI.SetActive(true);
         muertes = 0;
         muertesPorHabitacion.Clear();
         Debug.Log("[GameManager] NuevaPartida: inicio limpio aplicado.");
     }
-    //-------------------- SPAWN INICIAL---------------------
+
+    //-------------------- SPAWN INICIAL ---------------------
     public void TeleportarASpawnInicial()
     {
         MovimientoPersonaje jugador = FindObjectOfType<MovimientoPersonaje>();
@@ -177,6 +229,7 @@ public class GameManager : MonoBehaviour
 
         Debug.Log($"[GameManager] Jugador teletransportado a spawnInicial {spawnInicial.position}");
     }
+
     // ------------------- GUARDAR PARTIDA -------------------
     public void GuardarPartida()
     {
@@ -185,7 +238,7 @@ public class GameManager : MonoBehaviour
         {
             SistemaGuardar.Guardar(jugador, this);
             CanvasController cv = FindAnyObjectByType<CanvasController>();
-            cv.Reanudar();
+            if (cv != null) cv.Reanudar();
             Debug.Log("💾 Partida guardada correctamente.");
         }
         else
@@ -193,6 +246,7 @@ public class GameManager : MonoBehaviour
             Debug.LogWarning("⚠️ No se pudo guardar: jugador no encontrado.");
         }
     }
+
     // ------------------- REINTENTAR DESDE GUARDADO -------------------
     public void ReintentarDesdeGuardado()
     {
@@ -202,7 +256,6 @@ public class GameManager : MonoBehaviour
             bool cargado = SistemaGuardar.Cargar(jugador, this);
             if (!cargado)
             {
-                // Si no hay guardado, respawn inicial
                 ReiniciarEstado();
                 TeleportarASpawnInicial();
                 Debug.Log("🔄 No había guardado, respawn en spawn inicial.");
@@ -212,38 +265,16 @@ public class GameManager : MonoBehaviour
                 Debug.Log("📂 Partida cargada correctamente desde guardado.");
             }
 
-            // Reactivar jugador y cámara
             jugador.enabled = true;
             Camera cam = jugador.GetComponentInChildren<Camera>();
             if (cam != null) cam.enabled = true;
 
-            // Restaurar tiempo y controles
-            CanvasController cv = FindAnyObjectByType<CanvasController>(); 
-            cv.Reanudar();
+            CanvasController cv = FindAnyObjectByType<CanvasController>();
+            if (cv != null) cv.Reanudar();
         }
         else
         {
             Debug.LogWarning("⚠️ No se pudo reintentar: jugador no encontrado.");
         }
-    }
-    public void NotifyCrystalCollected()
-    {
-        if (HasCrystal) return;
-        HasCrystal = true;
-        OnCrystalCollected?.Invoke();
-        Debug.Log("[GameManager] NotifyCrystalCollected: cristal recogido (estado en memoria).");
-    }
-    public void RecogerCristal()
-    {
-        NotifyCrystalCollected();
-
-        MuroBloqueo[] muros = FindObjectsOfType<MuroBloqueo>();
-        foreach (var muro in muros)
-        {
-            if (muro != null)
-                muro.QuitarMuro();
-        }
-
-        Debug.Log("[GameManager] RecogerCristal: muros quitados en la escena.");
     }
 }
