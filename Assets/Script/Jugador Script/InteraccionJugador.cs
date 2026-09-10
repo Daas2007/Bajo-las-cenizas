@@ -16,6 +16,7 @@ public class InteraccionJugador : MonoBehaviour
 
     [Header("Referencias")]
     [SerializeField] private Transform manoIzquierda; // Empty object para la mano
+    [SerializeField] private Transform agarre; //Exclusivo para minienemigos del nivel 2
 
     private IInteractuable objetoActual;
     private Transform objetoTransform;
@@ -47,6 +48,8 @@ public class InteraccionJugador : MonoBehaviour
                 textoInteraccion.text = "Presiona [E] para agarrar pieza del oso";
             else if (objetoTransform.CompareTag("Llave"))
                 textoInteraccion.text = "Presiona [E] para agarrar llave";
+            else if (objetoTransform.CompareTag("MiniEnemigo"))
+                textoInteraccion.text = "Presiona [E] para agarrar mini enemigo";
             else
                 textoInteraccion.text = "Presiona [E] para interactuar";
 
@@ -57,9 +60,11 @@ public class InteraccionJugador : MonoBehaviour
                 {
                     IntentarColocar(objetoTransform.GetComponent<SlotPuzzle>());
                 }
-                else if (objetoTransform.CompareTag("Puzzle") || objetoTransform.CompareTag("Agarrar") || objetoTransform.CompareTag("OsoTorso") || objetoTransform.CompareTag("Llave"))
+                else if (objetoTransform.CompareTag("Puzzle") || objetoTransform.CompareTag("Agarrar") ||
+                         objetoTransform.CompareTag("OsoTorso") || objetoTransform.CompareTag("Llave") ||
+                         objetoTransform.CompareTag("MiniEnemigo"))
                 {
-                    // ✅ Pasar referencia de la mano a cualquier tipo de pieza
+                    // ✅ Pasar referencia de la mano a cualquier tipo de pieza/objeto
                     PiezaPuzzle piezaPuzzle = objetoTransform.GetComponent<PiezaPuzzle>();
                     if (piezaPuzzle != null) piezaPuzzle.SetMano(manoIzquierda);
 
@@ -68,6 +73,9 @@ public class InteraccionJugador : MonoBehaviour
 
                     LlaveInteractuable llave = objetoTransform.GetComponent<LlaveInteractuable>();
                     if (llave != null) llave.SetMano(manoIzquierda);
+
+                    MiniEnemigoController mini = objetoTransform.GetComponent<MiniEnemigoController>();
+                    if (mini != null) mini.SetMano(manoIzquierda);
 
                     objetoActual.Interactuar();
                     Debug.Log("[InteraccionJugador] Interactuando con: " + objetoTransform.name);
@@ -125,9 +133,17 @@ public class InteraccionJugador : MonoBehaviour
                         {
                             llave.Soltar();
                         }
-                        else if (objetoEnMano.CompareTag("Agarrar"))
+                        else
                         {
-                            objetoEnMano.SetParent(null);
+                            MiniEnemigoController mini = objetoEnMano.GetComponent<MiniEnemigoController>();
+                            if (mini != null)
+                            {
+                                mini.Soltar();
+                            }
+                            else if (objetoEnMano.CompareTag("Agarrar"))
+                            {
+                                objetoEnMano.SetParent(null);
+                            }
                         }
                     }
                 }
@@ -204,5 +220,26 @@ public class InteraccionJugador : MonoBehaviour
     {
         yield return null; // esperar un frame
         anim.SetBool(parametro, false);
+    }
+    //--------------INTERACCION CON MINI ENEMIGOS----------------
+    public void InteractuarConMiniEnemigo(MiniEnemigoController mini)
+    {
+        if (mini != null)
+        {
+            mini.SetMano(agarre);
+            mini.Interactuar();
+            Debug.Log("[InteraccionJugador] Interactuando con Mini Enemigo: " + mini.name);
+            if (movimientoJugador != null)
+            {
+                movimientoJugador.tieneObjeto = true;
+                Animator anim = movimientoJugador.GetComponent<Animator>();
+                if (anim != null)
+                {
+                    anim.SetBool("TieneObjeto", true);
+                    anim.SetBool("AgarraObjeto", true);
+                    StartCoroutine(ResetBool(anim, "AgarraObjeto"));
+                }
+            }
+        }
     }
 }

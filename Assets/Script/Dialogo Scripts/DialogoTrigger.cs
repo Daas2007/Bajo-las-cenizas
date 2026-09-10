@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class DialogueTrigger : MonoBehaviour, IInteractuable
+public class DialogueTrigger : MonoBehaviour
 {
     [System.Serializable]
     public struct Dialogo
@@ -63,8 +63,5 @@ public class DialogueTrigger : MonoBehaviour, IInteractuable
         }
     }
 
-    public void Interactuar()
-    {
-        DispararDialogo();
-    }
+
 }
