@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class MiniEnemigos : MonoBehaviour
@@ -26,10 +27,10 @@ public class MiniEnemigos : MonoBehaviour
     }
     private void Awake()
     {
-        miniEnemigos[0].SetActive(false);
-        miniEnemigos[1].SetActive(false);
-        miniEnemigos[2].SetActive(false);
-        miniEnemigos[3].SetActive(false);
+        for (int i = 0; i < miniEnemigos.Length; i ++)
+        {
+            miniEnemigos[i].SetActive(false);
+        }
     }
     private void Update()
     {
