@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using TMPro;
 using System.Collections;
+using NUnit.Framework;
+using System.Collections.Generic;
 
 public class InteraccionJugador : MonoBehaviour
 {
@@ -14,9 +16,12 @@ public class InteraccionJugador : MonoBehaviour
     [SerializeField] TMP_Text textoInteraccion;
     [SerializeField] GameObject dialogoCanvas;
 
+    [Header("Lista De Tags")]
+    [SerializeField] List<string> TagInteraccion = new List<string>();
+
     [Header("Referencias")]
     [SerializeField] private Transform manoIzquierda; // Empty object para la mano
-    [SerializeField] private Transform agarre; //Exclusivo para minienemigos del nivel 2
+    [SerializeField] private Transform agarreCentral; //Exclusivo para minienemigos del nivel 2
 
     private IInteractuable objetoActual;
     private Transform objetoTransform;
@@ -52,7 +57,7 @@ public class InteraccionJugador : MonoBehaviour
                 textoInteraccion.text = "Presiona [E] para agarrar mini enemigo";
             else
                 textoInteraccion.text = "Presiona [E] para interactuar";
-
+            
             // ✅ Interacción con E
             if (Input.GetKeyDown(KeyCode.E))
             {
@@ -73,9 +78,6 @@ public class InteraccionJugador : MonoBehaviour
 
                     LlaveInteractuable llave = objetoTransform.GetComponent<LlaveInteractuable>();
                     if (llave != null) llave.SetMano(manoIzquierda);
-
-                    MiniEnemigoController mini = objetoTransform.GetComponent<MiniEnemigoController>();
-                    if (mini != null) mini.SetMano(manoIzquierda);
 
                     objetoActual.Interactuar();
                     Debug.Log("[InteraccionJugador] Interactuando con: " + objetoTransform.name);
@@ -132,18 +134,6 @@ public class InteraccionJugador : MonoBehaviour
                         if (llave != null)
                         {
                             llave.Soltar();
-                        }
-                        else
-                        {
-                            MiniEnemigoController mini = objetoEnMano.GetComponent<MiniEnemigoController>();
-                            if (mini != null)
-                            {
-                                mini.Soltar();
-                            }
-                            else if (objetoEnMano.CompareTag("Agarrar"))
-                            {
-                                objetoEnMano.SetParent(null);
-                            }
                         }
                     }
                 }
@@ -220,26 +210,5 @@ public class InteraccionJugador : MonoBehaviour
     {
         yield return null; // esperar un frame
         anim.SetBool(parametro, false);
-    }
-    //--------------INTERACCION CON MINI ENEMIGOS----------------
-    public void InteractuarConMiniEnemigo(MiniEnemigoController mini)
-    {
-        if (mini != null)
-        {
-            mini.SetMano(agarre);
-            mini.Interactuar();
-            Debug.Log("[InteraccionJugador] Interactuando con Mini Enemigo: " + mini.name);
-            if (movimientoJugador != null)
-            {
-                movimientoJugador.tieneObjeto = true;
-                Animator anim = movimientoJugador.GetComponent<Animator>();
-                if (anim != null)
-                {
-                    anim.SetBool("TieneObjeto", true);
-                    anim.SetBool("AgarraObjeto", true);
-                    StartCoroutine(ResetBool(anim, "AgarraObjeto"));
-                }
-            }
-        }
     }
 }

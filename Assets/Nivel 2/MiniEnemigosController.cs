@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.AI;
 
 [RequireComponent(typeof(NavMeshAgent))]
-public class MiniEnemigoController : MonoBehaviour, IInteractuable
+public class MiniEnemigoController : MonoBehaviour
 {
     [Header("Referencias del Objetivo")]
     [Tooltip("Arrastra aquí la TV Principal o asignará una con el Tag 'TVPrincipal'")]
@@ -103,70 +103,5 @@ public class MiniEnemigoController : MonoBehaviour, IInteractuable
 
     // ------------------- IMPLEMENTACIÓN DE INTERACCIÓN -------------------
 
-    public void SetMano(Transform mano)
-    {
-        manoJugador = mano;
-    }
-
-    public void Interactuar()
-    {
-        // Al interactuar (agarrar con E)
-        estaEnMano = true;
-
-        if (agent != null) agent.enabled = false; // Desactivar la IA de navegación
-
-        Collider col = GetComponent<Collider>();
-        if (col != null) col.isTrigger = true; // Evita colisiones físicas con el jugador
-
-        if (manoJugador != null)
-        {
-            transform.SetParent(manoJugador);
-            transform.localPosition = Vector3.zero;
-            transform.localRotation = Quaternion.identity;
-        }
-
-        Debug.Log($"✋ Mini Enemigo agarrado por el jugador.");
-    }
-
-    public void Soltar()
-    {
-        estaEnMano = false;
-        transform.SetParent(null);
-
-        Collider col = GetComponent<Collider>();
-        if (col != null) col.isTrigger = false;
-
-        // Comprobar si el jugador lo soltó cerca de un televisor secundario para devolverlo
-        if (IntentarDevolverATelevisor())
-        {
-            // Desaparece / Desactiva el mini enemigo si lo metieron a un TV
-            gameObject.SetActive(false);
-            Debug.Log($"📺 Mini Enemigo devuelto al televisor secundario.");
-        }
-        else
-        {
-            // Si lo soltó en el aire/suelo, reactiva el NavMesh para que vuelva a caminar a la TV Principal
-            if (agent != null)
-            {
-                agent.enabled = true;
-                MoverHaciaTV();
-            }
-            Debug.Log($"👟 Mini Enemigo soltado al suelo.");
-        }
-    }
-
-    private bool IntentarDevolverATelevisor()
-    {
-        // Busca si hay un televisor secundario cerca al soltarlo
-        Collider[] hits = Physics.OverlapSphere(transform.position, 1.5f);
-        foreach (var hit in hits)
-        {
-            if (hit.CompareTag("TVSecundaria"))
-            {
-                return true; // Se detectó una TV cerca
-            }
-        }
-        return false;
-    }
 
 }

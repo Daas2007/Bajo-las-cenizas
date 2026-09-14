@@ -19,6 +19,7 @@ TagManager:
   - Candado
   - Dialogo
   - Llave
+  - Objeto interactivo
   layers:
   - Default
   - TransparentFX
@@ -31,7 +32,7 @@ TagManager:
   - Player
   - PostProcessing
   - EnMano
-  - 
+  - Raycast Detect
   - 
   - 
   - 
