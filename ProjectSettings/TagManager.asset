@@ -5,7 +5,6 @@ TagManager:
   serializedVersion: 3
   tags:
   - Opciones
-  - Pickup
   - EnemigoVentana
   - Nivel1
   - Agarrar
@@ -20,6 +19,9 @@ TagManager:
   - Dialogo
   - Llave
   - Objeto interactivo
+  - Portal
+  - PickUp
+  - Consola
   layers:
   - Default
   - TransparentFX

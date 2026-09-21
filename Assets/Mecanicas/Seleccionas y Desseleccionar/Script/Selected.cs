@@ -36,7 +36,28 @@ public class Interaccion : MonoBehaviour
                     hit.collider.transform.GetComponent<ObjetosInteractivo>().ActivarObjeto();
                 }
             }
-            Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * distancia, Color.red);
+           else if (hit.collider.tag == "Portal")
+            {
+                if (Input.GetKeyDown(KeyCode.E))
+                {
+                    hit.collider.transform.GetComponent<PortalController>().Interactuar();
+                }
+            }
+           else if (hit.collider.tag == "PickUp")
+            {
+                if (Input.GetKeyDown(KeyCode.E))
+                {
+                    hit.collider.transform.GetComponent<LinternaPickup>().Interactuar();
+                }
+            }
+           else if (hit.collider.tag == "Consola")
+            {
+                if (Input.GetKeyDown(KeyCode.E))
+                {
+                    hit.collider.transform.GetComponent<ActivadorDeMinijuegos>().Interactuar();
+                }
+            }
+                Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * distancia, Color.red);
         }
         else
         {
@@ -92,4 +113,6 @@ public class Interaccion : MonoBehaviour
             TextoDetect.SetActive(false);
         }
     }
+
+
 }

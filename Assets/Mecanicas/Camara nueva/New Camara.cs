@@ -1,7 +1,7 @@
 ﻿using Unity.Mathematics;
 using UnityEngine;
 
-public class Camara : MonoBehaviour
+public class NewCamara : MonoBehaviour
 {
     //---------------Rotación con Mouse---------------
     [Header("Rotación con Mouse")]
@@ -33,10 +33,10 @@ public class Camara : MonoBehaviour
     private bool estaEnModoUI = false;
 
     /// <summary>
-    /// Propiedad para bloquear u ocultar el cursor desde cualquier script externo.
-    /// Si asignas true: Bloquea y oculta el mouse (Modo Gameplay).
-    /// Si asignas false: Libera y muestra el mouse (Modo UI/Minijuego).
+    /// Propiedad para saber si estamos en modo UI o cambiar el estado.
     /// </summary>
+    public bool EstaEnModoUI => estaEnModoUI;
+
     public bool CursorBloqueado
     {
         get => !estaEnModoUI;
@@ -66,7 +66,7 @@ public class Camara : MonoBehaviour
         AplicarBalanceo();
     }
 
-    //---------------Método General para UI Externas---------------
+    //---------------Métodos de Control de UI / Cursor---------------
     /// <summary>
     /// Cambia el estado del cursor y de la cámara.
     /// </summary>
@@ -86,6 +86,16 @@ public class Camara : MonoBehaviour
             Cursor.visible = false;
         }
     }
+
+    /// <summary>
+    /// Método rápido para activar el modo UI (Mouse libre).
+    /// </summary>
+    public void EntrarModoUI() => SetModoUI(true);
+
+    /// <summary>
+    /// Método rápido para salir del modo UI y volver al gameplay (Mouse bloqueado).
+    /// </summary>
+    public void SalirModoUI() => SetModoUI(false);
 
     //---------------Funciones Compatibles Antiguas---------------
     public void OcultarMouse() => SetModoUI(false);
@@ -109,7 +119,7 @@ public class Camara : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("⚠ Falta asignar el jugador en el script Camara");
+            Debug.LogWarning("⚠ Falta asignar el jugador en el script NewCamara");
         }
     }
 
@@ -118,7 +128,6 @@ public class Camara : MonoBehaviour
     {
         float tiempo = Time.time;
 
-        // Valores objetivo según estado
         float targetAmplitud = 0f;
         float targetFrecuencia = 0f;
 
@@ -129,15 +138,12 @@ public class Camara : MonoBehaviour
             case Estado.Run: targetAmplitud = runAmplitude; targetFrecuencia = runFrequency; break;
         }
 
-        // Interpolación suave hacia los valores objetivo
         amplitudActual = Mathf.Lerp(amplitudActual, targetAmplitud, Time.deltaTime * 5f);
         frecuenciaActual = Mathf.Lerp(frecuenciaActual, targetFrecuencia, Time.deltaTime * 5f);
 
-        // Oscilación más natural
         float offsetY = Mathf.Sin(tiempo * frecuenciaActual) * amplitudActual;
         float offsetX = Mathf.Sin(tiempo * frecuenciaActual * 0.5f) * (amplitudActual * 0.5f);
 
-        // Transición suave de posición
         Vector3 targetPos = posicionInicial + new Vector3(offsetX, offsetY, 0f);
         transform.localPosition = Vector3.Lerp(transform.localPosition, targetPos, Time.deltaTime * 5f);
     }
