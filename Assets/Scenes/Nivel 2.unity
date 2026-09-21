@@ -28383,6 +28383,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 139399968802384039, guid: 2740401492e692d47be011a756a7a98d, type: 3}
+      propertyPath: m_Name
+      value: Tornillos 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 559846323361637178, guid: 2740401492e692d47be011a756a7a98d, type: 3}
+      propertyPath: m_Name
+      value: Tornillos 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2990723479820138466, guid: 2740401492e692d47be011a756a7a98d, type: 3}
       propertyPath: ClickMaximos
       value: 100
@@ -28531,6 +28539,10 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
+    - target: {fileID: 5832648597380447949, guid: 2740401492e692d47be011a756a7a98d, type: 3}
+      propertyPath: m_Name
+      value: Tornillos 3
+      objectReference: {fileID: 0}
     - target: {fileID: 6088426564699681422, guid: 2740401492e692d47be011a756a7a98d, type: 3}
       propertyPath: FondoNormal
       value: 
@@ -28575,6 +28587,10 @@ PrefabInstance:
       propertyPath: ChirridoTornillo
       value: 
       objectReference: {fileID: 8300000, guid: 3ae8ab6bc84d6ed40a4df3a466770acf, type: 3}
+    - target: {fileID: 6948902179936249337, guid: 2740401492e692d47be011a756a7a98d, type: 3}
+      propertyPath: m_Name
+      value: Tornillos 4
+      objectReference: {fileID: 0}
     - target: {fileID: 8870110809143805705, guid: 2740401492e692d47be011a756a7a98d, type: 3}
       propertyPath: m_IsActive
       value: 1
