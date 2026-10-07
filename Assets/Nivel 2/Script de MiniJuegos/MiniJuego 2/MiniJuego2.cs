@@ -1,45 +1,61 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class MiniJuego2 : MonoBehaviour, IMiniJuego
 {
+    public static MiniJuego2 Instance { get; private set; }
+
     [Header("Configuración de Escenas")]
-    [SerializeField] private string nombreEscenaMinijuego = "MinijuegoDino";
+    [SerializeField] private string nombreEscenaMinijuego = "MiniJuego2 Escena";
 
     [Header("Estado del Minijuego")]
     [SerializeField] private bool estaActivo = false;
 
+    [Header("Elementos a Ocultar en la Escena Principal")]
+    [Tooltip("Arrastra aquí el GameObject del Jugador o elementos que deban apagarse durante el minijuego.")]
+    [SerializeField] private List<GameObject> objetosParaDesactivar = new List<GameObject>();
+
     private Coroutine rutinaCarga;
     private Coroutine rutinaDescarga;
 
-    private void OnEnable()
+    private void Awake()
     {
-        // Mantiene consistencia si el objeto se activa manualmente en la jerarquía
-        IniciarMiniJuego();
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
-    /// <summary>
-    /// Implementación de IMiniJuego para arrancar la secuencia de carga aditiva.
-    /// </summary>
     public void IniciarMiniJuego()
     {
         if (estaActivo) return;
 
-        // Desactivar movimiento/interacción de la cámara principal mediante el script del juego
+        // 1. Desactivar el movimiento/interacción de la cámara principal mediante su script
         Camara cam = Camera.main != null ? Camera.main.GetComponent<Camara>() : FindFirstObjectByType<Camara>();
         if (cam != null)
         {
             cam.SetModoUI(true);
         }
 
+        // 2. Desactivar todos los objetos de la lista (Jugador, UI de juego, etc.)
+        foreach (GameObject obj in objetosParaDesactivar)
+        {
+            if (obj != null)
+            {
+                obj.SetActive(false);
+            }
+        }
+
         if (rutinaCarga != null) StopCoroutine(rutinaCarga);
         rutinaCarga = StartCoroutine(CargarMinijuegoRutina());
     }
 
-    /// <summary>
-    /// Carga asíncrona de la escena aditiva y transferencia de control de cámara.
-    /// </summary>
     private IEnumerator CargarMinijuegoRutina()
     {
         estaActivo = true;
@@ -57,18 +73,22 @@ public class MiniJuego2 : MonoBehaviour, IMiniJuego
             SceneManager.SetActiveScene(escenaMinijuego);
         }
 
-        // Ocultar cámara principal si la escena aditiva tiene su propia cámara
-        if (Camera.main != null)
+        // CORRECCIÓN: En lugar de apagar el Camera.main genérico (que puede ser la cámara principal),
+        // desactivamos únicamente el componente de la cámara anterior si sigue activa, 
+        // o dejamos que la cámara del minijuego (que está en su propia escena) tome el control visual.
+        Camera[] todasLasCamaras = FindObjectsByType<Camera>(FindObjectsSortMode.None);
+        foreach (Camera c in todasLasCamaras)
         {
-            Camera.main.gameObject.SetActive(false);
+            // Si la cámara pertenece a la escena principal (no a la del minijuego), la desactivamos temporalmente
+            if (c.gameObject.scene != escenaMinijuego)
+            {
+                c.gameObject.SetActive(false);
+            }
         }
 
         Debug.Log($"🎮 Minijuego Cargado: {nombreEscenaMinijuego}");
     }
 
-    /// <summary>
-    /// Implementación de IMiniJuego para cerrar la escena y restaurar el mundo 3D/Principal.
-    /// </summary>
     public void FinalizarMiniJuego()
     {
         if (!estaActivo) return;
@@ -77,17 +97,23 @@ public class MiniJuego2 : MonoBehaviour, IMiniJuego
         rutinaDescarga = StartCoroutine(DescargarMinijuegoRutina());
     }
 
-    /// <summary>
-    /// Descarga la escena aditiva y reactiva el estado de la cámara principal.
-    /// </summary>
     private IEnumerator DescargarMinijuegoRutina()
     {
-        // Reactivar cámara principal si fue desactivada
+        // 1. Reactivar la cámara principal del mundo y sus objetos
         Camara cam = FindFirstObjectByType<Camara>(FindObjectsInactive.Include);
         if (cam != null)
         {
             cam.gameObject.SetActive(true);
             cam.SetModoUI(false);
+        }
+
+        // 2. Volver a encender los objetos que estaban en la lista (Jugador, etc.)
+        foreach (GameObject obj in objetosParaDesactivar)
+        {
+            if (obj != null)
+            {
+                obj.SetActive(true);
+            }
         }
 
         AsyncOperation descarga = SceneManager.UnloadSceneAsync(nombreEscenaMinijuego);

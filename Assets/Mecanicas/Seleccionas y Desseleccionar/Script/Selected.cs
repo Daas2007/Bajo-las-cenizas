@@ -1,4 +1,3 @@
-using NUnit.Framework;
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UI;
@@ -18,7 +17,10 @@ public class Interaccion : MonoBehaviour
     private void Start()
     {
         Mask = LayerMask.GetMask("Interaccion");
-        TextoDetect.SetActive(false);
+        if (TextoDetect != null)
+        {
+            TextoDetect.SetActive(false);
+        }
     }
 
     private void Update()
@@ -29,35 +31,54 @@ public class Interaccion : MonoBehaviour
         {
             Deselect();
             SelectedObject(hit.transform);
-            if (hit.collider.tag == "Objeto interactivo")
+
+            string tagObjeto = hit.collider.tag;
+
+            if (tagObjeto == "Objeto interactivo")
             {
                 if (Input.GetKeyDown(KeyCode.E))
                 {
-                    hit.collider.transform.GetComponent<ObjetosInteractivo>().ActivarObjeto();
+                    var objetoInteractivo = hit.collider.transform.GetComponent<ObjetosInteractivo>();
+                    if (objetoInteractivo != null)
+                    {
+                        objetoInteractivo.ActivarObjeto();
+                    }
                 }
             }
-           else if (hit.collider.tag == "Portal")
+            else if (tagObjeto == "Portal")
             {
                 if (Input.GetKeyDown(KeyCode.E))
                 {
-                    hit.collider.transform.GetComponent<PortalController>().Interactuar();
+                    var portal = hit.collider.transform.GetComponent<PortalController>();
+                    if (portal != null)
+                    {
+                        portal.Interactuar();
+                    }
                 }
             }
-           else if (hit.collider.tag == "PickUp")
+            else if (tagObjeto == "PickUp")
             {
                 if (Input.GetKeyDown(KeyCode.E))
                 {
-                    hit.collider.transform.GetComponent<LinternaPickup>().Interactuar();
+                    var linterna = hit.collider.transform.GetComponent<LinternaPickup>();
+                    if (linterna != null)
+                    {
+                        linterna.Interactuar();
+                    }
                 }
             }
-           else if (hit.collider.tag == "Consola")
+            else if (tagObjeto == "Consola")
             {
                 if (Input.GetKeyDown(KeyCode.E))
                 {
-                    hit.collider.transform.GetComponent<ActivadorDeMinijuegos>().Interactuar();
+                    var activador = hit.collider.transform.GetComponent<ActivadorDeMinijuegos>();
+                    if (activador != null)
+                    {
+                        activador.Interactuar();
+                    }
                 }
             }
-                Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * distancia, Color.red);
+            Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * distancia, Color.red);
         }
         else
         {
@@ -65,13 +86,13 @@ public class Interaccion : MonoBehaviour
         }
     }
 
-    void SelectedObject(Transform transform)
+    void SelectedObject(Transform transformObjeto)
     {
         // Si es un objeto nuevo, guardamos su color original primero
-        if (ultimoReconocido != transform.gameObject)
+        if (ultimoReconocido != transformObjeto.gameObject)
         {
-            MeshRenderer renderer = transform.GetComponent<MeshRenderer>();
-            if (renderer != null)
+            MeshRenderer renderer = transformObjeto.GetComponent<MeshRenderer>();
+            if (renderer != null && renderer.material != null)
             {
                 colorOriginal = renderer.material.color;
 
@@ -80,39 +101,50 @@ public class Interaccion : MonoBehaviour
             }
         }
 
-        TextoDetect.SetActive(true);
-        ultimoReconocido = transform.gameObject;
+        if (TextoDetect != null)
+        {
+            TextoDetect.SetActive(true);
+        }
+        ultimoReconocido = transformObjeto.gameObject;
     }
 
     void Deselect()
     {
-        if (ultimoReconocido)
+        if (ultimoReconocido != null)
         {
             MeshRenderer renderer = ultimoReconocido.GetComponent<MeshRenderer>();
-            if (renderer != null)
+            if (renderer != null && renderer.material != null)
             {
                 // Devolvemos el objeto exactamente a su color almacenado previamente
                 renderer.material.color = colorOriginal;
             }
 
-            TextoDetect.SetActive(false);
+            if (TextoDetect != null)
+            {
+                TextoDetect.SetActive(false);
+            }
             ultimoReconocido = null;
         }
     }
 
     private void OnGUI()
     {
-        Rect rect = new Rect(Screen.width / 2, Screen.height / 2, puntero.width, puntero.height);
-        GUI.DrawTexture(rect, puntero);
-        if (ultimoReconocido)
+        if (puntero != null)
         {
-            TextoDetect.SetActive(true);
+            Rect rect = new Rect(Screen.width / 2, Screen.height / 2, puntero.width, puntero.height);
+            GUI.DrawTexture(rect, puntero);
         }
-        else
+
+        if (TextoDetect != null)
         {
-            TextoDetect.SetActive(false);
+            if (ultimoReconocido != null)
+            {
+                TextoDetect.SetActive(true);
+            }
+            else
+            {
+                TextoDetect.SetActive(false);
+            }
         }
     }
-
-
 }
