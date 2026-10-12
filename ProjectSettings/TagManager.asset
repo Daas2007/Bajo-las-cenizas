@@ -23,6 +23,9 @@ TagManager:
   - PickUp
   - Consola
   - Escondite
+  - Pickup
+  - Modelo
+  - MiniControlVelocidad
   layers:
   - Default
   - TransparentFX

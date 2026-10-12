@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿
+using UnityEngine;
 
 public class VictoriaMinijuego2 : MonoBehaviour
 {
@@ -6,27 +7,48 @@ public class VictoriaMinijuego2 : MonoBehaviour
     [SerializeField] private bool cerrarAlEntrarEnTrigger = true;
     [SerializeField] private string tagJugador = "Player";
 
-    /// <summary>
-    /// Ejecuta la secuencia de victoria y ordena el cierre de la escena aditiva.
-    /// </summary>
+    [Header("Referencia al activador")]
+    [SerializeField] private ActivadorDeMinijuegos activador;
+
+    private bool victoriaActivada;
+
+
+
     public void GanarMinijuego()
     {
-        Debug.Log("🏆 ¡Victoria detectada en el Minijuego 2!");
+        if (victoriaActivada)
+            return;
 
-        // Llama a la instancia principal para ejecutar la descarga asíncrona de la escena
-        if (MiniJuego2.Instance != null)
+        victoriaActivada = true;
+
+        Debug.Log("¡Victoria detectada!");
+
+        // Buscar el activador en las escenas cargadas.
+        ActivadorDeMinijuegos activador =
+            FindFirstObjectByType<ActivadorDeMinijuegos>();
+
+        if (activador != null)
         {
-            MiniJuego2.Instance.FinalizarMiniJuego();
+            activador.CerrarMinijuego();
         }
         else
         {
-            Debug.LogError("❌ No se encontró la instancia de MiniJuego2. Asegúrate de cargar la escena principal primero.");
+            Debug.LogWarning(
+                "No se encontró ActivadorDeMinijuegos."
+            );
+        }
+
+        // Después, finalizar el minijuego.
+        if (MiniJuego2.Instance != null)
+        {
+            MiniJuego2.Instance.FinalizarMiniJuego();
         }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (cerrarAlEntrarEnTrigger && other.CompareTag(tagJugador))
+        if (cerrarAlEntrarEnTrigger &&
+            other.CompareTag(tagJugador))
         {
             GanarMinijuego();
         }
