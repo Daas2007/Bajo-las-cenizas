@@ -11,7 +11,20 @@ public class ActivadorDeMinijuegos : MonoBehaviour, IInteractuable
     [Header("Referencia a la Cámara Principal")]
     [SerializeField] private NewCamara camaraScript;
 
+    [Header("Configuración del Televisor y Pistas (0 a 9)")]
+    [Tooltip("Arrastra el Renderer del televisor donde cambiará el material.")]
+    [SerializeField] private Renderer televisorRenderer;
+
+    [Tooltip("Lista de 10 materiales que representan los números del 0 al 9.")]
+    [SerializeField] private Material[] materialesNumeros = new Material[10];
+
     private IMiniJuego miniJuegoInterface;
+
+    // Control para evitar que se repita el minijuego
+    private bool minijuegoCompletado = false;
+
+    // Almacena el número (0-9) que salió asignado en este televisor para el candado
+    private int numeroAsignado = -1;
 
     private void Awake()
     {
@@ -37,6 +50,13 @@ public class ActivadorDeMinijuegos : MonoBehaviour, IInteractuable
 
     public void Interactuar()
     {
+        // 2. Si ya se completó, evitamos que se vuelva a abrir
+        if (minijuegoCompletado)
+        {
+            Debug.Log("Este minijuego ya fue completado y el televisor ya mostró su pista.");
+            return;
+        }
+
         if (canvasDeMinijuego != null)
         {
             canvasDeMinijuego.SetActive(true);
@@ -77,5 +97,39 @@ public class ActivadorDeMinijuegos : MonoBehaviour, IInteractuable
         {
             camaraScript.SalirModoUI();
         }
+
+        // 1, 2 y 3. Al cerrar/terminar el minijuego, aplicamos la lógica de bloqueo y material aleatorio
+        if (!minijuegoCompletado)
+        {
+            minijuegoCompletado = true;
+            AsignarMaterialAleatorioATelevisor();
+        }
+    }
+
+    private void AsignarMaterialAleatorioATelevisor()
+    {
+        if (materialesNumeros != null && materialesNumeros.Length >= 10 && televisorRenderer != null)
+        {
+            // Seleccionamos un número aleatorio del 0 al 9
+            numeroAsignado = Random.Range(0, 10);
+
+            // Cambiamos el material del televisor por el correspondiente al número elegido
+            televisorRenderer.material = materialesNumeros[numeroAsignado];
+
+            Debug.Log($"Minijuego completado. Número asignado para el candado: {numeroAsignado}");
+
+            // TODO: Aquí puedes guardar este `numeroAsignado` en un GameManager o gestor de contraseñas 
+            // para que el candado lo pueda leer al juntar los 3 minijuegos.
+        }
+        else
+        {
+            Debug.LogWarning("⚠ Faltan asignar materiales (deben ser 10) o el Renderer del televisor en el Inspector.");
+        }
+    }
+
+    // Método público para que el candado u otro script pueda consultar qué número descubrió este televisor
+    public int GetNumeroAsignado()
+    {
+        return numeroAsignado;
     }
 }
