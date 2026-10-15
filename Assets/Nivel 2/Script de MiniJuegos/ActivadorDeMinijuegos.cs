@@ -75,10 +75,6 @@ public class ActivadorDeMinijuegos : MonoBehaviour, IInteractuable
         {
             miniJuegoInterface.IniciarMiniJuego();
         }
-        else
-        {
-            Debug.LogWarning($"⚠ No se encontró un componente que implemente IMiniJuego en {gameObject.name}.");
-        }
     }
 
     public void CerrarMinijuego()
@@ -110,10 +106,8 @@ public class ActivadorDeMinijuegos : MonoBehaviour, IInteractuable
     {
         if (materialesNumeros != null && materialesNumeros.Length >= 10 && televisorRenderer != null)
         {
-            // Seleccionamos un número aleatorio del 0 al 9
             numeroAsignado = Random.Range(0, 10);
 
-            // Cambiamos el material del televisor por el correspondiente al número elegido
             televisorRenderer.material = materialesNumeros[numeroAsignado];
 
             Debug.Log($"Minijuego completado. Número asignado para el candado: {numeroAsignado}");
@@ -121,13 +115,8 @@ public class ActivadorDeMinijuegos : MonoBehaviour, IInteractuable
             // TODO: Aquí puedes guardar este `numeroAsignado` en un GameManager o gestor de contraseñas 
             // para que el candado lo pueda leer al juntar los 3 minijuegos.
         }
-        else
-        {
-            Debug.LogWarning("⚠ Faltan asignar materiales (deben ser 10) o el Renderer del televisor en el Inspector.");
-        }
     }
 
-    // Método público para que el candado u otro script pueda consultar qué número descubrió este televisor
     public int GetNumeroAsignado()
     {
         return numeroAsignado;

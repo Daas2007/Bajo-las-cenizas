@@ -7,14 +7,17 @@ public class PisoRepited : MonoBehaviour
     private void Start()
     {
         BoxCollider2D pisoCollider = GetComponent<BoxCollider2D>();
-        spriteAncho = pisoCollider.size.x;
+
+        // Multiplicamos por el localScale.x para obtener el ancho real en el mundo
+        spriteAncho = pisoCollider.size.x * transform.localScale.x;
     }
 
     private void Update()
     {
         if (transform.position.x < -spriteAncho)
         {
-            transform.Translate(Vector2.right * 2f * spriteAncho);
+            transform.Translate(Vector2.right * (2f * spriteAncho));
+            Debug.Log("Se movio el piso " + this + "2 veces a la derecha");
         }
     }
 }
