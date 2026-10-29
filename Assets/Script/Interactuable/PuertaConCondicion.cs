@@ -1,24 +1,48 @@
-﻿using UnityEngine;
+﻿
+using UnityEngine;
 
 public class PuertaConCondicion : MonoBehaviour, IInteractuable
 {
-    [Header("Puerta base")]
-    [SerializeField] private PuertaInteractuable puertaBase;
+    [Header("Puerta que se debe abrir")]
+    [SerializeField] PuertaInteractuable puertaBase;
 
-    [Header("Condición: NPC con el que hay que hablar primero")]
-    [SerializeField] private Dialogo npcDialogo;
+    [Header("NPC requerido")]
+    [SerializeField] DialogoInteractuable npcDialogo;
+
+    // Evita consultar continuamente si la puerta ya se desbloqueo.
+    bool puertaDesbloqueada;
+
+    private void Start()
+    {
+        ComprobarDesbloqueo();
+    }
 
     private void Update()
     {
-        // 🔹 Mientras no haya hablado con el NPC → Tag Candado
-        if (npcDialogo != null && !npcDialogo.HaHablado)
+        // Comprueba si el NPC ya fue escuchado por primera vez.
+        if (!puertaDesbloqueada)
         {
-            gameObject.tag = "Candado";
+            ComprobarDesbloqueo();
+        }
+    }
+
+    void ComprobarDesbloqueo()
+    {
+        if (npcDialogo == null)
+            return;
+
+        if (npcDialogo.HaHablado)
+        {
+            puertaDesbloqueada = true;
+
+            // Cambia el Tag para permitir la interaccion normal.
+            gameObject.tag = "Interactuable";
+
+            Debug.Log("Puerta desbloqueada: ya hablaste con el NPC.");
         }
         else
         {
-            // 🔹 Cuando ya habló → Tag normal (puedes usar "Untagged" o "Interactuable")
-            gameObject.tag = "Untagged";
+            gameObject.tag = "Candado";
         }
     }
 
@@ -26,18 +50,19 @@ public class PuertaConCondicion : MonoBehaviour, IInteractuable
     {
         if (puertaBase == null)
         {
-            Debug.LogWarning("[PuertaConCondicion] puertaBase no asignada.");
+            Debug.LogWarning("No se ha asignado Puerta Base.");
             return;
         }
 
-        // ✅ Solo abre si el NPC ya habló
-        if (npcDialogo != null && npcDialogo.HaHablado)
+        ComprobarDesbloqueo();
+
+        if (puertaDesbloqueada)
         {
             puertaBase.Interactuar();
         }
         else
         {
-            Debug.Log("[PuertaConCondicion] El jugador aún no ha hablado con el NPC, la puerta no se abre.");
+            Debug.Log("Debes hablar con el NPC antes de abrir esta puerta.");
         }
     }
 }
