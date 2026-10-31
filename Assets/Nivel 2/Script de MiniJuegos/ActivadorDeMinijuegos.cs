@@ -94,11 +94,17 @@ public class ActivadorDeMinijuegos : MonoBehaviour, IInteractuable
             camaraScript.SalirModoUI();
         }
 
-        // 1, 2 y 3. Al cerrar/terminar el minijuego, aplicamos la lógica de bloqueo y material aleatorio
         if (!minijuegoCompletado)
         {
             minijuegoCompletado = true;
             AsignarMaterialAleatorioATelevisor();
+        }
+
+        // Guardar partida al regresar al nivel normal
+        if (GameManager.Instancia != null)
+        {
+            GameManager.Instancia.GuardarPartida();
+            Debug.Log("Se Guardo Partida A Travez Del Minijuego");
         }
     }
 
