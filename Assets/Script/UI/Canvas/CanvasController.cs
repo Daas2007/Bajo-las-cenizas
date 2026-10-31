@@ -109,7 +109,6 @@ public class CanvasController : MonoBehaviour
             }
         }
     }
-
     //---------------Pausa---------------
     public void MostrarPausa()
     {
@@ -117,16 +116,26 @@ public class CanvasController : MonoBehaviour
     }
     public void Reanudar()
     {
-        if (panelPausa != null) panelPausa.SetActive(false);
+        if (panelPausa != null)
+            panelPausa.SetActive(false);
+
         panelActivo = null;
 
         Time.timeScale = 1f;
 
         if (panelHUD != null)
-            panelHUD.SetActive(true); // ✅ restaurar HUD al volver al juego
+            panelHUD.SetActive(true);
 
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        // Restaurar el control normal de la cámara
+        Camara camara = FindObjectOfType<Camara>();
+
+        if (camara != null)
+            camara.SetModoUI(false);
+        else
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
     }
     public void SalirAlMenuDesdePausa()
     {
@@ -181,10 +190,6 @@ public class CanvasController : MonoBehaviour
             GameManager.Instancia.introduccionMostrada = true;
         }
     }
-
-
-
-
     //---------------Opciones---------------
     public void MostrarOpciones()
     {
@@ -392,7 +397,7 @@ public class CanvasController : MonoBehaviour
         DesactivarTodos();
 
         if (panelHUD != null)
-            panelHUD.SetActive(false); // ✅ siempre desactivar HUD al abrir cualquier panel
+            panelHUD.SetActive(false);
 
         if (panel != null)
         {
@@ -400,18 +405,20 @@ public class CanvasController : MonoBehaviour
             panelActivo = panel;
 
             if (pausarJuego)
-            {
-                // ✅ solo los paneles que realmente pausan el juego
                 Time.timeScale = 0f;
-            }
+            else
+                Time.timeScale = 1f;
+
+            // Liberar el cursor al abrir un panel de UI
+            Camara camara = FindObjectOfType<Camara>();
+
+            if (camara != null)
+                camara.SetModoUI(true);
             else
             {
-                // ✅ forzar que el tiempo siga en 1 para evitar problemas
-                Time.timeScale = 1f;
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
             }
-
-            //Cursor.lockState = CursorLockMode.None;
-            //Cursor.visible = true;
         }
     }
     public void panelUIActivo()
