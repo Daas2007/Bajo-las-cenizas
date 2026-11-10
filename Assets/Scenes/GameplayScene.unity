@@ -10184,7 +10184,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &729383474
 RectTransform:
   m_ObjectHideFlags: 0
@@ -21103,7 +21103,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1537550606
 RectTransform:
   m_ObjectHideFlags: 0
@@ -28862,6 +28862,63 @@ Mesh:
     offset: 0
     size: 0
     path: 
+--- !u!1001 &1964602097
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3493477345387379103, guid: af1fb7cc936d966468a95d1220cf21a6, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -45.675777
+      objectReference: {fileID: 0}
+    - target: {fileID: 3493477345387379103, guid: af1fb7cc936d966468a95d1220cf21a6, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.685
+      objectReference: {fileID: 0}
+    - target: {fileID: 3493477345387379103, guid: af1fb7cc936d966468a95d1220cf21a6, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.46968532
+      objectReference: {fileID: 0}
+    - target: {fileID: 3493477345387379103, guid: af1fb7cc936d966468a95d1220cf21a6, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071067
+      objectReference: {fileID: 0}
+    - target: {fileID: 3493477345387379103, guid: af1fb7cc936d966468a95d1220cf21a6, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 3493477345387379103, guid: af1fb7cc936d966468a95d1220cf21a6, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3493477345387379103, guid: af1fb7cc936d966468a95d1220cf21a6, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3493477345387379103, guid: af1fb7cc936d966468a95d1220cf21a6, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3493477345387379103, guid: af1fb7cc936d966468a95d1220cf21a6, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3493477345387379103, guid: af1fb7cc936d966468a95d1220cf21a6, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6282170565116065448, guid: af1fb7cc936d966468a95d1220cf21a6, type: 3}
+      propertyPath: m_Name
+      value: Cristal Sano
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: af1fb7cc936d966468a95d1220cf21a6, type: 3}
 --- !u!43 &1979165973
 Mesh:
   m_ObjectHideFlags: 0
@@ -262880,3 +262937,4 @@ SceneRoots:
   - {fileID: 6253951535660393340}
   - {fileID: 6494080948901842536}
   - {fileID: 1002998147}
+  - {fileID: 1964602097}

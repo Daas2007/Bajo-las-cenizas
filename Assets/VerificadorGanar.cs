@@ -4,6 +4,8 @@ using System.Collections;
 
 public class VerificadorGanar : MonoBehaviour
 {
+
+
     [Header("UI Fade")]
     [SerializeField] private GameObject panelLoading;
     [SerializeField] private UnityEngine.UI.Image loadingImage;
@@ -190,17 +192,17 @@ public class VerificadorGanar : MonoBehaviour
         {
             panelLoading.SetActive(true);
             yield return StartCoroutine(FadeIn());
-            SceneManager.LoadScene(nombreEscena);
+            SceneManager.LoadScene("Nivel 2");
         }
         else
         {
-            SceneManager.LoadScene(nombreEscena);
+            SceneManager.LoadScene("Nivel 2");
         }
     }
 
     public void IrAlMenu(string nombreEscena)
     {
-        StartCoroutine(SalirMenuCoroutine(nombreEscena));
+        StartCoroutine(SalirMenuCoroutine("Nivel 2"));
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
