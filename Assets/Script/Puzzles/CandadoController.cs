@@ -109,8 +109,18 @@ public class CandadoController : MonoBehaviour
         if (scriptMovimientoJugador != null) scriptMovimientoJugador.enabled = true;
         if (scriptCamara != null) scriptCamara.enabled = true;
 
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        // Restaurar el control normal de la cámara
+        Camara camara = FindObjectOfType<Camara>();
+
+        if (camara != null)
+        {
+            camara.SetModoUI(false);
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
 
         // Aseguramos que el panel del puzzle se cierre si está asignado localmente
         if (panelPuzzle != null) panelPuzzle.SetActive(false);

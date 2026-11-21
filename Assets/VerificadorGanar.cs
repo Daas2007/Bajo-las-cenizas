@@ -192,17 +192,17 @@ public class VerificadorGanar : MonoBehaviour
         {
             panelLoading.SetActive(true);
             yield return StartCoroutine(FadeIn());
-            SceneManager.LoadScene("Nivel 2");
+            SceneManager.LoadScene("Lobby 2");
         }
         else
         {
-            SceneManager.LoadScene("Nivel 2");
+            SceneManager.LoadScene("Lobby 2");
         }
     }
 
     public void IrAlMenu(string nombreEscena)
     {
-        StartCoroutine(SalirMenuCoroutine("Nivel 2"));
+        StartCoroutine(SalirMenuCoroutine("Lobby 2"));
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
