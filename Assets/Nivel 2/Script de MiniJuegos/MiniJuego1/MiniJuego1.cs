@@ -39,13 +39,23 @@ public class MiniJuego1 : MonoBehaviour, IMiniJuego
             botonTerminarMinijuego.SetActive(false);
         }
 
+        // Enlazamos los tornillos desde el inicio para evitar referencias nulas en la Build
+        if (listaTornillos != null)
+        {
+            foreach (TornillosMinijuego tornillo in listaTornillos)
+            {
+                if (tornillo != null)
+                {
+                    tornillo.EstadoTornillo(this);
+                }
+            }
+        }
+
         ResetearFondos();
     }
 
-    private void OnEnable()
-    {
-        IniciarMiniJuego();
-    }
+    // Se elimina OnEnable() para evitar que IniciarMiniJuego() se ejecute dos veces
+
 
     public void IniciarMiniJuego()
     {

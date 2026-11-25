@@ -18,6 +18,8 @@ public class MiniEnemigos : MonoBehaviour
     private float cronometroDificultad = 0f;
     private float cronometroAparicion = 0f;
 
+    private float tiempoInicialApariciones;
+
     private void OnEnable()
     {
         // Reseteamos los cronómetros cada vez que el GameObject/Script se activa
@@ -27,9 +29,12 @@ public class MiniEnemigos : MonoBehaviour
     }
     private void Awake()
     {
-        for (int i = 0; i < miniEnemigos.Length; i ++)
+        tiempoInicialApariciones = tiempoEntreApariciones; // Guardamos el valor original
+
+        for (int i = 0; i < miniEnemigos.Length; i++)
         {
-            miniEnemigos[i].SetActive(false);
+            if (miniEnemigos[i] != null)
+                miniEnemigos[i].SetActive(false);
         }
     }
     private void Update()
@@ -138,5 +143,31 @@ public class MiniEnemigos : MonoBehaviour
             }
         }
         this.enabled = false; 
+    }
+
+    public void ResetMiniEnemigos()
+    {
+        // 1. Apagar todos los mini enemigos activos y devolverlos a su origen
+        for (int i = 0; i < miniEnemigos.Length; i++)
+        {
+            if (miniEnemigos[i] != null)
+            {
+                MiniEnemigoController controller = miniEnemigos[i].GetComponent<MiniEnemigoController>();
+                if (controller != null)
+                {
+                    controller.ResetMiniEnemigo();
+                }
+                miniEnemigos[i].SetActive(false);
+            }
+        }
+
+        // 2. Restaurar dificultad y cronómetros
+        tiempoEntreApariciones = tiempoInicialApariciones;
+        cronometroGeneral = 0f;
+        cronometroDificultad = 0f;
+        cronometroAparicion = 0f;
+
+        // 3. Reactivar el spawner (por si se apagó al romperse la TV)
+        this.enabled = true;
     }
 }

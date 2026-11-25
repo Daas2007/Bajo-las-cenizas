@@ -101,7 +101,25 @@ public class MiniEnemigoController : MonoBehaviour
         }
     }
 
-    // ------------------- IMPLEMENTACIÓN DE INTERACCIÓN -------------------
+    public void ResetMiniEnemigo()
+    {
+        estaEnMano = false;
+        cronometroAtaque = 0f;
 
+        // Devolverlo a la posición de su televisor de origen si está asignado
+        if (tvDeOrigen != null)
+        {
+            if (agent != null && agent.enabled)
+            {
+                agent.Warp(tvDeOrigen.position); // Warp evita errores de teletransporte con NavMeshAgent
+            }
+            else
+            {
+                transform.position = tvDeOrigen.position;
+            }
+            transform.rotation = tvDeOrigen.rotation;
+        }
+    }
+    // ------------------- IMPLEMENTACIÓN DE INTERACCIÓN -------------------
 
 }

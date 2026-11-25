@@ -161,6 +161,18 @@ public class GameManager : MonoBehaviour
         foreach (MuroBloqueo muro in FindObjectsOfType<MuroBloqueo>())
             muro.ResetMuro();
 
+        // Reset Televisor Principal y Enemigo Grande
+        foreach (TelevisorPrincipal tv in FindObjectsOfType<TelevisorPrincipal>(true))
+        {
+            tv.RepararTelevisor();
+        }
+
+        // Reset Spawner y Mini Enemigos
+        foreach (MiniEnemigos spawner in FindObjectsOfType<MiniEnemigos>(true))
+        {
+            spawner.ResetMiniEnemigos();
+        }
+
         // Reset puzzles
         ResetearPuzzleOso();
         puzzle1Completado = false;

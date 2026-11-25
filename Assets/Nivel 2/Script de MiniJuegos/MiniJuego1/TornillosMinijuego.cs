@@ -54,9 +54,10 @@ public class TornillosMinijuego : MonoBehaviour
 
         clicksRestantes--;
 
+        // FindObjectsInactive.Include asegura que lo encuentre aunque el padre haya estado desactivado
         if (controladorPrincipal == null)
         {
-            controladorPrincipal = FindFirstObjectByType<MiniJuego1>();
+            controladorPrincipal = FindFirstObjectByType<MiniJuego1>(FindObjectsInactive.Include);
         }
 
         if (controladorPrincipal != null && controladorPrincipal.PuedeAlertar())
@@ -75,14 +76,13 @@ public class TornillosMinijuego : MonoBehaviour
             }
         }
 
-        Debug.Log($"Tornillo {gameObject.name} - Clics restantes: {clicksRestantes}");
-
         if (clicksRestantes <= 0)
         {
             sumaTornillos();
             RetirarTornillos();
         }
     }
+
 
     void RetirarTornillos()
     {
